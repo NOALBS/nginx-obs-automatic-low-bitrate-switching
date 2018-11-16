@@ -1,0 +1,1 @@
+# nginx-obs-automatic-bitrate-switching
