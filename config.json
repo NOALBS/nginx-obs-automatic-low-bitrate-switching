@@ -1,0 +1,9 @@
+{
+    "ipObs": "localhost:4444",
+    "ipNginx": "localhost",
+    "password": "password",
+    "normalScene": "Screen",
+    "offlineScene": "BRB",
+    "lowBitrateScene": "lowbitratedetected",
+    "lowBitrateTrigger": 1000
+}
