@@ -23,7 +23,7 @@ Edit `config.json` to your own settings.
 
 ## How to run
 
-Run the node app by running: `node app`. 
+Run the node app by running: `node app`. Then stream to `rtmp://IPHERE/publish/live`
 
 ## Help i can't stream
 
