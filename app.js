@@ -18,11 +18,13 @@ obs
   );
 
 app.get("/online", (req, res) => {
+  console.log("Stream went online.");
   isLive = true;
   res.sendStatus(200);
 });
 
 app.get("/offline", (req, res) => {
+  if (isLive) console.log("Stream went offline.");
   isLive = false;
   res.sendStatus(200);
 });
@@ -62,6 +64,7 @@ setInterval(() => {
             console.log(`Switching back to scene ${config.normalScene}.`)));
       } catch (e) {
         isLive = false;
+
         canSwitch &&
           currentScene.name !== config.offlineScene &&
           (obs.setCurrentScene({ "scene-name": config.offlineScene }),
