@@ -35,8 +35,8 @@ setInterval(() => {
         isLive &&
           canSwitch &&
           (bitrate === 0 &&
-            obs.setCurrentScene({ "scene-name": config.normalScene })),
-          (bitrate <= config.lowBitrateTrigger &&
+            obs.setCurrentScene({ "scene-name": config.normalScene }),
+          bitrate <= config.lowBitrateTrigger &&
             currentScene.name !== config.lowBitrateScene &&
             bitrate !== 0 &&
             (obs.setCurrentScene({ "scene-name": config.lowBitrateScene }),
