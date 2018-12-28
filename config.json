@@ -6,6 +6,5 @@
   "offlineScene": "BRB",
   "lowBitrateScene": "lowbitratedetected",
   "lowBitrateTrigger": 1000,
-  "PORT": 3000,
   "requestMs": 2000
 }

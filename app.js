@@ -1,12 +1,9 @@
 var OBSWebSocket = require("obs-websocket-js");
-var express = require("express");
 var request = require("request");
 var xml2js = require("xml2js");
-
 var config = require("./config");
 
 const obs = new OBSWebSocket();
-const app = express();
 const parseString = xml2js.parseString;
 let isLive = false;
 
@@ -16,18 +13,6 @@ obs
   .catch(() =>
     console.error("Can't connect to OBS, did you enter the correct ip?")
   );
-
-app.get("/online", (req, res) => {
-  console.log("Stream went online.");
-  isLive = true;
-  res.sendStatus(200);
-});
-
-app.get("/offline", (req, res) => {
-  if (isLive) console.log("Stream went offline.");
-  isLive = false;
-  res.sendStatus(200);
-});
 
 setInterval(() => {
   request(`http://${config.ipNginx}/stat`, (error, response, body) => {
@@ -49,6 +34,8 @@ setInterval(() => {
 
         isLive &&
           canSwitch &&
+          (bitrate === 0 &&
+            obs.setCurrentScene({ "scene-name": config.normalScene })),
           (bitrate <= config.lowBitrateTrigger &&
             currentScene.name !== config.lowBitrateScene &&
             bitrate !== 0 &&
@@ -77,7 +64,3 @@ setInterval(() => {
     });
   });
 }, config.requestMs);
-
-app.listen(config.PORT, () => {
-  console.log(`App listening on port ${config.PORT}!`);
-});
