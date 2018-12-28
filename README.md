@@ -28,3 +28,8 @@ Run the node app by running: `node app`. Then stream to `rtmp://IPHERE/publish/l
 ## Help i can't stream
 
 Make sure the node app is running. It won't allow you to connect to the rtmp without it.
+
+## Help it wont change scenes
+
+It will only change scenes when OBS is set on a scene that's in the config.  
+(This is so that it wont change when you're on like your intro scene)
