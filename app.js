@@ -63,6 +63,7 @@ setInterval(() => {
       } catch (e) {
         isLive = false;
         canSwitch &&
+          currentScene.name !== config.offlineScene &&
           (obs.setCurrentScene({ "scene-name": config.offlineScene }),
           console.log(
             `Error receiving current bitrate or steam is offline. Switching to scene ${
