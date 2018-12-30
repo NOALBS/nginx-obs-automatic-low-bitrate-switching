@@ -53,7 +53,9 @@ class ObsSwitcher {
             this.isLive &&
               canSwitch &&
               (bitrate === 0 &&
-                this.obs.setCurrentScene({ "scene-name": config.normalScene }),
+                this.obs.setCurrentScene({
+                  "scene-name": config.lowBitrateScene
+                }),
               bitrate <= config.lowBitrateTrigger &&
                 currentScene.name !== config.lowBitrateScene &&
                 bitrate !== 0 &&
