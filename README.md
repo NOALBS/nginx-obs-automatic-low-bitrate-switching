@@ -1,4 +1,5 @@
 
+
 # nginx-obs-automatic-low-bitrate-switching
 
 Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.
@@ -21,8 +22,8 @@ Uses OBS plugin <a href="https://github.com/Palakis/obs-websocket">obs-websocket
 ## Config
 
 Edit `config.json` to your own settings.
- - Use https://twitchapps.com/tmi/ to get your oauth from Twitch for use with chat commands.
-   - I recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
+ - Use https://twitchapps.com/tmi to get your oauth from Twitch for use with chat commands.
+> We recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
 
 ## How to run
 
