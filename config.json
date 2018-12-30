@@ -6,5 +6,8 @@
   "offlineScene": "BRB",
   "lowBitrateScene": "lowbitratedetected",
   "lowBitrateTrigger": 1000,
-  "requestMs": 2000
+  "requestMs": 2000,
+  "allowedUsers": ["715209", "b3ck"],
+  "twitchUsername": "715209",
+  "twitchOauth": "oauth:YOUR_OAUTH_HERE"
 }

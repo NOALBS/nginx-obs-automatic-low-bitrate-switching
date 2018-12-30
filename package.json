@@ -4,13 +4,24 @@
   "description": "Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./lib/app",
+    "build": "babel src -d lib",
+    "dev": "nodemon --exec babel-node ./src/app.js"
   },
   "author": "Brian Spit",
   "license": "MIT",
   "dependencies": {
     "obs-websocket-js": "^1.2.0",
     "request": "^2.88.0",
+    "ws": "^6.1.2",
     "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "nodemon": "^1.18.9"
   }
 }
