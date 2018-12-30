@@ -13,7 +13,7 @@ Uses OBS plugin <a href="https://github.com/Palakis/obs-websocket">obs-websocket
 
 - `git clone <repository-url>`
 - Change into the new directory.
-- `npm install --productions`
+- `npm install --production`
 - Replace your `nginx.conf` with the one given here.
 - Put `stat.xsl` in your nginx folder.
 
