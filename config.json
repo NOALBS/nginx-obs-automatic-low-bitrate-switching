@@ -9,5 +9,7 @@
   "requestMs": 2000,
   "allowedUsers": ["715209", "b3ck"],
   "twitchUsername": "715209",
-  "twitchOauth": "oauth:YOUR_OAUTH_HERE"
+  "twitchOauth": "oauth:YOUR_OAUTH_HERE",
+  "stopStreamOnHostInterval": 5000,
+  "stopStreamOnRaidInterval": 15000
 }
