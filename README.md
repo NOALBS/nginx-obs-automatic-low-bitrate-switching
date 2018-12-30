@@ -22,6 +22,7 @@ Uses OBS plugin <a href="https://github.com/Palakis/obs-websocket">obs-websocket
 
 Edit `config.json` to your own settings.
  - Use https://twitchapps.com/tmi/ to get your oauth from Twitch for use with chat commands.
+   - I recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
 
 ## How to run
 
