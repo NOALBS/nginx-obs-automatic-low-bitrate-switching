@@ -25,6 +25,12 @@ Edit `config.json` to your own settings.
  - Use https://twitchapps.com/tmi to get your oauth from Twitch for use with chat commands.
 > We recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
 
+Also if you are going to be using your Twitch BOT Account please make sure it is an 'Editor' of your channel, see example;
+
+Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Find you bot on the list, add checkmark to 'Editor', done.
+
+![alt text](https://i.imgur.com/yRlBe5U.png "Setting you bot as Editor")
+
 ## How to run
 
 Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/live`
