@@ -43,6 +43,7 @@ The script monitors twitch chat and features some simple chat commands to help y
 >|:-------:| ------------- |:-------------| :----------------------|
 >| !       | host (channelname) | hosts said channel, and stops streaming in OBS. | !host 715209 |
 >| !       | unhost      | unhosts and starts streaming in OBS.      |   !unhost  |
+>| !       | raid (channelname) | raids said channel and stops streaming in OBS.      |   !raid 715209  |
 >| !       | start | on-demand command to start streaming in OBS.      |    !start |
 >| !       | stop | on-demand command to stop streaming in OBS.      |    !stop |
 >| !       | switch (scene) | switches to the provided scene (case senstive).      |    !switch INTRO|
