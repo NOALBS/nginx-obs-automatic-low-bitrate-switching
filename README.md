@@ -33,15 +33,10 @@ Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/
 
 The script monitors twitch chat and features some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
 
-#### Built-in Twitch commands without `!` prefix. 
 >| Prefix  | Command        | Description          | Example  |
 >|:-------:| ------------- |:-------------| :----------------------|
->| /       | host (channelname) | hosts said channel, and stops streaming in OBS. | /host 715209 |
->| /       | unhost      | unhosts and starts streaming in OBS.      |   /unhost  |
-
-#### Commands that need the `!` prefix.
->| Prefix  | Command        | Description          | Example  |
->|:-------:| ------------- |:-------------| :----------------------|
+>| !       | host (channelname) | hosts said channel, and stops streaming in OBS. | !host 715209 |
+>| !       | unhost      | unhosts and starts streaming in OBS.      |   !unhost  |
 >| !       | start | on-demand command to start streaming in OBS.      |    !start |
 >| !       | stop | on-demand command to stop streaming in OBS.      |    !stop |
 >| !       | switch (scene) | switches to the provided scene (case senstive).      |    !switch INTRO|
