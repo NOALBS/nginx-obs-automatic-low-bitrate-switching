@@ -45,7 +45,7 @@ The script monitors twitch chat and features some simple chat commands to help y
 
 Make sure the node app is running. It won't allow you to connect to the rtmp server without it.
 
-## Help it wont change scenes
+## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
 (This is so that it wont change when you're on like your intro or locked-brb scene)
