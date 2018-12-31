@@ -29,7 +29,7 @@ Also if you are going to be using your Twitch BOT Account please make sure it is
 
 Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Find you bot on the list, add checkmark to 'Editor', done.
 
-![alt text](https://i.imgur.com/yRlBe5U.png "Setting you bot as Editor")
+![alt text](https://i.imgur.com/yRlBe5U.png "Setting your bot as Editor")
 
 ## How to run
 
