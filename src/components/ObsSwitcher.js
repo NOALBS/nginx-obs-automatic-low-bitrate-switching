@@ -6,7 +6,7 @@ import config from "../../config";
 const parseString = xml2js.parseString;
 
 class ObsSwitcher {
-  constructor(address, password, low, normal, offline) {
+  constructor(address, password, low, normal, offline, lowBitrateTrigger) {
     this.obs = new OBSWebSocket();
     this.isLive = false;
     this.address = address;
@@ -14,6 +14,7 @@ class ObsSwitcher {
     this.lowBitrateScene = low;
     this.normalScene = normal;
     this.offlineScene = offline;
+    this.lowBitrateTrigger = lowBitrateTrigger;
     this.bitrate = null;
 
     this.obs

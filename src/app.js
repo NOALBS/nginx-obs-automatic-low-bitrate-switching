@@ -7,7 +7,8 @@ const obs = new ObsSwitcher(
   config.passwordObs,
   config.lowBitrateScene,
   config.normalScene,
-  config.offlineScene
+  config.offlineScene,
+  config.lowBitrateTrigger
 );
 
 const chat = new Chat(
