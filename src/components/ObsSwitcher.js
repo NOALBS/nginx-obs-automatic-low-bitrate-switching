@@ -14,6 +14,7 @@ class ObsSwitcher {
     this.lowBitrateScene = low;
     this.normalScene = normal;
     this.offlineScene = offline;
+    this.bitrate = null;
 
     this.obs
       .connect({ address: this.ipObs, password: this.passwordObs })
@@ -29,7 +30,7 @@ class ObsSwitcher {
   onAuth() {
     setInterval(async () => {
       const currentScene = await this.obs.GetCurrentScene();
-      const bitrate = await ObsSwitcher.getBitrate();
+      const bitrate = await this.getBitrate();
       const canSwitch =
         currentScene.name == this.lowBitrateScene ||
         currentScene.name == this.normalScene ||
@@ -72,25 +73,24 @@ class ObsSwitcher {
     }, config.requestMs);
   }
 
-  static async getBitrate(username = "live") {
+  async getBitrate(username = "live") {
     const response = await fetch(`http://${config.ipNginx}/stat`);
     const data = await response.text();
-    let bitrate;
 
     parseString(data, (err, result) => {
       const publish = result.rtmp.server[0].application[0].live[0].stream;
       if (publish == null) {
-        bitrate = null;
+        this.bitrate = null;
       } else {
         const stream = publish.find(stream => {
           return stream.name[0] === username;
         });
 
-        bitrate = stream.bw_video[0] / 1024;
+        this.bitrate = stream.bw_video[0] / 1024;
       }
     });
 
-    return bitrate;
+    return this.bitrate;
   }
 
   error(e) {

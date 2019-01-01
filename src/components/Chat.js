@@ -9,9 +9,18 @@ class Chat {
     this.password = password; // oauth
     this.channel = channel; // #channel
     this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+    this.obsProps = obs;
     this.obs = obs.obs;
     this.prefix = "!";
-    this.commands = ["host", "unhost", "start", "stop", "switch", "raid"];
+    this.commands = [
+      "host",
+      "unhost",
+      "start",
+      "stop",
+      "switch",
+      "raid",
+      "bitrate"
+    ];
 
     this.ws.onopen = this.onOpen.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
@@ -192,6 +201,11 @@ class Chat {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  bitrate() {
+    const bitrate = Math.round(this.obsProps.bitrate);
+    this.ws.send(`PRIVMSG ${this.channel} :Current bitrate: ${bitrate}`);
   }
 }
 
