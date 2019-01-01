@@ -1,20 +1,22 @@
 import OBSWebSocket from "obs-websocket-js";
-import request from "request";
+import fetch from "node-fetch";
 import xml2js from "xml2js";
 import config from "../../config";
 
-import Chat from "./Chat";
+const parseString = xml2js.parseString;
 
 class ObsSwitcher {
-  constructor() {
+  constructor(address, password, low, normal, offline) {
     this.obs = new OBSWebSocket();
-    this.parseString = xml2js.parseString;
     this.isLive = false;
-  }
+    this.address = address;
+    this.password = password;
+    this.lowBitrateScene = low;
+    this.normalScene = normal;
+    this.offlineScene = offline;
 
-  connect() {
     this.obs
-      .connect({ address: config.ipObs, password: config.passwordObs })
+      .connect({ address: this.ipObs, password: this.passwordObs })
       .then(() => console.log(`Success! We're connected & authenticated.`))
       .catch(() =>
         console.error("Can't connect to OBS, did you enter the correct ip?")
@@ -25,67 +27,70 @@ class ObsSwitcher {
   }
 
   onAuth() {
-    new Chat(
-      config.twitchUsername,
-      config.twitchOauth,
-      `#${config.twitchUsername}`,
-      this.obs
-    );
+    setInterval(async () => {
+      const currentScene = await this.obs.GetCurrentScene();
+      const bitrate = await ObsSwitcher.getBitrate();
+      const canSwitch =
+        currentScene.name == this.lowBitrateScene ||
+        currentScene.name == this.normalScene ||
+        currentScene.name == this.offlineScene;
 
-    setInterval(() => {
-      request(`http://${config.ipNginx}/stat`, (error, response, body) => {
-        if (error) console.log("Can't access nginx");
+      if (bitrate !== null) {
+        this.isLive = true;
 
-        this.parseString(body, async (err, result) => {
-          const currentScene = await this.obs.GetCurrentScene();
-          const canSwitch =
-            currentScene.name == config.lowBitrateScene ||
-            currentScene.name == config.normalScene ||
-            currentScene.name == config.offlineScene;
+        this.isLive &&
+          canSwitch &&
+          (bitrate === 0 &&
+            this.obs.setCurrentScene({
+              "scene-name": this.lowBitrateScene
+            }),
+          bitrate <= this.lowBitrateTrigger &&
+            currentScene.name !== this.lowBitrateScene &&
+            bitrate !== 0 &&
+            (this.obs.setCurrentScene({
+              "scene-name": this.lowBitrateScene
+            }),
+            console.log(
+              `Low bitrate detected switching to scene ${this.lowBitrateScene}.`
+            )),
+          bitrate > this.lowBitrateTrigger &&
+            currentScene.name !== this.normalScene &&
+            (this.obs.setCurrentScene({ "scene-name": this.normalScene }),
+            console.log(`Switching back to scene ${this.normalScene}.`)));
+      } else {
+        this.isLive = false;
 
-          try {
-            const bitrate =
-              result.rtmp.server[0].application[0].live[0].stream[0]
-                .bw_video[0] / 1024;
-
-            this.isLive = true;
-
-            this.isLive &&
-              canSwitch &&
-              (bitrate === 0 &&
-                this.obs.setCurrentScene({
-                  "scene-name": config.lowBitrateScene
-                }),
-              bitrate <= config.lowBitrateTrigger &&
-                currentScene.name !== config.lowBitrateScene &&
-                bitrate !== 0 &&
-                (this.obs.setCurrentScene({
-                  "scene-name": config.lowBitrateScene
-                }),
-                console.log(
-                  `Low bitrate detected switching to scene ${
-                    config.lowBitrateScene
-                  }.`
-                )),
-              bitrate > config.lowBitrateTrigger &&
-                currentScene.name !== config.normalScene &&
-                (this.obs.setCurrentScene({ "scene-name": config.normalScene }),
-                console.log(`Switching back to scene ${config.normalScene}.`)));
-          } catch (e) {
-            this.isLive = false;
-
-            canSwitch &&
-              currentScene.name !== config.offlineScene &&
-              (this.obs.setCurrentScene({ "scene-name": config.offlineScene }),
-              console.log(
-                `Error receiving current bitrate or steam is offline. Switching to scene ${
-                  config.offlineScene
-                }.`
-              ));
-          }
-        });
-      });
+        canSwitch &&
+          currentScene.name !== this.offlineScene &&
+          (this.obs.setCurrentScene({ "scene-name": this.offlineScene }),
+          console.log(
+            `Error receiving current bitrate or steam is offline. Switching to scene ${
+              this.offlineScene
+            }.`
+          ));
+      }
     }, config.requestMs);
+  }
+
+  static async getBitrate(username = "live") {
+    const response = await fetch(`http://${config.ipNginx}/stat`);
+    const data = await response.text();
+    let bitrate;
+
+    parseString(data, (err, result) => {
+      const publish = result.rtmp.server[0].application[0].live[0].stream;
+      if (publish == null) {
+        bitrate = null;
+      } else {
+        const stream = publish.find(stream => {
+          return stream.name[0] === username;
+        });
+
+        bitrate = stream.bw_video[0] / 1024;
+      }
+    });
+
+    return bitrate;
   }
 
   error(e) {

@@ -12,8 +12,8 @@
   "author": "Brian Spit",
   "license": "MIT",
   "dependencies": {
+    "node-fetch": "^2.3.0",
     "obs-websocket-js": "^1.2.0",
-    "request": "^2.88.0",
     "ws": "^6.1.2",
     "xml2js": "^0.4.19"
   },

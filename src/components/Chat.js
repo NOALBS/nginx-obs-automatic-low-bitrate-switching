@@ -1,14 +1,17 @@
 import WebSocket from "ws";
-import ChatCommands from "./ChatCommands";
 import config from "../../config";
 
+// TODO add reconnect on disconnect
+
 class Chat {
-  constructor(username, password, channel, OBS) {
+  constructor(username, password, channel, obs) {
     this.username = username; // username
     this.password = password; // oauth
     this.channel = channel; // #channel
     this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
-    this.obs = OBS;
+    this.obs = obs.obs;
+    this.prefix = "!";
+    this.commands = ["host", "unhost", "start", "stop", "switch", "raid"];
 
     this.ws.onopen = this.onOpen.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
@@ -17,7 +20,7 @@ class Chat {
   }
 
   keepAlive() {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.ws.send("PING :tmi.twitch.tv\r\n");
     }, 2000);
   }
@@ -33,12 +36,12 @@ class Chat {
       this.ws.send(`JOIN ${this.channel}`);
 
       this.keepAlive();
-      this.commands = new ChatCommands(this, "!");
     }
   }
 
   onClose() {
     console.log("Disconnected from the chat server.");
+    clearInterval(this.interval);
   }
 
   close() {
@@ -61,14 +64,14 @@ class Chat {
           config.allowedUsers.includes(parsed.username)
         ) {
           // not a command
-          if (parsed.message.substr(0, 1) !== this.commands.prefix) return;
+          if (parsed.message.substr(0, 1) !== this.prefix) return;
 
           // Split the message into individual words:
           const parse = parsed.message.slice(1).split(" ");
           const commandName = parse[0];
 
-          if (this.commands.options.includes(commandName)) {
-            this.commands[commandName](parse[1]);
+          if (this.commands.includes(commandName)) {
+            this[commandName](parse[1]);
 
             console.log(`! Executed ${commandName} command`);
           } else {
@@ -123,6 +126,72 @@ class Chat {
     }
 
     return parsedMessage;
+  }
+
+  host(username) {
+    if (username != null) {
+      this.ws.send(`PRIVMSG ${this.channel} :/host ${username}`);
+
+      setTimeout(() => {
+        this.stop();
+      }, config.stopStreamOnHostInterval);
+    } else {
+      this.ws.send(`PRIVMSG ${this.channel} :Error no username`);
+      console.log("Error executing host command no username");
+    }
+  }
+
+  unhost() {
+    this.ws.send(`PRIVMSG ${this.channel} :/unhost`);
+  }
+
+  raid(username) {
+    if (username != null) {
+      this.ws.send(`PRIVMSG ${this.channel} :/raid ${username}`);
+
+      setTimeout(() => {
+        this.stop();
+      }, config.stopStreamOnRaidInterval);
+    } else {
+      console.log("Error executing host command no username");
+      this.ws.send(`PRIVMSG ${this.channel} :Error no username`);
+    }
+  }
+
+  async start() {
+    // start streaming
+    try {
+      await this.obs.startStreaming();
+      this.ws.send(`PRIVMSG ${this.channel} :Successfully started stream`);
+    } catch (e) {
+      console.log(e);
+      this.ws.send(`PRIVMSG ${this.channel} :Error ${e.error}`);
+    }
+  }
+
+  async stop() {
+    // stop streaming
+    try {
+      await this.obs.stopStreaming();
+
+      this.ws.send(`PRIVMSG ${this.channel} :Successfully stopped stream`);
+    } catch (e) {
+      console.log(e.error);
+      this.ws.send(`PRIVMSG ${this.channel} :${e.error}`);
+    }
+  }
+
+  async switch(sceneName) {
+    // switch scene
+    try {
+      await this.obs.setCurrentScene({ "scene-name": sceneName });
+
+      this.ws.send(
+        `PRIVMSG ${this.channel} :Scene successfully switched to "${sceneName}"`
+      );
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 
