@@ -47,6 +47,7 @@ The script monitors twitch chat and features some simple chat commands to help y
 >| !       | start | on-demand command to start streaming in OBS.      |    !start |
 >| !       | stop | on-demand command to stop streaming in OBS.      |    !stop |
 >| !       | switch (scene) | switches to the provided scene (case senstive).      |    !switch INTRO|
+>| !       | bitrate | returns current bitrate | !bitrate |
 
 ## Help I can't stream
 
