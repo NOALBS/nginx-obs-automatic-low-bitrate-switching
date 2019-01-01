@@ -25,6 +25,12 @@ Edit `config.json` to your own settings.
  - Use https://twitchapps.com/tmi to get your oauth from Twitch for use with chat commands.
 > We recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
 
+Also if you are going to be using your Twitch BOT Account please make sure it is an 'Editor' of your channel, see example;
+
+Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Find you bot on the list, add checkmark to 'Editor', done.
+
+![alt text](https://i.imgur.com/yRlBe5U.png "Setting your bot as Editor")
+
 ## How to run
 
 Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/live`
@@ -33,15 +39,11 @@ Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/
 
 The script monitors twitch chat and features some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
 
-#### Built-in Twitch commands without `!` prefix. 
 >| Prefix  | Command        | Description          | Example  |
 >|:-------:| ------------- |:-------------| :----------------------|
->| /       | host (channelname) | hosts said channel, and stops streaming in OBS. | /host 715209 |
->| /       | unhost      | unhosts and starts streaming in OBS.      |   /unhost  |
-
-#### Commands that need the `!` prefix.
->| Prefix  | Command        | Description          | Example  |
->|:-------:| ------------- |:-------------| :----------------------|
+>| !       | host (channelname) | hosts said channel, and stops streaming in OBS. | !host 715209 |
+>| !       | unhost      | unhosts and starts streaming in OBS.      |   !unhost  |
+>| !       | raid (channelname) | raids said channel and stops streaming in OBS.      |   !raid 715209  |
 >| !       | start | on-demand command to start streaming in OBS.      |    !start |
 >| !       | stop | on-demand command to stop streaming in OBS.      |    !stop |
 >| !       | switch (scene) | switches to the provided scene (case senstive).      |    !switch INTRO|
@@ -50,7 +52,7 @@ The script monitors twitch chat and features some simple chat commands to help y
 
 Make sure the node app is running. It won't allow you to connect to the rtmp server without it.
 
-## Help it wont change scenes
+## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
 (This is so that it wont change when you're on like your intro or locked-brb scene)
