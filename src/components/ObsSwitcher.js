@@ -19,17 +19,20 @@ class ObsSwitcher {
 
     this.obs
       .connect({ address: this.ipObs, password: this.passwordObs })
-      .then(() => console.log(`Success! We're connected & authenticated.`))
-      .catch(() =>
-        console.error("Can't connect to OBS, did you enter the correct ip?")
-      );
+      .catch(e => {
+        // handle this somewhere else
+      });
 
+    this.obs.on("ConnectionClosed", this.onDisconnect.bind(this));
     this.obs.on("AuthenticationSuccess", this.onAuth.bind(this));
+    this.obs.on("AuthenticationFailure", this.onAuthFail.bind(this));
     this.obs.on("error", this.error.bind(this));
   }
 
   onAuth() {
-    setInterval(async () => {
+    console.log(`Success! We're connected & authenticated.`);
+
+    this.interval = setInterval(async () => {
       const currentScene = await this.obs.GetCurrentScene();
       const bitrate = await this.getBitrate();
       const canSwitch =
@@ -75,27 +78,53 @@ class ObsSwitcher {
   }
 
   async getBitrate(username = "live") {
-    const response = await fetch(`http://${config.ipNginx}/stat`);
-    const data = await response.text();
+    try {
+      const response = await fetch(`http://${config.ipNginx}/stat`);
+      const data = await response.text();
 
-    parseString(data, (err, result) => {
-      const publish = result.rtmp.server[0].application[0].live[0].stream;
-      if (publish == null) {
-        this.bitrate = null;
-      } else {
-        const stream = publish.find(stream => {
-          return stream.name[0] === username;
-        });
+      parseString(data, (err, result) => {
+        const publish = result.rtmp.server[0].application[0].live[0].stream;
+        if (publish == null) {
+          this.bitrate = null;
+        } else {
+          const stream = publish.find(stream => {
+            return stream.name[0] === username;
+          });
 
-        this.bitrate = stream.bw_video[0] / 1024;
-      }
-    });
+          this.bitrate = stream.bw_video[0] / 1024;
+        }
+      });
+    } catch (e) {
+      console.log("Error fetching stats");
+    }
 
     return this.bitrate;
   }
 
   error(e) {
     console.log(e);
+  }
+
+  onDisconnect() {
+    console.error("Can't connect to OBS or lost connnection.");
+    clearInterval(this.interval);
+
+    this.reconnect();
+  }
+
+  onAuthFail() {
+    console.log("Failed to authenticate to OBS");
+  }
+
+  reconnect() {
+    console.log("Trying to reconnect in 5 seconds");
+    setTimeout(() => {
+      this.obs
+        .connect({ address: this.ipObs, password: this.passwordObs })
+        .catch(e => {
+          // handle this somewhere else
+        });
+    }, 5000);
   }
 }
 
