@@ -18,7 +18,7 @@ class ObsSwitcher {
     this.bitrate = null;
 
     this.obs
-      .connect({ address: this.ipObs, password: this.passwordObs })
+      .connect({ address: this.address, password: this.password })
       .catch(e => {
         // handle this somewhere else
       });
@@ -120,7 +120,7 @@ class ObsSwitcher {
     console.log("Trying to reconnect in 5 seconds");
     setTimeout(() => {
       this.obs
-        .connect({ address: this.ipObs, password: this.passwordObs })
+        .connect({ address: this.address, password: this.password })
         .catch(e => {
           // handle this somewhere else
         });
