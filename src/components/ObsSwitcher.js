@@ -16,6 +16,7 @@ class ObsSwitcher {
     this.offlineScene = offline;
     this.lowBitrateTrigger = lowBitrateTrigger;
     this.bitrate = null;
+    this.currentScene = null;
 
     this.obs
       .connect({ address: this.address, password: this.password })
@@ -39,6 +40,8 @@ class ObsSwitcher {
         currentScene.name == this.lowBitrateScene ||
         currentScene.name == this.normalScene ||
         currentScene.name == this.offlineScene;
+
+      this.currentScene = currentScene.name;
 
       if (bitrate !== null) {
         this.isLive = true;

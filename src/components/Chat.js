@@ -19,7 +19,8 @@ class Chat {
       "stop",
       "switch",
       "raid",
-      "bitrate"
+      "bitrate",
+      "status"
     ];
 
     this.ws.onopen = this.onOpen.bind(this);
@@ -206,6 +207,12 @@ class Chat {
   bitrate() {
     const bitrate = Math.round(this.obsProps.bitrate);
     this.ws.send(`PRIVMSG ${this.channel} :Current bitrate: ${bitrate}`);
+  }
+
+  status() {
+    this.ws.send(
+      `PRIVMSG ${this.channel} :Current scene: ${this.obsProps.currentScene}`
+    );
   }
 }
 
