@@ -7,9 +7,11 @@
   "lowBitrateScene": "lowbitratedetected",
   "lowBitrateTrigger": 1000,
   "requestMs": 2000,
-  "allowedUsers": ["715209", "b3ck"],
+  "enableTwitchChat": true,
+  "enableTwitchPublicCommands": false,
   "twitchUsername": "715209",
   "twitchOauth": "oauth:YOUR_OAUTH_HERE",
+  "allowedUsers": ["715209", "b3ck"],
   "stopStreamOnHostInterval": 5000,
   "stopStreamOnRaidInterval": 15000
 }
