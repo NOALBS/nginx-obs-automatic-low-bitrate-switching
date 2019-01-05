@@ -80,14 +80,15 @@ class Chat {
           // Split the message into individual words:
           const parse = parsed.message.slice(1).split(" ");
           const commandName = parse[0];
-
+          console.log(parsed.username, config.twitchChat.username);
           if (
             (config.twitchChat.allowedUsers.includes(parsed.username) &&
               this.rate != 20) ||
             (config.twitchChat.enablePublicCommands &&
               this.allowAllCommands.includes(commandName) &&
               !this.wait &&
-              this.rate != 20)
+              this.rate != 20) ||
+            (parsed.username === config.twitchChat.username && this.rate != 20)
           ) {
             if (this.commands.includes(commandName)) {
               this[commandName](parse[1]);
