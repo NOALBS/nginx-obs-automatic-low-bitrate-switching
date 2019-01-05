@@ -11,9 +11,11 @@ const obs = new ObsSwitcher(
   config.lowBitrateTrigger
 );
 
-const chat = new Chat(
-  config.twitchUsername,
-  config.twitchOauth,
-  `#${config.twitchUsername}`,
-  obs
-);
+if (config.enableTwitchChat) {
+  const chat = new Chat(
+    config.twitchUsername,
+    config.twitchOauth,
+    `#${config.twitchUsername}`,
+    obs
+  );
+}

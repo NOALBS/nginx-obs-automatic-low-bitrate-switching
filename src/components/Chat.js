@@ -22,6 +22,10 @@ class Chat {
       "bitrate",
       "status"
     ];
+    this.allowAllCommands = ["bitrate", "status"];
+    this.wait = false;
+    this.rate = 0;
+    this.rateInterval = false;
 
     this.ws.onopen = this.onOpen.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
@@ -69,10 +73,7 @@ class Chat {
       const parsed = this.parse(message.data);
 
       if (parsed !== null) {
-        if (
-          parsed.command === "PRIVMSG" &&
-          config.allowedUsers.includes(parsed.username)
-        ) {
+        if (parsed.command === "PRIVMSG") {
           // not a command
           if (parsed.message.substr(0, 1) !== this.prefix) return;
 
@@ -80,12 +81,22 @@ class Chat {
           const parse = parsed.message.slice(1).split(" ");
           const commandName = parse[0];
 
-          if (this.commands.includes(commandName)) {
-            this[commandName](parse[1]);
+          if (
+            (config.allowedUsers.includes(parsed.username) &&
+              this.rate != 20) ||
+            (config.enableTwitchPublicCommands &&
+              this.allowAllCommands.includes(commandName) &&
+              !this.wait &&
+              this.rate != 20)
+          ) {
+            if (this.commands.includes(commandName)) {
+              this[commandName](parse[1]);
 
-            console.log(`! Executed ${commandName} command`);
-          } else {
-            console.log(`! Unknown command ${commandName}`);
+              console.log(`! Executed ${commandName} command`);
+              this.setWait();
+            } else {
+              console.log(`! Unknown command ${commandName}`);
+            }
           }
         } else if (parsed.command === "PING") {
           this.ws.send(`PONG :${parsed.message}`);
@@ -136,6 +147,27 @@ class Chat {
     }
 
     return parsedMessage;
+  }
+
+  setWait() {
+    this.rate++;
+
+    if (!this.rateInterval) {
+      this.rateInterval = true;
+
+      setTimeout(() => {
+        this.rate = 0;
+        this.rateInterval = false;
+      }, 30000);
+    }
+
+    if (!this.wait) {
+      this.wait = true;
+
+      setTimeout(() => {
+        this.wait = false;
+      }, 2000);
+    }
   }
 
   host(username) {
