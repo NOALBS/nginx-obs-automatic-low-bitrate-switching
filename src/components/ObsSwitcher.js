@@ -77,12 +77,12 @@ class ObsSwitcher {
             }.`
           ));
       }
-    }, config.requestMs);
+    }, config.obs.requestMs);
   }
 
   async getBitrate(username = "live") {
     try {
-      const response = await fetch(`http://${config.ipNginx}/stat`);
+      const response = await fetch(`http://${config.nginx.ip}/stat`);
       const data = await response.text();
 
       parseString(data, (err, result) => {

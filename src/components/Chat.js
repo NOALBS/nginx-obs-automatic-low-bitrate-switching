@@ -82,9 +82,9 @@ class Chat {
           const commandName = parse[0];
 
           if (
-            (config.allowedUsers.includes(parsed.username) &&
+            (config.twitchChat.allowedUsers.includes(parsed.username) &&
               this.rate != 20) ||
-            (config.enableTwitchPublicCommands &&
+            (config.twitchChat.enablePublicCommands &&
               this.allowAllCommands.includes(commandName) &&
               !this.wait &&
               this.rate != 20)
@@ -176,7 +176,7 @@ class Chat {
 
       setTimeout(() => {
         this.stop();
-      }, config.stopStreamOnHostInterval);
+      }, config.twitchChat.stopStreamOnHostInterval);
     } else {
       this.ws.send(`PRIVMSG ${this.channel} :Error no username`);
       console.log("Error executing host command no username");
@@ -193,7 +193,7 @@ class Chat {
 
       setTimeout(() => {
         this.stop();
-      }, config.stopStreamOnRaidInterval);
+      }, config.twitchChat.stopStreamOnRaidInterval);
     } else {
       console.log("Error executing host command no username");
       this.ws.send(`PRIVMSG ${this.channel} :Error no username`);

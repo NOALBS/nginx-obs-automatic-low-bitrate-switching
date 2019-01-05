@@ -3,19 +3,19 @@ import Chat from "./components/Chat";
 import config from "../config";
 
 const obs = new ObsSwitcher(
-  config.ipObs,
-  config.passwordObs,
-  config.lowBitrateScene,
-  config.normalScene,
-  config.offlineScene,
-  config.lowBitrateTrigger
+  config.obs.ip,
+  config.obs.password,
+  config.obs.lowBitrateScene,
+  config.obs.normalScene,
+  config.obs.offlineScene,
+  config.obs.lowBitrateTrigger
 );
 
-if (config.enableTwitchChat) {
+if (config.twitchChat.enable) {
   const chat = new Chat(
-    config.twitchUsername,
-    config.twitchOauth,
-    `#${config.twitchUsername}`,
+    config.twitchChat.username,
+    config.twitchChat.oauth,
+    `#${config.twitchChat.username}`,
     obs
   );
 }

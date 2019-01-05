@@ -1,17 +1,23 @@
 {
-  "ipObs": "localhost:4444",
-  "passwordObs": "password",
-  "ipNginx": "localhost",
-  "normalScene": "Screen",
-  "offlineScene": "BRB",
-  "lowBitrateScene": "lowbitratedetected",
-  "lowBitrateTrigger": 1000,
-  "requestMs": 2000,
-  "enableTwitchChat": true,
-  "enableTwitchPublicCommands": false,
-  "twitchUsername": "715209",
-  "twitchOauth": "oauth:YOUR_OAUTH_HERE",
-  "allowedUsers": ["715209", "b3ck"],
-  "stopStreamOnHostInterval": 5000,
-  "stopStreamOnRaidInterval": 15000
+  "obs": {
+    "ip": "localhost:4444",
+    "password": "password",
+    "normalScene": "Screen",
+    "offlineScene": "BRB",
+    "lowBitrateScene": "lowbitratedetected",
+    "lowBitrateTrigger": 1000,
+    "requestMs": 2000
+  },
+  "nginx": {
+    "ip": "localhost"
+  },
+  "twitchChat": {
+    "username": "715209",
+    "oauth": "oauth:YOUR_OAUTH_HERE",
+    "enable": true,
+    "enablePublicCommands": false,
+    "allowedUsers": ["715209", "b3ck"],
+    "stopStreamOnHostInterval": 5000,
+    "stopStreamOnRaidInterval": 15000
+  }
 }
