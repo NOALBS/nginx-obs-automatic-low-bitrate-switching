@@ -59,10 +59,6 @@ This script gives you the option to enable some simple chat commands to help you
 >| Public       | !bitrate | returns current BITRATE | !bitrate |
 >| Public       | !info | returns current SCENE and BITRATE. | !info |
 
-## Help I can't stream
-
-Make sure the node app is running. It won't allow you to connect to the rtmp server without it.
-
 ## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
