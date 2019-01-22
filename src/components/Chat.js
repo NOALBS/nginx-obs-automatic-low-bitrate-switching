@@ -20,9 +20,9 @@ class Chat {
       "switch",
       "raid",
       "bitrate",
-      "status"
+      "info"
     ];
-    this.allowAllCommands = ["bitrate", "status"];
+    this.allowAllCommands = ["bitrate", "info"];
     this.wait = false;
     this.rate = 0;
     this.rateInterval = false;
@@ -80,7 +80,7 @@ class Chat {
           // Split the message into individual words:
           const parse = parsed.message.slice(1).split(" ");
           const commandName = parse[0];
-          console.log(parsed.username, config.twitchChat.username);
+
           if (
             (config.twitchChat.allowedUsers.includes(parsed.username) &&
               this.rate != 20) ||
@@ -88,7 +88,7 @@ class Chat {
               this.allowAllCommands.includes(commandName) &&
               !this.wait &&
               this.rate != 20) ||
-            (parsed.username === config.twitchChat.username && this.rate != 20)
+            (parsed.username === this.username && this.rate != 20)
           ) {
             if (this.commands.includes(commandName)) {
               this[commandName](parse[1]);
@@ -242,9 +242,13 @@ class Chat {
     this.ws.send(`PRIVMSG ${this.channel} :Current bitrate: ${bitrate}`);
   }
 
-  status() {
+  info() {
+    const bitrate = Math.round(this.obsProps.bitrate);
+
     this.ws.send(
-      `PRIVMSG ${this.channel} :Current scene: ${this.obsProps.currentScene}`
+      `PRIVMSG ${this.channel} :Current scene: ${
+        this.obsProps.currentScene
+      } and bitrate: ${bitrate}`
     );
   }
 }
