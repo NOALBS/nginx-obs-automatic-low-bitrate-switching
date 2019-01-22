@@ -34,6 +34,11 @@ class Chat {
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = this.onError.bind(this);
     this.ws.onclose = this.onClose.bind(this);
+
+    this.obsProps.on("live", this.live.bind(this));
+    this.obsProps.on("normalScene", this.onNormalScene.bind(this));
+    this.obsProps.on("lowBitrateScene", this.onLowBitrateScene.bind(this));
+    this.obsProps.on("offlineScene", this.onOfflineScene.bind(this));
   }
 
   keepAlive() {
@@ -245,17 +250,16 @@ class Chat {
   }
 
   bitrate() {
-    const bitrate = Math.round(this.obsProps.bitrate);
-    this.ws.send(`PRIVMSG ${this.channel} :Current bitrate: ${bitrate}`);
+    this.ws.send(
+      `PRIVMSG ${this.channel} :Current bitrate: ${this.obsProps.bitrate}`
+    );
   }
 
   info() {
-    const bitrate = Math.round(this.obsProps.bitrate);
-
     this.ws.send(
       `PRIVMSG ${this.channel} :Current scene: ${
         this.obsProps.currentScene
-      } and bitrate: ${bitrate}`
+      } and bitrate: ${this.obsProps.bitrate}`
     );
   }
 
@@ -282,6 +286,32 @@ class Chat {
         console.log(e);
       }
     }
+  }
+
+  live() {
+    this.ws.send(`PRIVMSG ${this.channel} :Stream went live`);
+  }
+
+  onNormalScene() {
+    this.ws.send(
+      `PRIVMSG ${this.channel} :Scene switched to "${config.obs.normalScene}"`
+    );
+
+    this.bitrate();
+  }
+
+  onLowBitrateScene() {
+    this.ws.send(
+      `PRIVMSG ${this.channel} :Scene switched to "${
+        config.obs.lowBitrateScene
+      }"`
+    );
+
+    this.bitrate();
+  }
+
+  onOfflineScene() {
+    this.ws.send(`PRIVMSG ${this.channel} :Stream went offline`);
   }
 }
 
