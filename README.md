@@ -4,12 +4,15 @@
 
 Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.
 
-Uses OBS plugin <a href="https://github.com/Palakis/obs-websocket">obs-websocket</a>.
-
 ## Prerequisities
 
 - [Git](http://git-scm.com/)
 - [Node.js](http://nodejs.org/) (with NPM)
+
+>This script uses OBS plugin "obs-websocket" inconjuction with "OBS-Studio" and "NGINX-RTMP" (see links below). 
+- [NGINX-RTMP](https://github.com/arut/nginx-rtmp-module/)
+- [OBS-Studio](https://github.com/obsproject/obs-studio/)
+- [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
 
 ## Installation
 
@@ -22,6 +25,10 @@ Uses OBS plugin <a href="https://github.com/Palakis/obs-websocket">obs-websocket
 ## Config
 
 Edit `config.json` to your own settings.
+
+Here is an example config with comments:
+![alt text](https://i.imgur.com/mnxD5Mu.png "Configuration Comments")
+
  - Use https://twitchapps.com/tmi to get your oauth from Twitch for use with chat commands.
 > We recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
 
@@ -37,17 +44,20 @@ Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/
 
 ## Chat Commands
 
-The script monitors twitch chat and features some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
+This script gives you the option to enable some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
+>Please note: Admins are all the users in the "adminUsers" array in the config, MODs (if enabled in the config) are all of your MODs, and Public (if enabled in the config) is anyone in your chat.
 
->| Prefix  | Command        | Description          | Example  |
->|:-------:| ------------- |:-------------| :----------------------|
->| !       | host (channelname) | hosts said channel, and stops streaming in OBS after 5 seconds (changeable in config). | !host 715209 |
->| !       | unhost      | unhosts whoever you are currently hosting.      |   !unhost  |
->| !       | raid (channelname) | raids said channel and stops streaming in OBS after 15 seconds (changeable in config).      |   !raid 715209  |
->| !       | start | on-demand command to start streaming in OBS.      |    !start |
->| !       | stop | on-demand command to stop streaming in OBS.      |    !stop |
->| !       | switch (scene) | switches to the provided scene (case senstive).      |    !switch INTRO|
->| !       | bitrate | returns current bitrate | !bitrate |
+>| Role  | Command           | Description          | Example  |
+>|:-------:| ---------------- |:-------------| :----------------------|
+>| Admins       | !host (channelname) | hosts said channel, and stops streaming in OBS after 5 seconds (changeable in config). | !host 715209 |
+>| Admins       | !unhost      | unhosts whoever you are currently hosting.      |   !unhost  |
+>| Admins       | !raid (channelname) | raids said channel and stops streaming in OBS after 15 seconds (changeable in config).      |   !raid 715209  |
+>| Admins		| !start | on-demand command to start streaming in OBS.      |    !start |
+>| Admins       | !stop | on-demand command to stop streaming in OBS.      |    !stop |
+>| Admins       | !switch (scene) | switches to the provided SCENE (case senstive).      |    !switch INTRO|
+>| MODs			| !refresh | changes to the REFRESH scene for the set interval. | !refresh |
+>| Public       | !bitrate | returns current BITRATE | !bitrate |
+>| Public       | !info | returns current SCENE and BITRATE. | !info |
 
 ## Help I can't stream
 
