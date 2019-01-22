@@ -100,7 +100,7 @@ class ObsSwitcher extends EventEmitter {
       parseString(data, (err, result) => {
         const publish = result.rtmp.server[0].application[0].live[0].stream;
         if (publish == null) {
-          this.bitrate = 0;
+          this.bitrate = null;
         } else {
           const stream = publish.find(stream => {
             return stream.name[0] === username;

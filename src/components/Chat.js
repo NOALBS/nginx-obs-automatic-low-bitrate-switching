@@ -52,7 +52,7 @@ class Chat {
       console.log("Successfully Connected to websocket");
       console.log(`Authenticating and joining channel ${this.channel}`);
 
-      this.ws.send("CAP REQ :twitch.tv/tags");
+      this.ws.send("CAP REQ :twitch.tv/tags twitch.tv/commands");
       this.ws.send(`PASS ${this.password}`);
       this.ws.send(`NICK ${this.username}`);
       this.ws.send(`JOIN ${this.channel}`);
@@ -113,12 +113,24 @@ class Chat {
           }
         } else if (parsed.command === "PING") {
           this.ws.send(`PONG :${parsed.message}`);
+        } else if (parsed.command === "HOSTTARGET") {
+          if (
+            parsed.message != null &&
+            config.twitchChat.enableAutoStopStreamOnHostOrRaid &&
+            this.obsProps.bitrate != null
+          ) {
+            console.log("Channel started hosting stopping stream.");
+            this.stop();
+          }
         }
       }
     }
   }
 
   parse(message) {
+    const regex = RegExp(/([A-Z]\w*)/, "g");
+    const array = regex.exec(message);
+
     let parsedMessage = {
       tags: {},
       channel: null,
@@ -157,6 +169,11 @@ class Chat {
     } else if (firstString === "PING") {
       parsedMessage.command = "PING";
       parsedMessage.message = message.split(":")[1];
+    } else if (array[0] == "HOSTTARGET") {
+      const res = message.match(/:([\w]+)/g);
+
+      parsedMessage.command = "HOSTTARGET";
+      parsedMessage.message = res[1];
     }
 
     return parsedMessage;
@@ -186,10 +203,6 @@ class Chat {
   host(username) {
     if (username != null) {
       this.ws.send(`PRIVMSG ${this.channel} :/host ${username}`);
-
-      setTimeout(() => {
-        this.stop();
-      }, config.twitchChat.stopStreamOnHostInterval);
     } else {
       this.ws.send(`PRIVMSG ${this.channel} :Error no username`);
       console.log("Error executing host command no username");
@@ -203,10 +216,6 @@ class Chat {
   raid(username) {
     if (username != null) {
       this.ws.send(`PRIVMSG ${this.channel} :/raid ${username}`);
-
-      setTimeout(() => {
-        this.stop();
-      }, config.twitchChat.stopStreamOnRaidInterval);
     } else {
       console.log("Error executing host command no username");
       this.ws.send(`PRIVMSG ${this.channel} :Error no username`);

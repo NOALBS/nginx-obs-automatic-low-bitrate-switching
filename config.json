@@ -21,8 +21,7 @@
     "enablePublicCommands": false,
     "enableModCommands": false,
     "enableAutoSwitchNotification": true,
-    "adminUsers": ["715209", "b3ck"],
-    "stopStreamOnHostInterval": 5000,
-    "stopStreamOnRaidInterval": 15000
+    "enableAutoStopStreamOnHostOrRaid": true,
+    "adminUsers": ["715209", "b3ck"]
   }
 }
