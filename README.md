@@ -49,9 +49,9 @@ This script gives you the option to enable some simple chat commands to help you
 
 >| Role  | Command           | Description          | Example  |
 >|:-------:| ---------------- |:-------------| :----------------------|
->| Admins       | !host (channelname) | hosts said channel, and stops streaming in OBS after 5 seconds (changeable in config). | !host 715209 |
+>| Admins       | !host (channelname) | hosts said channel, and stops streaming in OBS if enabled in config. | !host 715209 |
 >| Admins       | !unhost      | unhosts whoever you are currently hosting.      |   !unhost  |
->| Admins       | !raid (channelname) | raids said channel and stops streaming in OBS after 15 seconds (changeable in config).      |   !raid 715209  |
+>| Admins       | !raid (channelname) | raids said channel and stops streaming in OBS if enabled in config.      |   !raid 715209  |
 >| Admins		| !start | on-demand command to start streaming in OBS.      |    !start |
 >| Admins       | !stop | on-demand command to stop streaming in OBS.      |    !stop |
 >| Admins       | !switch (scene) | switches to the provided SCENE (case senstive).      |    !switch INTRO|
