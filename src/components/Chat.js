@@ -7,7 +7,7 @@ class Chat {
   constructor(username, password, channel, obs) {
     this.username = username; // username
     this.password = password; // oauth
-    this.channel = channel; // #channel
+    this.channel = `#${channel}`; // #channel
     this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
     this.obsProps = obs;
     this.obs = obs.obs;
@@ -20,12 +20,15 @@ class Chat {
       "switch",
       "raid",
       "bitrate",
-      "info"
+      "info",
+      "refresh"
     ];
     this.allowAllCommands = ["bitrate", "info"];
+    this.allowModsCommands = ["refresh"];
     this.wait = false;
     this.rate = 0;
     this.rateInterval = false;
+    this.isRefreshing = false;
 
     this.ws.onopen = this.onOpen.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
@@ -88,7 +91,11 @@ class Chat {
               this.allowAllCommands.includes(commandName) &&
               !this.wait &&
               this.rate != 20) ||
-            (parsed.username === this.username && this.rate != 20)
+            (config.twitchChat.enableModCommands &&
+              parsed.tags.mod === "1" &&
+              this.allowModsCommands.includes(commandName) &&
+              this.rate != 20) ||
+            (parsed.username === this.channel.substring(1) && this.rate != 20)
           ) {
             if (this.commands.includes(commandName)) {
               this[commandName](parse[1]);
@@ -250,6 +257,31 @@ class Chat {
         this.obsProps.currentScene
       } and bitrate: ${bitrate}`
     );
+  }
+
+  async refresh() {
+    // switch scene
+    if (!this.isRefreshing) {
+      try {
+        await this.obs.setCurrentScene({
+          "scene-name": config.obs.refreshScene
+        });
+
+        this.ws.send(`PRIVMSG ${this.channel} :Refreshing stream`);
+        this.isRefreshing = true;
+
+        setTimeout(() => {
+          this.obs.setCurrentScene({
+            "scene-name": config.obs.normalScene
+          });
+
+          this.ws.send(`PRIVMSG ${this.channel} :Refreshing stream completed`);
+          this.isRefreshing = false;
+        }, config.obs.refreshSceneInterval);
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
 }
 

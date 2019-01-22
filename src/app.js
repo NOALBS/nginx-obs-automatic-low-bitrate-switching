@@ -13,9 +13,9 @@ const obs = new ObsSwitcher(
 
 if (config.twitchChat.enable) {
   const chat = new Chat(
-    config.twitchChat.username,
+    config.twitchChat.botUsername,
     config.twitchChat.oauth,
-    `#${config.twitchChat.username}`,
+    config.twitchChat.channel,
     obs
   );
 }
