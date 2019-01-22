@@ -90,7 +90,7 @@ class Chat {
           const commandName = parse[0];
 
           if (
-            (config.twitchChat.allowedUsers.includes(parsed.username) &&
+            (config.twitchChat.adminUsers.includes(parsed.username) &&
               this.rate != 20) ||
             (config.twitchChat.enablePublicCommands &&
               this.allowAllCommands.includes(commandName) &&
