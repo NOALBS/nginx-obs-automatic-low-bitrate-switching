@@ -313,7 +313,7 @@ class Chat {
 
     onOfflineScene() {
         // this.ws.send(`PRIVMSG ${this.channel} :Stream went offline`);
-        this.say(`Error editing trigger ${number} is not a valid value`);
+        this.say(`Scene switched to "${config.obs.offlineScene}"`);
     }
 
     trigger(number) {
