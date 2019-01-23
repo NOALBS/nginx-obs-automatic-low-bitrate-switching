@@ -84,7 +84,7 @@ class ObsSwitcher extends EventEmitter {
           config.twitchChat.enableAutoSwitchNotification &&
             this.emit("offlineScene"),
           console.log(
-            `Error receiving current bitrate or steam is offline. Switching to scene ${
+            `Error receiving current bitrate or stream is offline. Switching to scene ${
               this.offlineScene
             }.`
           ));
