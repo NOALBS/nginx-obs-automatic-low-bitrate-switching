@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import config from "../../config";
+import fs from "fs";
 
 // TODO add reconnect on disconnect
 
@@ -21,10 +22,11 @@ class Chat {
       "raid",
       "bitrate",
       "info",
-      "refresh"
+      "refresh",
+      "trigger"
     ];
     this.allowAllCommands = ["bitrate", "info"];
-    this.allowModsCommands = ["refresh"];
+    this.allowModsCommands = ["refresh", "trigger"];
     this.wait = false;
     this.rate = 0;
     this.rateInterval = false;
@@ -260,7 +262,7 @@ class Chat {
 
   bitrate() {
     this.ws.send(
-      `PRIVMSG ${this.channel} :Current bitrate: ${this.obsProps.bitrate}`
+      `PRIVMSG ${this.channel} :Current bitrate: ${this.obsProps.bitrate} Kbps`
     );
   }
 
@@ -268,7 +270,7 @@ class Chat {
     this.ws.send(
       `PRIVMSG ${this.channel} :Current scene: ${
         this.obsProps.currentScene
-      } and bitrate: ${this.obsProps.bitrate}`
+      } and bitrate: ${this.obsProps.bitrate} Kbps`
     );
   }
 
@@ -330,6 +332,43 @@ class Chat {
 
     this.ws.send(
       `PRIVMSG ${this.channel} :Scene switched to "${config.obs.offlineScene}"`
+    );
+  }
+
+  trigger(number) {
+    if (number) {
+      if (!isNaN(number)) {
+        this.obsProps.lowBitrateTrigger = +number;
+        config.obs.lowBitrateTrigger = +number;
+
+        fs.writeFile(
+          '"../../config.json',
+          JSON.stringify(config, null, 2),
+          err => {
+            if (err) console.log(err);
+          }
+        );
+
+        this.ws.send(
+          `PRIVMSG ${this.channel} :Trigger successfully set to ${
+            this.obsProps.lowBitrateTrigger
+          } Kbps`
+        );
+      } else {
+        this.ws.send(
+          `PRIVMSG ${
+            this.channel
+          } :Error editing trigger ${number} is not a valid value`
+        );
+      }
+
+      return;
+    }
+
+    this.ws.send(
+      `PRIVMSG ${this.channel} :Current trigger set at ${
+        this.obsProps.lowBitrateTrigger
+      } Kbps`
     );
   }
 }
