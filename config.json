@@ -1,27 +1,27 @@
 {
-  "obs": {
-    "ip": "localhost:4444",
-    "password": "password",
-    "normalScene": "Screen",
-    "offlineScene": "BRB",
-    "lowBitrateScene": "lowbitratedetected",
-    "refreshScene": "REFRESH",
-    "lowBitrateTrigger": 1000,
-    "refreshSceneInterval": 10000,
-    "requestMs": 2000
-  },
-  "nginx": {
-    "ip": "localhost"
-  },
-  "twitchChat": {
-    "channel": "715209",
-    "botUsername": "715209",
-    "oauth": "oauth:YOUR_OAUTH_HERE",
-    "enable": true,
-    "enablePublicCommands": false,
-    "enableModCommands": false,
-    "enableAutoSwitchNotification": true,
-    "enableAutoStopStreamOnHostOrRaid": true,
-    "adminUsers": ["715209", "b3ck"]
-  }
+    "obs": {
+        "ip": "localhost:4444",
+        "password": "password",
+        "normalScene": "Screen",
+        "offlineScene": "BRB",
+        "lowBitrateScene": "lowbitratedetected",
+        "refreshScene": "REFRESH",
+        "lowBitrateTrigger": 1000,
+        "refreshSceneInterval": 10000,
+        "requestMs": 2000
+    },
+    "nginx": {
+        "ip": "localhost"
+    },
+    "twitchChat": {
+        "channel": "715209",
+        "botUsername": "715209",
+        "oauth": "oauth:tw22363ue00bn1epggizsjsr18hnbr",
+        "enable": true,
+        "enablePublicCommands": false,
+        "enableModCommands": false,
+        "enableAutoSwitchNotification": true,
+        "enableAutoStopStreamOnHostOrRaid": true,
+        "adminUsers": ["715209", "b3ck"]
+    }
 }
