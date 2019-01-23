@@ -62,4 +62,4 @@ This script gives you the option to enable some simple chat commands to help you
 ## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
-(This is so that it wont change when you're on like your intro or locked-brb scene)
+(This is so that it wont change when you are on for example your 'intro' or 'locked-brb' scene)
