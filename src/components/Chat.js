@@ -268,9 +268,13 @@ class Chat {
     }
 
     obsinfo() {
-        const { fps, kbitsPerSec } = this.obsProps.streamStatus;
+        if (this.obsProps.nginxVideoMeta != null) {
+            const { fps, kbitsPerSec } = this.obsProps.streamStatus;
 
-        this.say(`[OBS] S: ${this.obsProps.currentScene} | F: ${Math.round(fps)} | B: ${kbitsPerSec}`);
+            this.say(`[OBS] S: ${this.obsProps.currentScene} | F: ${Math.round(fps)} | B: ${kbitsPerSec}`);
+        } else {
+            this.say(`[OBS] offline`);
+        }
     }
 
     async refresh() {
