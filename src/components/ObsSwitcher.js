@@ -47,7 +47,7 @@ class ObsSwitcher extends EventEmitter {
 
             if (bitrate !== null) {
                 this.isLive = true;
-                console.log(config.twitchChat.enableAutoSwitchNotification);
+
                 this.isLive &&
                     canSwitch &&
                     (bitrate === 0 &&
