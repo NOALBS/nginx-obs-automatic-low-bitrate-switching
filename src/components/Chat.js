@@ -21,12 +21,17 @@ class Chat {
       "switch",
       "raid",
       "bitrate",
-      "info",
       "refresh",
-      "trigger"
+      "trigger",
+      "sourceinfo",
+      "obsinfo",
+      "public",
+      "mod",
+      "notify",
+      "autostop"
     ];
-    this.allowAllCommands = ["bitrate", "info"];
-    this.allowModsCommands = ["refresh", "trigger"];
+    this.allowAllCommands = ["bitrate"];
+    this.allowModsCommands = ["refresh", "trigger", "sourceinfo", "obsinfo"];
     this.wait = false;
     this.rate = 0;
     this.rateInterval = false;
@@ -266,11 +271,27 @@ class Chat {
     );
   }
 
-  info() {
+  sourceinfo() {
+    if (this.obsProps.nginxVideoMeta != null) {
+      const { height, frame_rate } = this.obsProps.nginxVideoMeta;
+
+      this.ws.send(
+        `PRIVMSG ${this.channel} :[SRC] R: ${height[0]} | F: ${
+          frame_rate[0]
+        } | B: ${this.obsProps.bitrate}`
+      );
+    } else {
+      this.ws.send(`PRIVMSG ${this.channel} :[Source Info] offline`);
+    }
+  }
+
+  obsinfo() {
+    const { fps, kbitsPerSec } = this.obsProps.streamStatus;
+
     this.ws.send(
-      `PRIVMSG ${this.channel} :Current scene: ${
+      `PRIVMSG ${this.channel} :[OBS] S: ${
         this.obsProps.currentScene
-      } and bitrate: ${this.obsProps.bitrate} Kbps`
+      } | F: ${Math.round(fps)} | B: ${kbitsPerSec}`
     );
   }
 
@@ -341,13 +362,7 @@ class Chat {
         this.obsProps.lowBitrateTrigger = +number;
         config.obs.lowBitrateTrigger = +number;
 
-        fs.writeFile(
-          '"../../config.json',
-          JSON.stringify(config, null, 2),
-          err => {
-            if (err) console.log(err);
-          }
-        );
+        this.handleWriteToConfig();
 
         this.ws.send(
           `PRIVMSG ${this.channel} :Trigger successfully set to ${
@@ -370,6 +385,38 @@ class Chat {
         this.obsProps.lowBitrateTrigger
       } Kbps`
     );
+  }
+
+  public(bool) {
+    this.handleEnable("enablePublicCommands", bool);
+  }
+
+  mod(bool) {
+    this.handleEnable("enableModCommands", bool);
+  }
+
+  notify(bool) {
+    this.handleEnable("enableAutoSwitchNotification", bool);
+  }
+
+  autostop(bool) {
+    this.handleEnable("enableAutoStopStreamOnHostOrRaid", bool);
+  }
+
+  handleEnable(name, message) {
+    if (message === "on" && config.twitchChat[name] != true) {
+      config.twitchChat[name] = true;
+      this.handleWriteToConfig();
+    } else if (message === "off" && config.twitchChat[name] != false) {
+      config.twitchChat[name] = false;
+      this.handleWriteToConfig();
+    }
+  }
+
+  handleWriteToConfig() {
+    fs.writeFile('"../../config.json', JSON.stringify(config, null, 2), err => {
+      if (err) console.log(err);
+    });
   }
 }
 

@@ -19,6 +19,8 @@ class ObsSwitcher extends EventEmitter {
     this.offlineScene = offline;
     this.lowBitrateTrigger = lowBitrateTrigger;
     this.bitrate = null;
+    this.nginxVideoMeta = null;
+    this.streamStatus = null;
     this.currentScene = null;
 
     this.obs
@@ -31,6 +33,7 @@ class ObsSwitcher extends EventEmitter {
     this.obs.on("AuthenticationSuccess", this.onAuth.bind(this));
     this.obs.on("AuthenticationFailure", this.onAuthFail.bind(this));
     this.obs.on("error", this.error.bind(this));
+    this.obs.on("StreamStatus", this.setStreamStatus.bind(this));
   }
 
   onAuth() {
@@ -48,7 +51,7 @@ class ObsSwitcher extends EventEmitter {
 
       if (bitrate !== null) {
         this.isLive = true;
-
+        console.log(config.twitchChat.enableAutoSwitchNotification);
         this.isLive &&
           canSwitch &&
           (bitrate === 0 &&
@@ -100,12 +103,14 @@ class ObsSwitcher extends EventEmitter {
       parseString(data, (err, result) => {
         const publish = result.rtmp.server[0].application[0].live[0].stream;
         if (publish == null) {
+          this.nginxVideoMeta = null;
           this.bitrate = null;
         } else {
           const stream = publish.find(stream => {
             return stream.name[0] === username;
           });
 
+          this.nginxVideoMeta = stream.meta[0].video[0];
           this.bitrate = Math.round(stream.bw_video[0] / 1024);
         }
       });
@@ -114,6 +119,10 @@ class ObsSwitcher extends EventEmitter {
     }
 
     return this.bitrate;
+  }
+
+  setStreamStatus(res) {
+    this.streamStatus = res;
   }
 
   error(e) {
