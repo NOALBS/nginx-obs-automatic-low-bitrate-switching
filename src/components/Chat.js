@@ -298,7 +298,13 @@ class Chat {
   }
 
   live() {
-    this.ws.send(`PRIVMSG ${this.channel} :Stream went live`);
+    // this.ws.send(`PRIVMSG ${this.channel} :Scene switching to live`);
+
+    this.ws.send(
+      `PRIVMSG ${this.channel} :Scene switched to "${
+        config.obs.lowBitrateScene
+      }"`
+    );
   }
 
   onNormalScene() {
@@ -320,7 +326,11 @@ class Chat {
   }
 
   onOfflineScene() {
-    this.ws.send(`PRIVMSG ${this.channel} :Stream went offline`);
+    // this.ws.send(`PRIVMSG ${this.channel} :Stream went offline`);
+
+    this.ws.send(
+      `PRIVMSG ${this.channel} :Scene switched to "${config.obs.offlineScene}"`
+    );
   }
 }
 
