@@ -12,7 +12,7 @@ class Chat {
         this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
         this.obsProps = obs;
         this.obs = obs.obs;
-        this.prefix = "!";
+        this.prefix = config.twitchChat.prefix;
         this.commands = [
             "host",
             "unhost",

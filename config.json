@@ -16,8 +16,9 @@
     "twitchChat": {
         "channel": "715209",
         "botUsername": "715209",
-        "oauth": "oauth:tw22363ue00bn1epggizsjsr18hnbr",
+        "oauth": "oauth:YOUR_OAUTH_HERE",
         "enable": true,
+        "prefix": "!",
         "enablePublicCommands": false,
         "enableModCommands": false,
         "enableAutoSwitchNotification": true,
