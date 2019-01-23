@@ -4,7 +4,7 @@
 
 Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.
 
-## Prerequisities
+## ▒▒ Prerequisities ▒▒
 
 - [Git](http://git-scm.com/)
 - [Node.js](http://nodejs.org/) (with NPM)
@@ -14,7 +14,7 @@ Simple app to automatically switch scenes based on the current bitrate on the ng
 - [OBS-Studio](https://github.com/obsproject/obs-studio/)
 - [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
 
-## Installation
+## ▒▒ Installation ▒▒
 
 - `git clone <repository-url>`
 - Change into the new directory.
@@ -22,7 +22,7 @@ Simple app to automatically switch scenes based on the current bitrate on the ng
 - Replace your `nginx.conf` with the one given here.
 - Put `stat.xsl` in your nginx folder.
 
-## Config
+## ▒▒ Config ▒▒
 
 Edit `config.json` to your own settings.
 
@@ -38,11 +38,11 @@ Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Fin
 
 ![alt text](https://i.imgur.com/yRlBe5U.png "Setting your bot as Editor")
 
-## How to run
+## ▒▒ How to run ▒▒
 
 Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/live`
 
-## Chat Commands
+## ▒▒ Chat Commands ▒▒
 
 This script gives you the option to enable some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
 >Please note: Admins are all the users in the "adminUsers" array in the config, MODs (if enabled in the config) are all of your MODs, and Public (if enabled in the config) is anyone in your chat.
@@ -59,7 +59,7 @@ This script gives you the option to enable some simple chat commands to help you
 >| Public       | !bitrate | returns current BITRATE | !bitrate |
 >| Public       | !info | returns current SCENE and BITRATE. | !info |
 
-## Help it won't change scenes
+## ▒▒ Help it won't change scenes ▒▒
 
 It will only change scenes when OBS is set on a scene that's in the config.  
 (This is so that it wont change when you are on for example your 'intro' or 'locked-brb' scene)
