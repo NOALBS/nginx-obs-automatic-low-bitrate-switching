@@ -209,23 +209,24 @@ class Chat {
 
   host(username) {
     if (username != null) {
-      this.ws.send(`PRIVMSG ${this.channel} :/host ${username}`);
+      this.say(`/host ${username}`);
     } else {
-      this.ws.send(`PRIVMSG ${this.channel} :Error no username`);
+      this.say(`Error no username`);
+
       console.log("Error executing host command no username");
     }
   }
 
   unhost() {
-    this.ws.send(`PRIVMSG ${this.channel} :/unhost`);
+    this.say(`/unhost`);
   }
 
   raid(username) {
     if (username != null) {
-      this.ws.send(`PRIVMSG ${this.channel} :/raid ${username}`);
+      this.say(`/raid ${username}`);
     } else {
       console.log("Error executing host command no username");
-      this.ws.send(`PRIVMSG ${this.channel} :Error no username`);
+      this.say(`Error no username`);
     }
   }
 
@@ -233,10 +234,10 @@ class Chat {
     // start streaming
     try {
       await this.obs.startStreaming();
-      this.ws.send(`PRIVMSG ${this.channel} :Successfully started stream`);
+      this.say(`Successfully started stream`);
     } catch (e) {
       console.log(e);
-      this.ws.send(`PRIVMSG ${this.channel} :Error ${e.error}`);
+      this.say(`Error ${e.error}`);
     }
   }
 
@@ -244,11 +245,10 @@ class Chat {
     // stop streaming
     try {
       await this.obs.stopStreaming();
-
-      this.ws.send(`PRIVMSG ${this.channel} :Successfully stopped stream`);
+      this.say(`Successfully stopped stream`);
     } catch (e) {
       console.log(e.error);
-      this.ws.send(`PRIVMSG ${this.channel} :${e.error}`);
+      this.say(`${e.error}`);
     }
   }
 
@@ -256,42 +256,37 @@ class Chat {
     // switch scene
     try {
       await this.obs.setCurrentScene({ "scene-name": sceneName });
-
-      this.ws.send(
-        `PRIVMSG ${this.channel} :Scene successfully switched to "${sceneName}"`
-      );
+      this.say(`Scene successfully switched to "${sceneName}"`);
     } catch (e) {
       console.log(e);
     }
   }
 
   bitrate() {
-    this.ws.send(
-      `PRIVMSG ${this.channel} :Current bitrate: ${this.obsProps.bitrate} Kbps`
-    );
+    this.say(`Current bitrate: ${this.obsProps.bitrate} Kbps`);
   }
 
   sourceinfo() {
     if (this.obsProps.nginxVideoMeta != null) {
       const { height, frame_rate } = this.obsProps.nginxVideoMeta;
 
-      this.ws.send(
-        `PRIVMSG ${this.channel} :[SRC] R: ${height[0]} | F: ${
-          frame_rate[0]
-        } | B: ${this.obsProps.bitrate}`
+      this.say(
+        `[SRC] R: ${height[0]} | F: ${frame_rate[0]} | B: ${
+          this.obsProps.bitrate
+        }`
       );
     } else {
-      this.ws.send(`PRIVMSG ${this.channel} :[Source Info] offline`);
+      this.say(`[Source Info] offline`);
     }
   }
 
   obsinfo() {
     const { fps, kbitsPerSec } = this.obsProps.streamStatus;
 
-    this.ws.send(
-      `PRIVMSG ${this.channel} :[OBS] S: ${
-        this.obsProps.currentScene
-      } | F: ${Math.round(fps)} | B: ${kbitsPerSec}`
+    this.say(
+      `[OBS] S: ${this.obsProps.currentScene} | F: ${Math.round(
+        fps
+      )} | B: ${kbitsPerSec}`
     );
   }
 
@@ -302,16 +297,14 @@ class Chat {
         await this.obs.setCurrentScene({
           "scene-name": config.obs.refreshScene
         });
-
-        this.ws.send(`PRIVMSG ${this.channel} :Refreshing stream`);
+        this.say(`Refreshing stream`);
         this.isRefreshing = true;
 
         setTimeout(() => {
           this.obs.setCurrentScene({
             "scene-name": config.obs.normalScene
           });
-
-          this.ws.send(`PRIVMSG ${this.channel} :Refreshing stream completed`);
+          this.say(`Refreshing stream completed`);
           this.isRefreshing = false;
         }, config.obs.refreshSceneInterval);
       } catch (e) {
@@ -322,38 +315,22 @@ class Chat {
 
   live() {
     // this.ws.send(`PRIVMSG ${this.channel} :Scene switching to live`);
-
-    this.ws.send(
-      `PRIVMSG ${this.channel} :Scene switched to "${
-        config.obs.lowBitrateScene
-      }"`
-    );
+    this.say(`Scene switched to "${config.obs.lowBitrateScene}"`);
   }
 
   onNormalScene() {
-    this.ws.send(
-      `PRIVMSG ${this.channel} :Scene switched to "${config.obs.normalScene}"`
-    );
-
+    this.say(`Scene switched to "${config.obs.normalScene}"`);
     this.bitrate();
   }
 
   onLowBitrateScene() {
-    this.ws.send(
-      `PRIVMSG ${this.channel} :Scene switched to "${
-        config.obs.lowBitrateScene
-      }"`
-    );
-
+    this.say(`Scene switched to "${config.obs.lowBitrateScene}"`);
     this.bitrate();
   }
 
   onOfflineScene() {
     // this.ws.send(`PRIVMSG ${this.channel} :Stream went offline`);
-
-    this.ws.send(
-      `PRIVMSG ${this.channel} :Scene switched to "${config.obs.offlineScene}"`
-    );
+    this.say(`Error editing trigger ${number} is not a valid value`);
   }
 
   trigger(number) {
@@ -363,28 +340,17 @@ class Chat {
         config.obs.lowBitrateTrigger = +number;
 
         this.handleWriteToConfig();
-
-        this.ws.send(
-          `PRIVMSG ${this.channel} :Trigger successfully set to ${
-            this.obsProps.lowBitrateTrigger
-          } Kbps`
+        this.say(
+          `Trigger successfully set to ${this.obsProps.lowBitrateTrigger} Kbps`
         );
       } else {
-        this.ws.send(
-          `PRIVMSG ${
-            this.channel
-          } :Error editing trigger ${number} is not a valid value`
-        );
+        this.say(`Error editing trigger ${number} is not a valid value`);
       }
 
       return;
     }
 
-    this.ws.send(
-      `PRIVMSG ${this.channel} :Current trigger set at ${
-        this.obsProps.lowBitrateTrigger
-      } Kbps`
-    );
+    this.say(`Current trigger set at ${this.obsProps.lowBitrateTrigger} Kbps`);
   }
 
   public(bool) {
@@ -417,6 +383,10 @@ class Chat {
     fs.writeFile('"../../config.json', JSON.stringify(config, null, 2), err => {
       if (err) console.log(err);
     });
+  }
+
+  say(message) {
+    this.ws.send(`PRIVMSG ${this.channel} :${message}`);
   }
 }
 
