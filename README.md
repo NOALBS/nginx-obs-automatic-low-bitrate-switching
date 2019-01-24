@@ -1,4 +1,11 @@
-
+```
+███╗   ██╗ ██████╗  █████╗ ██╗     ██████╗ ███████╗
+████╗  ██║██╔═══██╗██╔══██╗██║     ██╔══██╗██╔════╝
+██╔██╗ ██║██║   ██║███████║██║     ██████╔╝███████╗
+██║╚██╗██║██║   ██║██╔══██║██║     ██╔══██╗╚════██║
+██║ ╚████║╚██████╔╝██║  ██║███████╗██████╔╝███████║
+╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝
+```  
 
 # nginx-obs-automatic-low-bitrate-switching
 
@@ -26,8 +33,8 @@ Simple app to automatically switch scenes based on the current bitrate on the ng
 
 Edit `config.json` to your own settings.
 
-Here is an example config with comments:
-![alt text](https://i.imgur.com/jjI2Do8.png "Configuration Comments")
+Here is an example config with comments (click to enlarge):
+![alt text](https://i.imgur.com/cVbz1bN.png "Configuration Comments (Click to Enlarge)")
 
  - Use https://twitchapps.com/tmi to get your oauth from Twitch for use with chat commands.
 > We recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
