@@ -339,28 +339,32 @@ class Chat {
     }
 
     public(bool) {
-        this.handleEnable("enablePublicCommands", bool);
+        this.handleEnable("enablePublicCommands", bool, "Public comands");
     }
 
     mod(bool) {
-        this.handleEnable("enableModCommands", bool);
+        this.handleEnable("enableModCommands", bool, "Mod commands");
     }
 
     notify(bool) {
-        this.handleEnable("enableAutoSwitchNotification", bool);
+        this.handleEnable("enableAutoSwitchNotification", bool, "Auto switch notification");
     }
 
     autostop(bool) {
-        this.handleEnable("enableAutoStopStreamOnHostOrRaid", bool);
+        this.handleEnable("enableAutoStopStreamOnHostOrRaid", bool, "Auto stop stream");
     }
 
-    handleEnable(name, message) {
-        if (message === "on" && config.twitchChat[name] != true) {
+    handleEnable(name, bool, response) {
+        if (bool === "on" && config.twitchChat[name] != true) {
             config.twitchChat[name] = true;
             this.handleWriteToConfig();
-        } else if (message === "off" && config.twitchChat[name] != false) {
+            this.say(`${response} enabled`);
+        } else if (bool === "off" && config.twitchChat[name] != false) {
             config.twitchChat[name] = false;
             this.handleWriteToConfig();
+            this.say(`${response} disabled`);
+        } else {
+            this.say(`${response} already ${config.twitchChat[name] ? "on" : "off"}`);
         }
     }
 
