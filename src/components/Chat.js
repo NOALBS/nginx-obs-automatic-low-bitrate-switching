@@ -268,7 +268,7 @@ class Chat {
     }
 
     obsinfo() {
-        if (this.obsProps.nginxVideoMeta != null) {
+        if (this.obsProps.streamStatus != null) {
             const { fps, kbitsPerSec } = this.obsProps.streamStatus;
 
             this.say(`[OBS] S: ${this.obsProps.currentScene} | F: ${Math.round(fps)} | B: ${kbitsPerSec}`);
