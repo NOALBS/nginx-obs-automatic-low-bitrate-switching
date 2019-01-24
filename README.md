@@ -11,7 +11,7 @@
 
 Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.
 
-## ▒▒ Prerequisities ▒▒
+## ▒▒ Build Prerequisities ▒▒
 
 - [Git](http://git-scm.com/)
 - [Node.js](http://nodejs.org/) (with NPM)
@@ -21,7 +21,7 @@ Simple app to automatically switch scenes based on the current bitrate on the ng
 - [OBS-Studio](https://github.com/obsproject/obs-studio/)
 - [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
 
-## ▒▒ Installation ▒▒
+## ▒▒ Installation from Source ▒▒
 
 - `git clone <repository-url>`
 - Change into the new directory.
@@ -45,7 +45,7 @@ Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Fin
 
 ![alt text](https://i.imgur.com/yRlBe5U.png "Setting your bot as Editor")
 
-## ▒▒ How to run ▒▒
+## ▒▒ How to run from source ▒▒
 
 Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/live`
 
