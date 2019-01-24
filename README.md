@@ -9,7 +9,7 @@
 
 # nginx-obs-automatic-low-bitrate-switching
 
-Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.
+Simple app to automatically switch scenes in OBS based on the current bitrate fetched from the NGINX stats page.
 
 ## ▒▒ Build Prerequisities ▒▒
 
