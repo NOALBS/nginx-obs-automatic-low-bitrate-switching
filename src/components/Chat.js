@@ -30,8 +30,8 @@ class Chat {
             "notify",
             "autostop"
         ];
-        this.allowAllCommands = ["bitrate"];
-        this.allowModsCommands = ["refresh", "trigger", "sourceinfo", "obsinfo"];
+        this.allowAllCommands = config.twitchChat.publicCommands;
+        this.allowModsCommands = config.twitchChat.modCommands;
         this.wait = false;
         this.rate = 0;
         this.rateInterval = false;
