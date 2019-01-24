@@ -289,7 +289,7 @@ class Chat {
 
                 setTimeout(() => {
                     this.obs.setCurrentScene({
-                        "scene-name": config.obs.normalScene
+                        "scene-name": this.obsProps.lastAllowedScene
                     });
                     this.say(`Refreshing stream completed`);
                     this.isRefreshing = false;
