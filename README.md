@@ -54,7 +54,7 @@ Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/
 This script gives you the option to enable some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
 >Please note: Admins are all the users in the "adminUsers" array in the config, MODs (if enabled in the config) are all of your MODs, and Public (if enabled in the config) is anyone in your chat.
 
->| Role  | Command           | Description          | Example  |
+>| Default Role  | Command           | Description          | Example  |
 >|:-------:| ---------------- |:-------------| :----------------------|
 >| Admins       | !host (channelname) | hosts said channel, and stops streaming in OBS if enabled in config. | !host 715209 |
 >| Admins       | !unhost      | unhosts whoever you are currently hosting.      |   !unhost  |
@@ -63,8 +63,19 @@ This script gives you the option to enable some simple chat commands to help you
 >| Admins       | !stop | on-demand command to stop streaming in OBS.      |    !stop |
 >| Admins       | !switch (scene) | switches to the provided SCENE (case senstive).      |    !switch INTRO|
 >| MODs			| !refresh | changes to the REFRESH scene for the set interval. | !refresh |
+>| MODs			| !trigger (value) | changes the low bitrate threshold to the defined value. | !trigger 1000 |
+>| MODs			| !sourceinfo | gives you details about the SOURCE in chat. | !sourceinfo |
+>| MODs			| !obsinfo | gives you details about OBS in chat. | !obsinfo |
 >| Public       | !bitrate | returns current BITRATE | !bitrate |
->| Public       | !info | returns current SCENE and BITRATE. | !info |
+
+You can also enable/disable certain features from chat, see below:
+>| Default Role  | Command           | Description          | Example  |
+>|:-------:| ---------------- |:-------------| :----------------------|
+>| Admins       | !public (on/off) | enables/disables the use of Public commands. | !public off |
+>| Admins       | !mod (on/off) | enables/disables the use of MOD commands. | !mod on |
+>| Admins       | !notify (on/off) | enables/disables the notifications in chat. | !notify off |
+>| Admins       | !autostop (on/off) | enables/disables the auto stop feature when you host/raid. | !autostop on |
+
 
 ## ▒▒ Help it won't change scenes ▒▒
 
