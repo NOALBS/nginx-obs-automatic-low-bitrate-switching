@@ -281,6 +281,8 @@ class Chat {
         // switch scene
         if (!this.isRefreshing) {
             try {
+                const lastScene = this.obsProps.currentScene;
+
                 await this.obs.setCurrentScene({
                     "scene-name": config.obs.refreshScene
                 });
@@ -289,7 +291,7 @@ class Chat {
 
                 setTimeout(() => {
                     this.obs.setCurrentScene({
-                        "scene-name": this.obsProps.lastAllowedScene
+                        "scene-name": lastScene
                     });
                     this.say(`Refreshing stream completed`);
                     this.isRefreshing = false;

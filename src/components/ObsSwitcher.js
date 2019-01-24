@@ -22,7 +22,6 @@ class ObsSwitcher extends EventEmitter {
         this.nginxVideoMeta = null;
         this.streamStatus = null;
         this.currentScene = null;
-        this.lastAllowedScene = offline;
 
         this.obs.connect({ address: this.address, password: this.password }).catch(e => {
             // handle this somewhere else
@@ -56,7 +55,6 @@ class ObsSwitcher extends EventEmitter {
                         (this.obs.setCurrentScene({
                             "scene-name": this.lowBitrateScene
                         }),
-                        (this.lastAllowedScene = this.lowBitrateScene),
                         config.twitchChat.enableAutoSwitchNotification && this.emit("live")),
                     bitrate <= this.lowBitrateTrigger &&
                         currentScene.name !== this.lowBitrateScene &&
@@ -65,13 +63,11 @@ class ObsSwitcher extends EventEmitter {
                             "scene-name": this.lowBitrateScene
                         }),
                         config.twitchChat.enableAutoSwitchNotification && this.emit("lowBitrateScene"),
-                        (this.lastAllowedScene = this.lowBitrateScene),
                         console.log(`Low bitrate detected switching to scene ${this.lowBitrateScene}.`)),
                     bitrate > this.lowBitrateTrigger &&
                         currentScene.name !== this.normalScene &&
                         (this.obs.setCurrentScene({ "scene-name": this.normalScene }),
                         config.twitchChat.enableAutoSwitchNotification && this.emit("normalScene"),
-                        (this.lastAllowedScene = this.normalScene),
                         console.log(`Switching back to scene ${this.normalScene}.`)));
             } else {
                 this.isLive = false;
@@ -81,7 +77,6 @@ class ObsSwitcher extends EventEmitter {
                     (this.obs.setCurrentScene({ "scene-name": this.offlineScene }),
                     config.twitchChat.enableAutoSwitchNotification && this.emit("offlineScene"),
                     (this.streamStatus = null),
-                    (this.lastAllowedScene = this.offlineScene),
                     console.log(`Error receiving current bitrate or stream is offline. Switching to scene ${this.offlineScene}.`));
             }
         }, config.obs.requestMs);
