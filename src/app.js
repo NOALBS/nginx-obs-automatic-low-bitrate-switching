@@ -2,6 +2,15 @@ import ObsSwitcher from "./components/ObsSwitcher";
 import Chat from "./components/Chat";
 import config from "../config";
 
+console.log(`
+    ███╗   ██╗ ██████╗  █████╗ ██╗     ██████╗ ███████╗
+    ████╗  ██║██╔═══██╗██╔══██╗██║     ██╔══██╗██╔════╝
+    ██╔██╗ ██║██║   ██║███████║██║     ██████╔╝███████╗
+    ██║╚██╗██║██║   ██║██╔══██║██║     ██╔══██╗╚════██║
+    ██║ ╚████║╚██████╔╝██║  ██║███████╗██████╔╝███████║
+    ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝ v1.0.0
+`);
+
 const obs = new ObsSwitcher(
     config.obs.ip,
     config.obs.password,

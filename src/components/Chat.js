@@ -1,6 +1,14 @@
 import WebSocket from "ws";
 import config from "../../config";
 import fs from "fs";
+import signale from "signale";
+
+signale.config({
+    displayTimestamp: true,
+    displayDate: true
+});
+
+const log = signale.scope("CHT");
 
 // TODO add reconnect on disconnect
 
@@ -46,6 +54,8 @@ class Chat {
         this.obsProps.on("normalScene", this.onNormalScene.bind(this));
         this.obsProps.on("lowBitrateScene", this.onLowBitrateScene.bind(this));
         this.obsProps.on("offlineScene", this.onOfflineScene.bind(this));
+
+        log.info("Connecting to twitch");
     }
 
     keepAlive() {
@@ -56,8 +66,8 @@ class Chat {
 
     onOpen() {
         if (this.ws !== null && this.ws.readyState === 1) {
-            console.log("Successfully Connected to websocket");
-            console.log(`Authenticating and joining channel ${this.channel}`);
+            log.success("Successfully Connected");
+            log.success(`Authenticating and joining channel ${this.channel}`);
 
             this.ws.send("CAP REQ :twitch.tv/tags twitch.tv/commands");
             this.ws.send(`PASS ${this.password}`);
@@ -69,7 +79,7 @@ class Chat {
     }
 
     onClose() {
-        console.log("Disconnected from the chat server.");
+        log.error("Disconnected from twitch server");
         clearInterval(this.interval);
     }
 
@@ -80,7 +90,7 @@ class Chat {
     }
 
     onError(e) {
-        console.log(`Error: ${e}`);
+        log.error(new Error(e));
     }
 
     onMessage(message) {
@@ -108,17 +118,17 @@ class Chat {
                         if (this.commands.includes(commandName)) {
                             this[commandName](parse[1]);
 
-                            console.log(`! Executed ${commandName} command`);
+                            log.success(`${parsed.username} Executed ${commandName} command`);
                             this.setWait();
                         } else {
-                            console.log(`! Unknown command ${commandName}`);
+                            log.error(`${parsed.username} Executed unknown command ${commandName}`);
                         }
                     }
                 } else if (parsed.command === "PING") {
                     this.ws.send(`PONG :${parsed.message}`);
                 } else if (parsed.command === "HOSTTARGET") {
                     if (parsed.message != null && config.twitchChat.enableAutoStopStreamOnHostOrRaid && this.obsProps.bitrate != null) {
-                        console.log("Channel started hosting stopping stream.");
+                        log.info("Channel started hosting, stopping stream");
                         this.stop();
                     }
                 }
@@ -201,8 +211,7 @@ class Chat {
             this.say(`/host ${username}`);
         } else {
             this.say(`Error no username`);
-
-            console.log("Error executing host command no username");
+            // console.log("Error executing host command no username");
         }
     }
 
@@ -214,8 +223,8 @@ class Chat {
         if (username != null) {
             this.say(`/raid ${username}`);
         } else {
-            console.log("Error executing host command no username");
             this.say(`Error no username`);
+            // console.log("Error executing host command no username");
         }
     }
 
@@ -225,7 +234,7 @@ class Chat {
             await this.obs.startStreaming();
             this.say(`Successfully started stream`);
         } catch (e) {
-            console.log(e);
+            log.error(e);
             this.say(`Error ${e.error}`);
         }
     }
@@ -236,7 +245,7 @@ class Chat {
             await this.obs.stopStreaming();
             this.say(`Successfully stopped stream`);
         } catch (e) {
-            console.log(e.error);
+            log.error(e.error);
             this.say(`${e.error}`);
         }
     }
@@ -249,7 +258,7 @@ class Chat {
             });
             this.say(`Scene successfully switched to "${sceneName}"`);
         } catch (e) {
-            console.log(e);
+            log.error(e);
         }
     }
 
@@ -297,7 +306,7 @@ class Chat {
                     this.isRefreshing = false;
                 }, config.obs.refreshSceneInterval);
             } catch (e) {
-                console.log(e);
+                log.error(e);
             }
         }
     }
@@ -372,7 +381,7 @@ class Chat {
 
     handleWriteToConfig() {
         fs.writeFile('"../../config.json', JSON.stringify(config, null, 4), err => {
-            if (err) console.log(err);
+            if (err) log.error(err);
         });
     }
 

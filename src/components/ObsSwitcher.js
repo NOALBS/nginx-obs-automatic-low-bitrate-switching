@@ -3,7 +3,14 @@ import fetch from "node-fetch";
 import xml2js from "xml2js";
 import config from "../../config";
 import EventEmitter from "events";
+import signale from "signale";
 
+signale.config({
+    displayTimestamp: true,
+    displayDate: true
+});
+
+const log = signale.scope("OBS");
 const parseString = xml2js.parseString;
 
 class ObsSwitcher extends EventEmitter {
@@ -32,10 +39,12 @@ class ObsSwitcher extends EventEmitter {
         this.obs.on("AuthenticationFailure", this.onAuthFail.bind(this));
         this.obs.on("error", this.error.bind(this));
         this.obs.on("StreamStatus", this.setStreamStatus.bind(this));
+
+        log.info("Connecting & authenticating");
     }
 
     onAuth() {
-        console.log(`Success! We're connected & authenticated.`);
+        log.success(`Successfully connected`);
 
         this.interval = setInterval(async () => {
             const currentScene = await this.obs.GetCurrentScene();
@@ -55,7 +64,8 @@ class ObsSwitcher extends EventEmitter {
                         (this.obs.setCurrentScene({
                             "scene-name": this.lowBitrateScene
                         }),
-                        config.twitchChat.enableAutoSwitchNotification && this.emit("live")),
+                        config.twitchChat.enableAutoSwitchNotification && this.emit("live"),
+                        log.info(`Stream went online switching to scene: "${this.lowBitrateScene}"`)),
                     bitrate <= this.lowBitrateTrigger &&
                         currentScene.name !== this.lowBitrateScene &&
                         bitrate !== 0 &&
@@ -63,12 +73,12 @@ class ObsSwitcher extends EventEmitter {
                             "scene-name": this.lowBitrateScene
                         }),
                         config.twitchChat.enableAutoSwitchNotification && this.emit("lowBitrateScene"),
-                        console.log(`Low bitrate detected switching to scene ${this.lowBitrateScene}.`)),
+                        log.info(`Low bitrate detected switching to scene: "${this.lowBitrateScene}"`)),
                     bitrate > this.lowBitrateTrigger &&
                         currentScene.name !== this.normalScene &&
                         (this.obs.setCurrentScene({ "scene-name": this.normalScene }),
                         config.twitchChat.enableAutoSwitchNotification && this.emit("normalScene"),
-                        console.log(`Switching back to scene ${this.normalScene}.`)));
+                        log.info(`Switching to normal scene: "${this.normalScene}"`)));
             } else {
                 this.isLive = false;
 
@@ -77,7 +87,7 @@ class ObsSwitcher extends EventEmitter {
                     (this.obs.setCurrentScene({ "scene-name": this.offlineScene }),
                     config.twitchChat.enableAutoSwitchNotification && this.emit("offlineScene"),
                     (this.streamStatus = null),
-                    console.log(`Error receiving current bitrate or stream is offline. Switching to scene ${this.offlineScene}.`));
+                    log.warn(`Error receiving current bitrate or stream is offline. Switching to offline scene: "${this.offlineScene}"`));
             }
         }, config.obs.requestMs);
     }
@@ -102,7 +112,7 @@ class ObsSwitcher extends EventEmitter {
                 }
             });
         } catch (e) {
-            console.log("Error fetching stats");
+            log.error("[NGINX] Error fetching stats");
         }
 
         return this.bitrate;
@@ -113,22 +123,22 @@ class ObsSwitcher extends EventEmitter {
     }
 
     error(e) {
-        console.log(e);
+        log.error(e);
     }
 
     onDisconnect() {
-        console.error("Can't connect to OBS or lost connnection.");
+        log.error("Can't connect or lost connnection");
         clearInterval(this.interval);
 
         this.reconnect();
     }
 
     onAuthFail() {
-        console.log("Failed to authenticate to OBS");
+        log.error("Failed to authenticate");
     }
 
     reconnect() {
-        console.log("Trying to reconnect in 5 seconds");
+        log.info("Trying to reconnect in 5 seconds");
         setTimeout(() => {
             this.obs.connect({ address: this.address, password: this.password }).catch(e => {
                 // handle this somewhere else
