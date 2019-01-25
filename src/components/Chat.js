@@ -272,7 +272,7 @@ class Chat {
 
             this.say(`[SRC] R: ${height[0]} | F: ${frame_rate[0]} | B: ${this.obsProps.bitrate}`);
         } else {
-            this.say(`[Source Info] offline`);
+            this.say(`[SRC] offline`);
         }
     }
 
