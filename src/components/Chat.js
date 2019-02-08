@@ -10,14 +10,11 @@ signale.config({
 
 const log = signale.scope("CHT");
 
-// TODO add reconnect on disconnect
-
 class Chat {
     constructor(username, password, channel, obs) {
         this.username = username; // username
         this.password = password; // oauth
         this.channel = `#${channel}`; // #channel
-        this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
         this.obsProps = obs;
         this.obs = obs.obs;
         this.prefix = config.twitchChat.prefix;
@@ -45,10 +42,7 @@ class Chat {
         this.rateInterval = false;
         this.isRefreshing = false;
 
-        this.ws.onopen = this.onOpen.bind(this);
-        this.ws.onmessage = this.onMessage.bind(this);
-        this.ws.onerror = this.onError.bind(this);
-        this.ws.onclose = this.onClose.bind(this);
+        this.open();
 
         this.obsProps.on("live", this.live.bind(this));
         this.obsProps.on("normalScene", this.onNormalScene.bind(this));
@@ -56,6 +50,15 @@ class Chat {
         this.obsProps.on("offlineScene", this.onOfflineScene.bind(this));
 
         log.info("Connecting to twitch");
+    }
+
+    open() {
+        this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+
+        this.ws.onopen = this.onOpen.bind(this);
+        this.ws.onmessage = this.onMessage.bind(this);
+        this.ws.onerror = this.onError.bind(this);
+        this.ws.onclose = this.onClose.bind(this);
     }
 
     keepAlive() {
@@ -81,12 +84,23 @@ class Chat {
     onClose() {
         log.error("Disconnected from twitch server");
         clearInterval(this.interval);
+        this.ws.removeAllListeners();
+        this.reconnect();
     }
 
     close() {
         if (this.ws) {
             this.ws.close();
         }
+    }
+
+    reconnect() {
+        log.info(`Trying to reconnect in 5 seconds`);
+
+        setTimeout(() => {
+            log.info("Reconnecting...");
+            this.open();
+        }, 5000);
     }
 
     onError(e) {
