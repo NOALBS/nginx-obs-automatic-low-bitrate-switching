@@ -273,11 +273,16 @@ class Chat {
             this.say(`Scene successfully switched to "${sceneName}"`);
         } catch (e) {
             log.error(e);
+            this.say(e.error);
         }
     }
 
     bitrate() {
-        this.say(`Current bitrate: ${this.obsProps.bitrate} Kbps`);
+        if (this.obsProps.bitrate != null) {
+            this.say(`Current bitrate: ${this.obsProps.bitrate} Kbps`);
+        } else {
+            this.say(`Current bitrate: offline`);
+        }
     }
 
     sourceinfo() {
