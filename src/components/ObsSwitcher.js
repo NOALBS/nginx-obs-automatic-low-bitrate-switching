@@ -28,6 +28,7 @@ class ObsSwitcher extends EventEmitter {
         this.bitrate = null;
         this.nginxVideoMeta = null;
         this.streamStatus = null;
+        this.obsStreaming = false;
         this.currentScene = null;
 
         this.obs.connect({ address: this.address, password: this.password }).catch(e => {
@@ -39,6 +40,8 @@ class ObsSwitcher extends EventEmitter {
         this.obs.on("AuthenticationFailure", this.onAuthFail.bind(this));
         this.obs.on("error", this.error.bind(this));
         this.obs.on("StreamStatus", this.setStreamStatus.bind(this));
+        this.obs.on("StreamStopped", this.streamStopped.bind(this));
+        this.obs.on("StreamStarted", this.streamStarted.bind(this));
 
         log.info("Connecting & authenticating");
     }
@@ -64,7 +67,7 @@ class ObsSwitcher extends EventEmitter {
                         (this.obs.setCurrentScene({
                             "scene-name": this.lowBitrateScene
                         }),
-                        config.twitchChat.enableAutoSwitchNotification && this.emit("live"),
+                        this.switchSceneEmit("live"),
                         log.info(`Stream went online switching to scene: "${this.lowBitrateScene}"`)),
                     bitrate <= this.lowBitrateTrigger &&
                         currentScene.name !== this.lowBitrateScene &&
@@ -72,12 +75,12 @@ class ObsSwitcher extends EventEmitter {
                         (this.obs.setCurrentScene({
                             "scene-name": this.lowBitrateScene
                         }),
-                        config.twitchChat.enableAutoSwitchNotification && this.emit("lowBitrateScene"),
+                        this.switchSceneEmit("lowBitrateScene"),
                         log.info(`Low bitrate detected switching to scene: "${this.lowBitrateScene}"`)),
                     bitrate > this.lowBitrateTrigger &&
                         currentScene.name !== this.normalScene &&
                         (this.obs.setCurrentScene({ "scene-name": this.normalScene }),
-                        config.twitchChat.enableAutoSwitchNotification && this.emit("normalScene"),
+                        this.switchSceneEmit("normalScene"),
                         log.info(`Switching to normal scene: "${this.normalScene}"`)));
             } else {
                 this.isLive = false;
@@ -85,11 +88,17 @@ class ObsSwitcher extends EventEmitter {
                 canSwitch &&
                     currentScene.name !== this.offlineScene &&
                     (this.obs.setCurrentScene({ "scene-name": this.offlineScene }),
-                    config.twitchChat.enableAutoSwitchNotification && this.emit("offlineScene"),
+                    this.switchSceneEmit("offlineScene"),
                     (this.streamStatus = null),
                     log.warn(`Error receiving current bitrate or stream is offline. Switching to offline scene: "${this.offlineScene}"`));
             }
         }, config.obs.requestMs);
+    }
+
+    switchSceneEmit(sceneName) {
+        if (config.twitchChat.enableAutoSwitchNotification && this.obsStreaming) {
+            this.emit(sceneName);
+        }
     }
 
     async getBitrate(username = "live") {
@@ -144,6 +153,14 @@ class ObsSwitcher extends EventEmitter {
                 // handle this somewhere else
             });
         }, 5000);
+    }
+
+    streamStopped() {
+        this.obsStreaming = false;
+    }
+
+    streamStarted() {
+        this.obsStreaming = true;
     }
 }
 
