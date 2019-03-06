@@ -28,6 +28,7 @@ class ObsSwitcher extends EventEmitter {
         this.bitrate = null;
         this.nginxVideoMeta = null;
         this.streamStatus = null;
+        this.heartbeat = null;
         this.obsStreaming = false;
         this.currentScene = null;
 
@@ -42,12 +43,14 @@ class ObsSwitcher extends EventEmitter {
         this.obs.on("StreamStatus", this.setStreamStatus.bind(this));
         this.obs.on("StreamStopped", this.streamStopped.bind(this));
         this.obs.on("StreamStarted", this.streamStarted.bind(this));
+        this.obs.on("Heartbeat", heartbeat => (this.heartbeat = heartbeat));
 
         log.info("Connecting & authenticating");
     }
 
     onAuth() {
         log.success(`Successfully connected`);
+        this.obs.SetHeartbeat({ enable: true });
 
         this.interval = setInterval(async () => {
             const currentScene = await this.obs.GetCurrentScene();

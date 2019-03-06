@@ -33,7 +33,8 @@ class Chat {
             "public",
             "mod",
             "notify",
-            "autostop"
+            "autostop",
+            "rec"
         ];
         this.allowAllCommands = config.twitchChat.publicCommands;
         this.allowModsCommands = config.twitchChat.modCommands;
@@ -261,6 +262,45 @@ class Chat {
         } catch (e) {
             log.error(e.error);
             this.say(`${e.error}`);
+        }
+    }
+
+    rec(bool) {
+        if (!bool) {
+            this.say(`[REC] ${this.obsProps.heartbeat.recording ? "started" : "stopped"}`);
+            return;
+        }
+
+        switch (bool) {
+            case "on":
+                this.startStopRec(true);
+                return;
+            case "off":
+                this.startStopRec(false);
+                return;
+            default:
+                this.say(`[REC] Invalid option`);
+                return;
+        }
+    }
+
+    async startStopRec(bool) {
+        if (bool) {
+            try {
+                const res = await this.obs.StartRecording();
+                if (res.status === "ok") this.say(`[REC] Started`);
+                log.success(`Started recording`);
+            } catch (error) {
+                this.say(`[REC] already started`);
+            }
+        } else {
+            try {
+                const res = await this.obs.StopRecording();
+                if (res.status === "ok") this.say(`[REC] Stopped`);
+                log.success(`Stopped recording`);
+            } catch (error) {
+                this.say(`[REC] already stopped`);
+            }
         }
     }
 
