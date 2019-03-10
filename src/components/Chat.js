@@ -425,6 +425,11 @@ class Chat {
     }
 
     handleEnable(name, bool, response) {
+        if (!bool) {
+            this.say(`${response} is ${config.twitchChat[name] ? "enabled" : "disabled"}`);
+            return;
+        }
+
         if (bool === "on" && config.twitchChat[name] != true) {
             config.twitchChat[name] = true;
             this.handleWriteToConfig();
@@ -434,7 +439,7 @@ class Chat {
             this.handleWriteToConfig();
             this.say(`${response} disabled`);
         } else {
-            this.say(`${response} already ${config.twitchChat[name] ? "on" : "off"}`);
+            this.say(`${response} already ${config.twitchChat[name] ? "enabled" : "disabled"}`);
         }
     }
 
