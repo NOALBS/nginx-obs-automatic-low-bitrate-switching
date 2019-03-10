@@ -34,7 +34,8 @@ class Chat {
             "mod",
             "notify",
             "autostop",
-            "rec"
+            "rec",
+            "noalbs"
         ];
         this.allowAllCommands = config.twitchChat.publicCommands;
         this.allowModsCommands = config.twitchChat.modCommands;
@@ -451,6 +452,10 @@ class Chat {
 
     say(message) {
         this.ws.send(`PRIVMSG ${this.channel} :${message}`);
+    }
+
+    noalbs(a) {
+        if (a === "version") this.say(`Running NOALBS v${process.env.npm_package_version}`);
     }
 }
 
