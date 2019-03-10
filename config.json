@@ -11,7 +11,7 @@
         "requestMs": 2000
     },
     "nginx": {
-        "ip": "localhost"
+        "rtmp": "rtmp://localhost/publish/live"
     },
     "twitchChat": {
         "channel": "715209",

@@ -31,6 +31,7 @@ class ObsSwitcher extends EventEmitter {
         this.heartbeat = null;
         this.obsStreaming = false;
         this.currentScene = null;
+        this.nginxSettings;
 
         this.obs.connect({ address: this.address, password: this.password }).catch(e => {
             // handle this somewhere else
@@ -104,19 +105,31 @@ class ObsSwitcher extends EventEmitter {
         }
     }
 
-    async getBitrate(username = "live") {
+    async getBitrate() {
+        if (!this.nginxSettings) {
+            const rtmp = /rtmp:\/\/(\w+)\/(\w+)\/(\w+)/g.exec(config.nginx.rtmp);
+            this.nginxSettings = {
+                ip: rtmp[1],
+                application: rtmp[2],
+                key: rtmp[3]
+            };
+        }
+
         try {
-            const response = await fetch(`http://${config.nginx.ip}/stat`);
+            const response = await fetch(`http://${this.nginxSettings.ip}/stat`);
             const data = await response.text();
 
             parseString(data, (err, result) => {
-                const publish = result.rtmp.server[0].application[0].live[0].stream;
+                const publish = result.rtmp.server[0].application.find(stream => {
+                    return stream.name[0] === this.nginxSettings.application;
+                }).live[0].stream;
+
                 if (publish == null) {
                     this.nginxVideoMeta = null;
                     this.bitrate = null;
                 } else {
                     const stream = publish.find(stream => {
-                        return stream.name[0] === username;
+                        return stream.name[0] === this.nginxSettings.key;
                     });
 
                     this.nginxVideoMeta = stream.meta[0].video[0];
