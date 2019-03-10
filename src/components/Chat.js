@@ -2,6 +2,7 @@ import WebSocket from "ws";
 import config from "../../config";
 import fs from "fs";
 import signale from "signale";
+import { search } from "fast-fuzzy";
 
 signale.config({
     displayTimestamp: true,
@@ -306,12 +307,14 @@ class Chat {
     }
 
     async switch(sceneName) {
+        const res = search(sceneName, this.obsProps.scenes, { keySelector: obj => obj.name });
+
         // switch scene
         try {
             await this.obs.setCurrentScene({
-                "scene-name": sceneName
+                "scene-name": res[0].name
             });
-            this.say(`Scene successfully switched to "${sceneName}"`);
+            this.say(`Scene successfully switched to "${res[0].name}"`);
         } catch (e) {
             log.error(e);
             this.say(e.error);

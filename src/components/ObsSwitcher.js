@@ -33,6 +33,7 @@ class ObsSwitcher extends EventEmitter {
         this.currentScene = null;
         this.nginxSettings;
         this.previousScene = this.lowBitrateScene;
+        this.scenes = null;
 
         this.obs.connect({ address: this.address, password: this.password }).catch(e => {
             // handle this somewhere else
@@ -46,6 +47,7 @@ class ObsSwitcher extends EventEmitter {
         this.obs.on("StreamStopped", this.streamStopped.bind(this));
         this.obs.on("StreamStarted", this.streamStarted.bind(this));
         this.obs.on("Heartbeat", heartbeat => (this.heartbeat = heartbeat));
+        this.obs.on("ScenesChanged", this.scenesChanged.bind(this));
 
         log.info("Connecting & authenticating");
     }
@@ -53,6 +55,7 @@ class ObsSwitcher extends EventEmitter {
     onAuth() {
         log.success(`Successfully connected`);
         this.obs.SetHeartbeat({ enable: true });
+        this.getSceneList();
 
         this.interval = setInterval(async () => {
             const currentScene = await this.obs.GetCurrentScene();
@@ -180,6 +183,15 @@ class ObsSwitcher extends EventEmitter {
 
     streamStarted() {
         this.obsStreaming = true;
+    }
+
+    async getSceneList() {
+        const list = await this.obs.GetSceneList();
+        this.scenes = list.scenes;
+    }
+
+    scenesChanged() {
+        this.getSceneList();
     }
 }
 
