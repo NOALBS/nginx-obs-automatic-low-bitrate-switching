@@ -32,6 +32,7 @@ class ObsSwitcher extends EventEmitter {
         this.obsStreaming = false;
         this.currentScene = null;
         this.nginxSettings;
+        this.previousScene = this.lowBitrateScene;
 
         this.obs.connect({ address: this.address, password: this.password }).catch(e => {
             // handle this somewhere else
@@ -67,23 +68,25 @@ class ObsSwitcher extends EventEmitter {
                 this.isLive &&
                     canSwitch &&
                     (bitrate === 0 &&
-                        currentScene.name !== this.lowBitrateScene &&
+                        currentScene.name !== this.previousScene &&
                         (this.obs.setCurrentScene({
-                            "scene-name": this.lowBitrateScene
+                            "scene-name": this.previousScene
                         }),
-                        this.switchSceneEmit("live"),
-                        log.info(`Stream went online switching to scene: "${this.lowBitrateScene}"`)),
+                        this.switchSceneEmit("live", this.previousScene),
+                        log.info(`Stream went online switching to scene: "${this.previousScene}"`)),
                     bitrate <= this.lowBitrateTrigger &&
                         currentScene.name !== this.lowBitrateScene &&
                         bitrate !== 0 &&
                         (this.obs.setCurrentScene({
                             "scene-name": this.lowBitrateScene
                         }),
+                        (this.previousScene = this.lowBitrateScene),
                         this.switchSceneEmit("lowBitrateScene"),
                         log.info(`Low bitrate detected switching to scene: "${this.lowBitrateScene}"`)),
                     bitrate > this.lowBitrateTrigger &&
                         currentScene.name !== this.normalScene &&
                         (this.obs.setCurrentScene({ "scene-name": this.normalScene }),
+                        (this.previousScene = this.normalScene),
                         this.switchSceneEmit("normalScene"),
                         log.info(`Switching to normal scene: "${this.normalScene}"`)));
             } else {
@@ -99,9 +102,9 @@ class ObsSwitcher extends EventEmitter {
         }, config.obs.requestMs);
     }
 
-    switchSceneEmit(sceneName) {
+    switchSceneEmit(sceneName, args) {
         if (config.twitchChat.enableAutoSwitchNotification && this.obsStreaming) {
-            this.emit(sceneName);
+            this.emit(sceneName, args);
         }
     }
 

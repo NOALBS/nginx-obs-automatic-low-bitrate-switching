@@ -370,9 +370,9 @@ class Chat {
         }
     }
 
-    live() {
+    live(previous) {
         // this.ws.send(`PRIVMSG ${this.channel} :Scene switching to live`);
-        this.say(`Scene switched to "${config.obs.lowBitrateScene}"`);
+        this.say(`Scene switched to "${previous}"`);
     }
 
     onNormalScene() {
