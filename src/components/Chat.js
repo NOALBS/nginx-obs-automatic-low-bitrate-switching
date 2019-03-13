@@ -308,13 +308,13 @@ class Chat {
 
     async switch(sceneName) {
         const res = search(sceneName, this.obsProps.scenes, { keySelector: obj => obj.name });
+        const scene = res.length > 0 ? res[0].name : sceneName;
 
-        // switch scene
         try {
             await this.obs.setCurrentScene({
-                "scene-name": res[0].name
+                "scene-name": scene
             });
-            this.say(`Scene successfully switched to "${res[0].name}"`);
+            this.say(`Scene successfully switched to "${scene}"`);
         } catch (e) {
             log.error(e);
             this.say(e.error);
