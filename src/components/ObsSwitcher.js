@@ -46,7 +46,7 @@ class ObsSwitcher extends EventEmitter {
         this.obs.on("StreamStatus", this.setStreamStatus.bind(this));
         this.obs.on("StreamStopped", this.streamStopped.bind(this));
         this.obs.on("StreamStarted", this.streamStarted.bind(this));
-        this.obs.on("Heartbeat", heartbeat => (this.heartbeat = heartbeat));
+        this.obs.on("Heartbeat", this.handleHeartbeat.bind(this));
         this.obs.on("ScenesChanged", this.scenesChanged.bind(this));
 
         log.info("Connecting & authenticating");
@@ -192,6 +192,11 @@ class ObsSwitcher extends EventEmitter {
 
     scenesChanged() {
         this.getSceneList();
+    }
+
+    handleHeartbeat(heartbeat) {
+        this.heartbeat = heartbeat;
+        this.obsStreaming = heartbeat.streaming;
     }
 }
 
