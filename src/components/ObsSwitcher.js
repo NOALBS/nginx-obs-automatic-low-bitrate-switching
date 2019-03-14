@@ -113,7 +113,7 @@ class ObsSwitcher extends EventEmitter {
 
     async getBitrate() {
         if (!this.nginxSettings) {
-            const rtmp = /rtmp:\/\/(\w+)\/(\w+)\/(\w+)/g.exec(config.nginx.rtmp);
+            const rtmp = /rtmp:\/\/(.*)\/(\w+)\/(\w+)/g.exec(config.nginx.rtmp);
             this.nginxSettings = {
                 ip: rtmp[1],
                 application: rtmp[2],
