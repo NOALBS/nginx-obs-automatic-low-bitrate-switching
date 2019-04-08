@@ -58,6 +58,8 @@ class ObsSwitcher extends EventEmitter {
         this.getSceneList();
 
         this.interval = setInterval(async () => {
+            if (!this.obsStreaming) return;
+
             const currentScene = await this.obs.GetCurrentScene();
             const bitrate = await this.getBitrate();
             const canSwitch =
