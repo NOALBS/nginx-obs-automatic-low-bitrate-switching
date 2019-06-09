@@ -60,12 +60,8 @@ class ObsSwitcher extends EventEmitter {
         this.interval = setInterval(async () => {
             if (!this.obsStreaming) return;
 
-            const currentScene = await this.obs.GetCurrentScene();
             const bitrate = await this.getBitrate();
-            const canSwitch =
-                currentScene.name == this.lowBitrateScene || currentScene.name == this.normalScene || currentScene.name == this.offlineScene;
-
-            this.currentScene = currentScene.name;
+            const { currentScene, canSwitch } = await this.canSwitch();
 
             if (bitrate !== null) {
                 this.isLive = true;
@@ -179,8 +175,16 @@ class ObsSwitcher extends EventEmitter {
         }, 5000);
     }
 
-    streamStopped() {
+    async streamStopped() {
         this.obsStreaming = false;
+
+        const { canSwitch } = await this.canSwitch();
+
+        if (canSwitch) {
+            this.obs.setCurrentScene({
+                "scene-name": this.offlineScene
+            });
+        }
     }
 
     streamStarted() {
@@ -199,6 +203,16 @@ class ObsSwitcher extends EventEmitter {
     handleHeartbeat(heartbeat) {
         this.heartbeat = heartbeat;
         this.obsStreaming = heartbeat.streaming;
+    }
+
+    async canSwitch() {
+        const currentScene = await this.obs.GetCurrentScene();
+        const canSwitch =
+            currentScene.name == this.lowBitrateScene || currentScene.name == this.normalScene || currentScene.name == this.offlineScene;
+
+        this.currentScene = currentScene.name;
+
+        return { currentScene, canSwitch };
     }
 }
 

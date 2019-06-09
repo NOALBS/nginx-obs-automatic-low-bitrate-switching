@@ -130,7 +130,8 @@ class Chat {
                             parsed.tags.mod === "1" &&
                             this.allowModsCommands.includes(commandName) &&
                             this.rate != 20) ||
-                        (parsed.username === this.channel.substring(1) && this.rate != 20)
+                        (parsed.username === this.channel.substring(1) && this.rate != 20) ||
+                        commandName == "noalbs"
                     ) {
                         if (this.commands.includes(commandName)) {
                             this[commandName](parse[1]);
