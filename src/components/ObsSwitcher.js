@@ -177,6 +177,8 @@ class ObsSwitcher extends EventEmitter {
 
     async streamStopped() {
         this.obsStreaming = false;
+        this.nginxVideoMeta = null;
+        this.bitrate = null;
 
         const { canSwitch } = await this.canSwitch();
 
