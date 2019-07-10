@@ -138,8 +138,6 @@ class Chat {
 
                             log.success(`${parsed.username} Executed ${commandName} command`);
                             this.setWait();
-                        } else {
-                            log.error(`${parsed.username} Executed unknown command ${commandName}`);
                         }
                     }
                 } else if (parsed.command === "PING") {

@@ -8,7 +8,8 @@
         "refreshScene": "REFRESH",
         "lowBitrateTrigger": 1000,
         "refreshSceneInterval": 10000,
-        "requestMs": 2000
+        "requestMs": 2000,
+        "onlySwitchWhenStreaming": true
     },
     "nginx": {
         "rtmp": "rtmp://localhost/publish/live"
