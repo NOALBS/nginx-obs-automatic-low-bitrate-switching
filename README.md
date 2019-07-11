@@ -28,7 +28,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 
 ## Installation from Source
 
--   `git clone <repository-url>`
+-   `git clone <repository-url>` or download from [RELEASES](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
 -   Change into the new directory.
 -   `npm install --production`
 -   Replace your `nginx.conf` with the one given here.
