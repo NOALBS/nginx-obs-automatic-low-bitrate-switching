@@ -11,7 +11,9 @@
 
 Simple app to automatically switch scenes in OBS based on the current bitrate fetched from the NGINX stats page.
 
-Don't feel like setting this all up by yourself? Check out [norip.io](https://www.norip.io) for a similar solution!
+Don't feel like setting this all up by yourself? Check out these links for similar solutions!
+-   [psynapticmedia.com](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
+-   [norip.io](https://www.norip.io)
 
 ## Build Prerequisities
 
