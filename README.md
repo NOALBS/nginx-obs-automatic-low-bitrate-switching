@@ -39,6 +39,9 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 Edit `config.json` to your own settings.
 
 Here is an example config with comments (click to enlarge):
+
+***PLEASE NOTE CONFIG MAY NOT REPRESENT CURRENT CONFIG***
+
 ![alt text](https://i.imgur.com/cVbz1bN.png "Configuration Comments (Click to Enlarge)")
 
 -   Use https://twitchapps.com/tmi to get your oauth from Twitch for use with chat commands.
