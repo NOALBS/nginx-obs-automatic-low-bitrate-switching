@@ -23,7 +23,7 @@
         "enablePublicCommands": false,
         "publicCommands": ["bitrate"],
         "enableModCommands": false,
-        "modCommands": ["refresh", "trigger", "sourceinfo", "obsinfo"],
+        "modCommands": ["refresh", "fix", "trigger", "sourceinfo", "obsinfo"],
         "enableAutoSwitchNotification": true,
         "enableAutoStopStreamOnHostOrRaid": true,
         "adminUsers": ["715209", "b3ck"]
