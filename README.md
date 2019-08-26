@@ -12,6 +12,7 @@
 Simple app to automatically switch scenes in OBS based on the current bitrate fetched from the NGINX stats page.
 
 Don't feel like setting this all up by yourself? Check out these links for similar solutions!
+
 -   [psynapticmedia.com](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
 -   [norip.io](https://www.norip.io)
 
@@ -40,7 +41,7 @@ Edit `config.json` to your own settings.
 
 Here is an example config with comments (click to enlarge):
 
-***PLEASE NOTE CONFIG MAY NOT REPRESENT CURRENT CONFIG***
+**_PLEASE NOTE CONFIG MAY NOT REPRESENT CURRENT CONFIG_**
 
 ![alt text](https://i.imgur.com/cVbz1bN.png "Configuration Comments (Click to Enlarge)")
 
@@ -73,6 +74,7 @@ This script gives you the option to enable some simple chat commands to help you
 > |    Admins    | !rec (on/off)       | on-demand command to start/stop recording in OBS.                                                       | !rec on       |
 > |    Admins    | !switch (scene)     | switches to the provided SCENE ([fuzzy match](https://wikipedia.org/wiki/Approximate_string_matching)). | !switch INTRO |
 > |     MODs     | !refresh            | changes to the REFRESH scene for the set interval.                                                      | !refresh      |
+> |     MODs     | !fix                | tries to fix the stream.                                                                                | !fix          |
 > |     MODs     | !trigger (value)    | changes the low bitrate threshold to the defined value.                                                 | !trigger 1000 |
 > |     MODs     | !sourceinfo         | gives you details about the SOURCE in chat.                                                             | !sourceinfo   |
 > |     MODs     | !obsinfo            | gives you details about OBS in chat.                                                                    | !obsinfo      |
