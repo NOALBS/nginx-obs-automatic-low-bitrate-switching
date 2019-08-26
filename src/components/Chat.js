@@ -3,6 +3,7 @@ import config from "../../config";
 import fs from "fs";
 import signale from "signale";
 import { search } from "fast-fuzzy";
+import fetch from "node-fetch";
 
 signale.config({
     displayTimestamp: true,
@@ -36,7 +37,8 @@ class Chat {
             "notify",
             "autostop",
             "rec",
-            "noalbs"
+            "noalbs",
+            "fix"
         ];
         this.allowAllCommands = config.twitchChat.publicCommands;
         this.allowModsCommands = config.twitchChat.modCommands;
@@ -458,6 +460,22 @@ class Chat {
 
     noalbs(a) {
         if (a === "version") this.say(`Running NOALBS v${process.env.npm_package_version}`);
+    }
+
+    async fix() {
+        this.say(`Trying to fix the stream`);
+
+        try {
+            const { ip, application, key } = this.obsProps.nginxSettings;
+            const response = await fetch(`http://${ip}/control/drop/subscriber?app=${application}&name=${key}`);
+
+            if (response.ok) {
+                this.say(`Successfully fixed the stream`);
+            }
+        } catch (e) {
+            console.log(e);
+            this.say(`Error fixing the stream`);
+        }
     }
 }
 
