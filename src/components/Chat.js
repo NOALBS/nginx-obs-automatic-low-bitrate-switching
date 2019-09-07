@@ -115,49 +115,32 @@ class Chat {
     onMessage(message) {
         if (message !== null) {
             const parsed = this.parse(message.data);
-
-            if (parsed !== null) {
-                if (parsed.command === "PRIVMSG") {
-                    // not a command
-                    if (parsed.message.substr(0, 1) !== this.prefix) return;
-
-                    // Split the message into individual words:
-                    const parse = parsed.message.slice(1).split(" ");
-                    const commandName = parse[0];
-
-                    if (
-                        (config.twitchChat.adminUsers.includes(parsed.username) && this.rate != 20) ||
-                        (config.twitchChat.enablePublicCommands && this.allowAllCommands.includes(commandName) && !this.wait && this.rate != 20) ||
-                        (config.twitchChat.enableModCommands &&
-                            parsed.tags.mod === "1" &&
-                            this.allowModsCommands.includes(commandName) &&
-                            this.rate != 20) ||
-                        (parsed.username === this.channel.substring(1) && this.rate != 20) ||
-                        commandName == "noalbs"
-                    ) {
-                        if (this.commands.includes(commandName)) {
-                            this[commandName](parse[1]);
-
-                            log.success(`${parsed.username} Executed ${commandName} command`);
-                            this.setWait();
-                        }
-                    }
-                } else if (parsed.command === "PING") {
-                    this.ws.send(`PONG :${parsed.message}`);
-                } else if (parsed.command === "HOSTTARGET") {
-                    if (parsed.message != null && config.twitchChat.enableAutoStopStreamOnHostOrRaid && this.obsProps.bitrate != null) {
+            switch (parsed.command) {
+                case "PRIVMSG":
+                    console.log("Got message", parsed);
+                    this.handleMessage(parsed);
+                    break;
+                case "HOSTTARGET":
+                    console.log("HOSTTARGET", parsed);
+                    if (config.twitchChat.enableAutoStopStreamOnHostOrRaid && this.obsProps.bitrate != null) {
                         log.info("Channel started hosting, stopping stream");
                         this.stop();
                     }
-                }
+                    break;
+                case "PING":
+                    this.ws.send(`PONG ${parsed.channel}`);
+                    break;
+                case "PONG":
+                    // do something.
+                    break;
+                default:
+                    console.log(`Unhandled command:`, parsed);
+                    break;
             }
         }
     }
 
     parse(message) {
-        const regex = RegExp(/([A-Z]\w*)/, "g");
-        const array = regex.exec(message);
-
         let parsedMessage = {
             tags: {},
             channel: null,
@@ -167,40 +150,63 @@ class Chat {
             raw: message
         };
 
-        const firstString = message.split(" ", 1)[0];
-
-        if (message[0] === "@") {
+        // tags
+        if (message.startsWith("@")) {
             var space = message.indexOf(" ");
             const tagsRaw = message.slice(1, space);
             const tagsSplit = tagsRaw.split(";");
-
             tagsSplit.map(d => {
                 const tagSplit = d.split("=");
+                if (tagSplit[1] == "") tagSplit[1] = null;
                 parsedMessage.tags[tagSplit[0]] = tagSplit[1];
             });
-
-            const userIndex = message.indexOf("!");
-            parsedMessage.username = message.slice(space + 2, userIndex);
-
-            const commandIndex = message.indexOf(" ", userIndex);
-            const channelIndex = message.indexOf("#", space);
-
-            parsedMessage.command = message.slice(commandIndex + 1, channelIndex - 1);
-            const messageIndex = message.indexOf(":", commandIndex);
-
-            parsedMessage.channel = message.slice(channelIndex, messageIndex - 1);
-            parsedMessage.message = message.slice(messageIndex + 1, message.length - 2);
-        } else if (firstString === "PING") {
-            parsedMessage.command = "PING";
-            parsedMessage.message = message.split(":")[1];
-        } else if (array[0] == "HOSTTARGET") {
-            const res = message.match(/:([\w]+)/g);
-
-            parsedMessage.command = "HOSTTARGET";
-            parsedMessage.message = res[1];
         }
 
+        message = message
+            .slice(space + 1)
+            .trim()
+            .split(" ");
+        let pos = 0;
+
+        if (message[0].startsWith(":")) {
+            parsedMessage.username = message[0].substring(1, message[0].indexOf("!"));
+            pos += 1;
+        }
+
+        parsedMessage.command = message[pos];
+        parsedMessage.channel = message[pos + 1];
+
+        if (!message[pos + 2] == "")
+            parsedMessage.message = message
+                .slice(3)
+                .join(" ")
+                .slice(1);
+
         return parsedMessage;
+    }
+
+    handleMessage(msg) {
+        if (!msg.message.startsWith(this.prefix)) return;
+
+        const [commandName, ...params] = msg.message.slice(1).split(" ");
+
+        switch (true) {
+            case commandName == "noalbs":
+            case config.twitchChat.adminUsers.includes(msg.username):
+            case config.twitchChat.enableModCommands && msg.tags.mod === "1" && this.allowModsCommands.includes(commandName):
+            case config.twitchChat.enablePublicCommands && !this.wait && this.allowAllCommands.includes(commandName):
+            case msg.username === this.channel.substring(1):
+                if (this.rate == 20) return;
+                if (!this.commands.includes(commandName)) return;
+
+                this[commandName](...params);
+                log.success(`${msg.username} Executed ${commandName} command`);
+                this.setWait();
+                break;
+
+            default:
+                break;
+        }
     }
 
     setWait() {
