@@ -321,6 +321,8 @@ class Chat {
     }
 
     async switch(sceneName) {
+        if (sceneName == null) return this.say(`No scene specified`);
+
         const res = search(sceneName, this.obsProps.scenes, { keySelector: obj => obj.name });
         const scene = res.length > 0 ? res[0].name : sceneName;
 
@@ -364,10 +366,11 @@ class Chat {
     }
 
     async refresh() {
-        // switch scene
         if (!this.isRefreshing) {
             try {
                 const lastScene = this.obsProps.currentScene;
+
+                if (lastScene == null) return this.say(`Error refreshing stream`);
 
                 await this.obs.setCurrentScene({
                     "scene-name": config.obs.refreshScene
