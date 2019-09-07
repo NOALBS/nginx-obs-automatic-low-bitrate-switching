@@ -118,11 +118,9 @@ class Chat {
             const parsed = this.parse(message.data);
             switch (parsed.command) {
                 case "PRIVMSG":
-                    console.log("Got message", parsed);
                     this.handleMessage(parsed);
                     break;
                 case "HOSTTARGET":
-                    console.log("HOSTTARGET", parsed);
                     if (config.twitchChat.enableAutoStopStreamOnHostOrRaid && this.obsProps.bitrate != null) {
                         log.info("Channel started hosting, stopping stream");
                         this.stop();
@@ -135,7 +133,6 @@ class Chat {
                     // do something.
                     break;
                 default:
-                    console.log(`Unhandled command:`, parsed);
                     break;
             }
         }
@@ -191,9 +188,7 @@ class Chat {
 
         let [commandName, ...params] = msg.message.slice(1).split(" ");
 
-        // // check if command is alias
         if (commandName in this.aliases) {
-            console.log("command is an alias");
             commandName = this.aliases[commandName];
         }
 
