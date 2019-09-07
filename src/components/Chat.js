@@ -40,6 +40,7 @@ class Chat {
             "noalbs",
             "fix"
         ];
+        this.aliases = {};
         this.allowAllCommands = config.twitchChat.publicCommands;
         this.allowModsCommands = config.twitchChat.modCommands;
         this.wait = false;
@@ -48,16 +49,16 @@ class Chat {
         this.isRefreshing = false;
 
         this.open();
+        this.registerAliases();
 
         this.obsProps.on("live", this.live.bind(this));
         this.obsProps.on("normalScene", this.onNormalScene.bind(this));
         this.obsProps.on("lowBitrateScene", this.onLowBitrateScene.bind(this));
         this.obsProps.on("offlineScene", this.onOfflineScene.bind(this));
-
-        log.info("Connecting to twitch");
     }
 
     open() {
+        log.info("Connecting to twitch");
         this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
 
         this.ws.onopen = this.onOpen.bind(this);
@@ -188,7 +189,13 @@ class Chat {
     handleMessage(msg) {
         if (!msg.message.startsWith(this.prefix)) return;
 
-        const [commandName, ...params] = msg.message.slice(1).split(" ");
+        let [commandName, ...params] = msg.message.slice(1).split(" ");
+
+        // // check if command is alias
+        if (commandName in this.aliases) {
+            console.log("command is an alias");
+            commandName = this.aliases[commandName];
+        }
 
         switch (true) {
             case commandName == "noalbs":
@@ -481,6 +488,14 @@ class Chat {
         } catch (e) {
             console.log(e);
             this.say(`Error fixing the stream`);
+        }
+    }
+
+    registerAliases() {
+        if (config.twitchChat.alias == null) return;
+
+        for (const alias of config.twitchChat.alias) {
+            this.aliases[alias[0]] = alias[1];
         }
     }
 }
