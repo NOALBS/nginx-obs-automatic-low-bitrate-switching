@@ -482,8 +482,52 @@ class Chat {
         this.ws.send(`PRIVMSG ${this.channel} :${message}`);
     }
 
-    noalbs(a) {
-        if (a === "version") this.say(`Running NOALBS v${process.env.npm_package_version}`);
+    noalbs(method, alias, commandName) {
+        if (method === "version") this.say(`Running NOALBS v${process.env.npm_package_version}`);
+
+        let exists = false;
+
+        switch (method) {
+            case "add":
+                if (!this.commands.includes(commandName)) return this.say(`Error ${commandName} does not exist`);
+
+                // Check if already exists to replace it
+                config.twitchChat.alias.map(arr => {
+                    if (arr[0] == alias) {
+                        arr[1] = commandName;
+                        exists = true;
+                    }
+                });
+
+                this.aliases[alias] = commandName;
+                if (exists) return this.writeAliasToConfig(alias);
+
+                config.twitchChat.alias.push([alias, commandName]);
+                this.writeAliasToConfig(alias);
+                break;
+            case "remove":
+                config.twitchChat.alias.map((arr, index) => {
+                    if (arr[0] == alias) {
+                        config.twitchChat.alias.splice(index);
+                        delete this.aliases[alias];
+                        this.handleWriteToConfig();
+                        this.say(`Removed alias "${alias}"`);
+                        exists = true;
+                    }
+                });
+
+                if (exists) return;
+
+                this.say(`Alias "${alias}" does not exist`);
+                break;
+            default:
+                break;
+        }
+    }
+
+    writeAliasToConfig(alias) {
+        this.handleWriteToConfig();
+        this.say(`Added alias "${alias}"`);
     }
 
     async fix() {
