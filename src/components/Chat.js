@@ -38,7 +38,8 @@ class Chat {
             "autostop",
             "rec",
             "noalbs",
-            "fix"
+            "fix",
+            "alias"
         ];
         this.aliases = { o: "obsinfo", s: "sourceinfo", b: "bitrate", r: "refresh", ss: "switch" };
         this.allowAllCommands = config.twitchChat.publicCommands;
@@ -482,9 +483,11 @@ class Chat {
         this.ws.send(`PRIVMSG ${this.channel} :${message}`);
     }
 
-    noalbs(method, alias, commandName) {
-        if (method === "version") this.say(`Running NOALBS v${process.env.npm_package_version}`);
+    noalbs(a) {
+        if (a === "version") this.say(`Running NOALBS v${process.env.npm_package_version}`);
+    }
 
+    alias(method, alias, commandName) {
         let exists = false;
 
         switch (method) {
