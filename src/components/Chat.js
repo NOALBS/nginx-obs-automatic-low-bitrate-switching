@@ -69,8 +69,17 @@ class Chat {
 
     keepAlive() {
         this.interval = setInterval(() => {
+            if (this.sendPing) return;
+
             this.ws.send("PING :tmi.twitch.tv\r\n");
-        }, 2000);
+            this.sendPing = new Date().getTime();
+
+            this.pingTimeout = setTimeout(() => {
+                log.error(`Didn't receive PONG in time.. reconnecting to twitch.`);
+                this.close();
+                this.sendPing = null;
+            }, 1000 * 10);
+        }, 1000 * 60 * 2);
     }
 
     onOpen() {
@@ -130,7 +139,11 @@ class Chat {
                     this.ws.send(`PONG ${parsed.channel}`);
                     break;
                 case "PONG":
-                    // do something.
+                    const ms = new Date().getTime() - this.sendPing;
+                    // console.log(`Pong received after ${ms} ms`);
+
+                    clearTimeout(this.pingTimeout);
+                    this.sendPing = null;
                     break;
                 default:
                     break;
