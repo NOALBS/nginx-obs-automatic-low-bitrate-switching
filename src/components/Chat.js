@@ -40,7 +40,7 @@ class Chat {
             "noalbs",
             "fix"
         ];
-        this.aliases = {};
+        this.aliases = { o: "obsinfo", s: "sourceinfo", b: "bitrate", r: "refresh", ss: "switch" };
         this.allowAllCommands = config.twitchChat.publicCommands;
         this.allowModsCommands = config.twitchChat.modCommands;
         this.wait = false;
