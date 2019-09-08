@@ -26,6 +26,7 @@
         "modCommands": ["refresh", "fix", "trigger", "sourceinfo", "obsinfo"],
         "enableAutoSwitchNotification": true,
         "enableAutoStopStreamOnHostOrRaid": true,
-        "adminUsers": ["715209", "b3ck"]
+        "adminUsers": ["715209", "b3ck"],
+        "alias": [["r", "refresh"], ["f", "fix"], ["b", "bitrate"]]
     }
 }

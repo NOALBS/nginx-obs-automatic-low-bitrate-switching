@@ -38,8 +38,10 @@ class Chat {
             "autostop",
             "rec",
             "noalbs",
-            "fix"
+            "fix",
+            "alias"
         ];
+        this.aliases = { o: "obsinfo", s: "sourceinfo", b: "bitrate", r: "refresh", ss: "switch" };
         this.allowAllCommands = config.twitchChat.publicCommands;
         this.allowModsCommands = config.twitchChat.modCommands;
         this.wait = false;
@@ -48,16 +50,16 @@ class Chat {
         this.isRefreshing = false;
 
         this.open();
+        this.registerAliases();
 
         this.obsProps.on("live", this.live.bind(this));
         this.obsProps.on("normalScene", this.onNormalScene.bind(this));
         this.obsProps.on("lowBitrateScene", this.onLowBitrateScene.bind(this));
         this.obsProps.on("offlineScene", this.onOfflineScene.bind(this));
-
-        log.info("Connecting to twitch");
     }
 
     open() {
+        log.info("Connecting to twitch");
         this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
 
         this.ws.onopen = this.onOpen.bind(this);
@@ -68,8 +70,17 @@ class Chat {
 
     keepAlive() {
         this.interval = setInterval(() => {
+            if (this.sendPing) return;
+
             this.ws.send("PING :tmi.twitch.tv\r\n");
-        }, 2000);
+            this.sendPing = new Date().getTime();
+
+            this.pingTimeout = setTimeout(() => {
+                log.error(`Didn't receive PONG in time.. reconnecting to twitch.`);
+                this.close();
+                this.sendPing = null;
+            }, 1000 * 10);
+        }, 1000 * 60 * 2);
     }
 
     onOpen() {
@@ -115,49 +126,33 @@ class Chat {
     onMessage(message) {
         if (message !== null) {
             const parsed = this.parse(message.data);
-
-            if (parsed !== null) {
-                if (parsed.command === "PRIVMSG") {
-                    // not a command
-                    if (parsed.message.substr(0, 1) !== this.prefix) return;
-
-                    // Split the message into individual words:
-                    const parse = parsed.message.slice(1).split(" ");
-                    const commandName = parse[0];
-
-                    if (
-                        (config.twitchChat.adminUsers.includes(parsed.username) && this.rate != 20) ||
-                        (config.twitchChat.enablePublicCommands && this.allowAllCommands.includes(commandName) && !this.wait && this.rate != 20) ||
-                        (config.twitchChat.enableModCommands &&
-                            parsed.tags.mod === "1" &&
-                            this.allowModsCommands.includes(commandName) &&
-                            this.rate != 20) ||
-                        (parsed.username === this.channel.substring(1) && this.rate != 20) ||
-                        commandName == "noalbs"
-                    ) {
-                        if (this.commands.includes(commandName)) {
-                            this[commandName](parse[1]);
-
-                            log.success(`${parsed.username} Executed ${commandName} command`);
-                            this.setWait();
-                        }
-                    }
-                } else if (parsed.command === "PING") {
-                    this.ws.send(`PONG :${parsed.message}`);
-                } else if (parsed.command === "HOSTTARGET") {
-                    if (parsed.message != null && config.twitchChat.enableAutoStopStreamOnHostOrRaid && this.obsProps.bitrate != null) {
+            switch (parsed.command) {
+                case "PRIVMSG":
+                    this.handleMessage(parsed);
+                    break;
+                case "HOSTTARGET":
+                    if (config.twitchChat.enableAutoStopStreamOnHostOrRaid && this.obsProps.bitrate != null) {
                         log.info("Channel started hosting, stopping stream");
                         this.stop();
                     }
-                }
+                    break;
+                case "PING":
+                    this.ws.send(`PONG ${parsed.channel}`);
+                    break;
+                case "PONG":
+                    const ms = new Date().getTime() - this.sendPing;
+                    // console.log(`Pong received after ${ms} ms`);
+
+                    clearTimeout(this.pingTimeout);
+                    this.sendPing = null;
+                    break;
+                default:
+                    break;
             }
         }
     }
 
     parse(message) {
-        const regex = RegExp(/([A-Z]\w*)/, "g");
-        const array = regex.exec(message);
-
         let parsedMessage = {
             tags: {},
             channel: null,
@@ -167,40 +162,67 @@ class Chat {
             raw: message
         };
 
-        const firstString = message.split(" ", 1)[0];
-
-        if (message[0] === "@") {
+        // tags
+        if (message.startsWith("@")) {
             var space = message.indexOf(" ");
             const tagsRaw = message.slice(1, space);
             const tagsSplit = tagsRaw.split(";");
-
             tagsSplit.map(d => {
                 const tagSplit = d.split("=");
+                if (tagSplit[1] == "") tagSplit[1] = null;
                 parsedMessage.tags[tagSplit[0]] = tagSplit[1];
             });
-
-            const userIndex = message.indexOf("!");
-            parsedMessage.username = message.slice(space + 2, userIndex);
-
-            const commandIndex = message.indexOf(" ", userIndex);
-            const channelIndex = message.indexOf("#", space);
-
-            parsedMessage.command = message.slice(commandIndex + 1, channelIndex - 1);
-            const messageIndex = message.indexOf(":", commandIndex);
-
-            parsedMessage.channel = message.slice(channelIndex, messageIndex - 1);
-            parsedMessage.message = message.slice(messageIndex + 1, message.length - 2);
-        } else if (firstString === "PING") {
-            parsedMessage.command = "PING";
-            parsedMessage.message = message.split(":")[1];
-        } else if (array[0] == "HOSTTARGET") {
-            const res = message.match(/:([\w]+)/g);
-
-            parsedMessage.command = "HOSTTARGET";
-            parsedMessage.message = res[1];
         }
 
+        message = message
+            .slice(space + 1)
+            .trim()
+            .split(" ");
+        let pos = 0;
+
+        if (message[0].startsWith(":")) {
+            parsedMessage.username = message[0].substring(1, message[0].indexOf("!"));
+            pos += 1;
+        }
+
+        parsedMessage.command = message[pos];
+        parsedMessage.channel = message[pos + 1];
+
+        if (!message[pos + 2] == "")
+            parsedMessage.message = message
+                .slice(3)
+                .join(" ")
+                .slice(1);
+
         return parsedMessage;
+    }
+
+    handleMessage(msg) {
+        if (!msg.message.startsWith(this.prefix)) return;
+
+        let [commandName, ...params] = msg.message.slice(1).split(" ");
+
+        if (commandName in this.aliases) {
+            commandName = this.aliases[commandName];
+        }
+
+        switch (true) {
+            case commandName == "noalbs":
+            case config.twitchChat.adminUsers.includes(msg.username):
+            case config.twitchChat.enableModCommands && msg.tags.mod === "1" && this.allowModsCommands.includes(commandName):
+            case config.twitchChat.enablePublicCommands && !this.wait && this.allowAllCommands.includes(commandName):
+            case msg.username === this.channel.substring(1):
+                if (this.rate == 20) return;
+                if (!this.commands.includes(commandName)) return;
+
+                this[commandName](...params);
+                log.success(`${msg.username} Executed ${commandName} command`);
+                this.setWait();
+                break;
+
+            default:
+                break;
+        }
     }
 
     setWait() {
@@ -308,6 +330,8 @@ class Chat {
     }
 
     async switch(sceneName) {
+        if (sceneName == null) return this.say(`No scene specified`);
+
         const res = search(sceneName, this.obsProps.scenes, { keySelector: obj => obj.name });
         const scene = res.length > 0 ? res[0].name : sceneName;
 
@@ -351,10 +375,11 @@ class Chat {
     }
 
     async refresh() {
-        // switch scene
         if (!this.isRefreshing) {
             try {
                 const lastScene = this.obsProps.currentScene;
+
+                if (lastScene == null) return this.say(`Error refreshing stream`);
 
                 await this.obs.setCurrentScene({
                     "scene-name": config.obs.refreshScene
@@ -462,6 +487,52 @@ class Chat {
         if (a === "version") this.say(`Running NOALBS v${process.env.npm_package_version}`);
     }
 
+    alias(method, alias, commandName) {
+        let exists = false;
+
+        switch (method) {
+            case "add":
+                if (!this.commands.includes(commandName)) return this.say(`Error ${commandName} does not exist`);
+
+                // Check if already exists to replace it
+                config.twitchChat.alias.map(arr => {
+                    if (arr[0] == alias) {
+                        arr[1] = commandName;
+                        exists = true;
+                    }
+                });
+
+                this.aliases[alias] = commandName;
+                if (exists) return this.writeAliasToConfig(alias);
+
+                config.twitchChat.alias.push([alias, commandName]);
+                this.writeAliasToConfig(alias);
+                break;
+            case "remove":
+                config.twitchChat.alias.map((arr, index) => {
+                    if (arr[0] == alias) {
+                        config.twitchChat.alias.splice(index);
+                        delete this.aliases[alias];
+                        this.handleWriteToConfig();
+                        this.say(`Removed alias "${alias}"`);
+                        exists = true;
+                    }
+                });
+
+                if (exists) return;
+
+                this.say(`Alias "${alias}" does not exist`);
+                break;
+            default:
+                break;
+        }
+    }
+
+    writeAliasToConfig(alias) {
+        this.handleWriteToConfig();
+        this.say(`Added alias "${alias}"`);
+    }
+
     async fix() {
         this.say(`Trying to fix the stream`);
 
@@ -475,6 +546,14 @@ class Chat {
         } catch (e) {
             console.log(e);
             this.say(`Error fixing the stream`);
+        }
+    }
+
+    registerAliases() {
+        if (config.twitchChat.alias == null) return;
+
+        for (const alias of config.twitchChat.alias) {
+            this.aliases[alias[0]] = alias[1];
         }
     }
 }
