@@ -131,7 +131,7 @@ class Chat {
                     this.handleMessage(parsed);
                     break;
                 case "HOSTTARGET":
-                    if (config.twitchChat.enableAutoStopStreamOnHostOrRaid && this.obsProps.bitrate != null) {
+                    if (config.twitchChat.enableAutoStopStreamOnHostOrRaid && !parsed.message.startsWith("-") && this.obsProps.bitrate != null) {
                         log.info("Channel started hosting, stopping stream");
                         this.stop();
                     }
