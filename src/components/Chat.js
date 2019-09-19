@@ -4,6 +4,7 @@ import fs from "fs";
 import signale from "signale";
 import { search } from "fast-fuzzy";
 import fetch from "node-fetch";
+import format from "string-template";
 
 signale.config({
     displayTimestamp: true,
@@ -48,9 +49,11 @@ class Chat {
         this.rate = 0;
         this.rateInterval = false;
         this.isRefreshing = false;
+        this.language = "en";
 
         this.open();
         this.registerAliases();
+        this.getLanguage();
 
         this.obsProps.on("live", this.live.bind(this));
         this.obsProps.on("normalScene", this.onNormalScene.bind(this));
@@ -272,10 +275,14 @@ class Chat {
         // start streaming
         try {
             await this.obs.startStreaming();
-            this.say(`Successfully started stream`);
+            this.say(this.locale.start.success);
         } catch (e) {
             log.error(e);
-            this.say(`Error ${e.error}`);
+            this.say(
+                format(this.locale.start.error, {
+                    error: e.error
+                })
+            );
         }
     }
 
@@ -283,16 +290,20 @@ class Chat {
         // stop streaming
         try {
             await this.obs.stopStreaming();
-            this.say(`Successfully stopped stream`);
+            this.say(this.locale.stop.success);
         } catch (e) {
             log.error(e.error);
-            this.say(`${e.error}`);
+            this.say(
+                format(this.locale.stop.error, {
+                    error: e.error
+                })
+            );
         }
     }
 
     rec(bool) {
         if (!bool) {
-            this.say(`[REC] ${this.obsProps.heartbeat.recording ? "started" : "stopped"}`);
+            this.say(`[REC] ${this.obsProps.heartbeat.recording ? this.locale.rec.started : this.locale.rec.stopped}`);
             return;
         }
 
@@ -304,7 +315,7 @@ class Chat {
                 this.startStopRec(false);
                 return;
             default:
-                this.say(`[REC] Invalid option`);
+                this.say(`[REC] ${this.locale.rec.invalid}`);
                 return;
         }
     }
@@ -313,24 +324,32 @@ class Chat {
         if (bool) {
             try {
                 const res = await this.obs.StartRecording();
-                if (res.status === "ok") this.say(`[REC] Started`);
+                if (res.status === "ok") this.say(`[REC] ${this.locale.rec.started}`);
                 log.success(`Started recording`);
             } catch (error) {
-                this.say(`[REC] already started`);
+                this.say(
+                    format(`[REC] ${this.locale.rec.error}`, {
+                        option: this.locale.rec.started
+                    })
+                );
             }
         } else {
             try {
                 const res = await this.obs.StopRecording();
-                if (res.status === "ok") this.say(`[REC] Stopped`);
+                if (res.status === "ok") this.say(`[REC] ${this.locale.rec.stopped}`);
                 log.success(`Stopped recording`);
             } catch (error) {
-                this.say(`[REC] already stopped`);
+                this.say(
+                    format(` [REC] ${this.locale.rec.error}`, {
+                        option: this.locale.rec.stopped
+                    })
+                );
             }
         }
     }
 
     async switch(sceneName) {
-        if (sceneName == null) return this.say(`No scene specified`);
+        if (sceneName == null) return this.say(this.locale.switch.error);
 
         const res = search(sceneName, this.obsProps.scenes, { keySelector: obj => obj.name });
         const scene = res.length > 0 ? res[0].name : sceneName;
@@ -339,7 +358,12 @@ class Chat {
             await this.obs.setCurrentScene({
                 "scene-name": scene
             });
-            this.say(`Scene successfully switched to "${scene}"`);
+
+            this.say(
+                format(this.locale.switch.success, {
+                    scene: sceneName
+                })
+            );
         } catch (e) {
             log.error(e);
             this.say(e.error);
@@ -348,9 +372,13 @@ class Chat {
 
     bitrate() {
         if (this.obsProps.bitrate != null) {
-            this.say(`Current bitrate: ${this.obsProps.bitrate} Kbps`);
+            this.say(
+                format(this.locale.bitrate.success, {
+                    bitrate: this.obsProps.bitrate
+                })
+            );
         } else {
-            this.say(`Current bitrate: offline`);
+            this.say(this.locale.bitrate.error);
         }
     }
 
@@ -358,9 +386,15 @@ class Chat {
         if (this.obsProps.nginxVideoMeta != null) {
             const { height, frame_rate } = this.obsProps.nginxVideoMeta;
 
-            this.say(`[SRC] R: ${height[0]} | F: ${frame_rate[0]} | B: ${this.obsProps.bitrate}`);
+            this.say(
+                format(this.locale.sourceinfo.success, {
+                    height: height[0],
+                    fps: frame_rate[0],
+                    bitrate: this.obsProps.bitrate
+                })
+            );
         } else {
-            this.say(`[SRC] offline`);
+            this.say(this.locale.sourceinfo.error);
         }
     }
 
@@ -368,9 +402,15 @@ class Chat {
         if (this.obsProps.streamStatus != null) {
             const { fps, kbitsPerSec } = this.obsProps.streamStatus;
 
-            this.say(`[OBS] S: ${this.obsProps.currentScene} | F: ${Math.round(fps)} | B: ${kbitsPerSec}`);
+            this.say(
+                format(this.locale.obsinfo.success, {
+                    currentScene: this.obsProps.currentScene,
+                    fps: Math.round(fps),
+                    bitrate: kbitsPerSec
+                })
+            );
         } else {
-            this.say(`[OBS] offline`);
+            this.say(this.locale.obsinfo.error);
         }
     }
 
@@ -379,19 +419,19 @@ class Chat {
             try {
                 const lastScene = this.obsProps.currentScene;
 
-                if (lastScene == null) return this.say(`Error refreshing stream`);
+                if (lastScene == null) return this.say(this.locale.refresh.error);
 
                 await this.obs.setCurrentScene({
                     "scene-name": config.obs.refreshScene
                 });
-                this.say(`Refreshing stream`);
+                this.say(this.locale.refresh.success);
                 this.isRefreshing = true;
 
                 setTimeout(() => {
                     this.obs.setCurrentScene({
                         "scene-name": lastScene
                     });
-                    this.say(`Refreshing stream completed`);
+                    this.say(this.locale.refresh.done);
                     this.isRefreshing = false;
                 }, config.obs.refreshSceneInterval);
             } catch (e) {
@@ -402,22 +442,38 @@ class Chat {
 
     live(previous) {
         // this.ws.send(`PRIVMSG ${this.channel} :Scene switching to live`);
-        this.say(`Scene switched to "${previous}"`);
+        this.say(
+            format(this.locale.sceneSwitch.switch, {
+                scene: previous
+            })
+        );
     }
 
     onNormalScene() {
-        this.say(`Scene switched to "${config.obs.normalScene}"`);
+        this.say(
+            format(this.locale.sceneSwitch.switch, {
+                scene: config.obs.normalScene
+            })
+        );
         this.bitrate();
     }
 
     onLowBitrateScene() {
-        this.say(`Scene switched to "${config.obs.lowBitrateScene}"`);
+        this.say(
+            format(this.locale.sceneSwitch.switch, {
+                scene: config.obs.lowBitrateScene
+            })
+        );
         this.bitrate();
     }
 
     onOfflineScene() {
         // this.ws.send(`PRIVMSG ${this.channel} :Stream went offline`);
-        this.say(`Scene switched to "${config.obs.offlineScene}"`);
+        this.say(
+            format(this.locale.sceneSwitch.switch, {
+                scene: config.obs.offlineScene
+            })
+        );
     }
 
     trigger(number) {
@@ -427,49 +483,65 @@ class Chat {
                 config.obs.lowBitrateTrigger = +number;
 
                 this.handleWriteToConfig();
-                this.say(`Trigger successfully set to ${this.obsProps.lowBitrateTrigger} Kbps`);
+                this.say(
+                    format(this.locale.trigger.success, {
+                        number: this.obsProps.lowBitrateTrigger
+                    })
+                );
             } else {
-                this.say(`Error editing trigger ${number} is not a valid value`);
+                this.say(
+                    format(this.locale.trigger.error, {
+                        number: number
+                    })
+                );
             }
 
             return;
         }
 
-        this.say(`Current trigger set at ${this.obsProps.lowBitrateTrigger} Kbps`);
+        this.say(
+            format(this.locale.trigger.current, {
+                number: this.obsProps.lowBitrateTrigger
+            })
+        );
     }
 
     public(bool) {
-        this.handleEnable("enablePublicCommands", bool, "Public comands");
+        this.handleEnable("enablePublicCommands", bool, this.locale.handleCommands.public);
     }
 
     mod(bool) {
-        this.handleEnable("enableModCommands", bool, "Mod commands");
+        this.handleEnable("enableModCommands", bool, this.locale.handleCommands.mod);
     }
 
     notify(bool) {
-        this.handleEnable("enableAutoSwitchNotification", bool, "Auto switch notification");
+        this.handleEnable("enableAutoSwitchNotification", bool, this.locale.handleCommands.notify);
     }
 
     autostop(bool) {
-        this.handleEnable("enableAutoStopStreamOnHostOrRaid", bool, "Auto stop stream");
+        this.handleEnable("enableAutoStopStreamOnHostOrRaid", bool, this.locale.handleCommands.autostop);
     }
 
     handleEnable(name, bool, response) {
         if (!bool) {
-            this.say(`${response} is ${config.twitchChat[name] ? "enabled" : "disabled"}`);
+            this.say(`${response} is ${config.twitchChat[name] ? this.locale.handleCommands.enabled : this.locale.handleCommands.disabled}`);
             return;
         }
 
         if (bool === "on" && config.twitchChat[name] != true) {
             config.twitchChat[name] = true;
             this.handleWriteToConfig();
-            this.say(`${response} enabled`);
+            this.say(`${response} ${this.locale.handleCommands.enabled}`);
         } else if (bool === "off" && config.twitchChat[name] != false) {
             config.twitchChat[name] = false;
             this.handleWriteToConfig();
-            this.say(`${response} disabled`);
+            this.say(`${response} ${this.locale.handleCommands.disabled}`);
         } else {
-            this.say(`${response} already ${config.twitchChat[name] ? "enabled" : "disabled"}`);
+            this.say(
+                `${response} ${this.locale.handleCommands.already} ${
+                    config.twitchChat[name] ? this.locale.handleCommands.enabled : this.locale.handleCommands.disabled
+                }`
+            );
         }
     }
 
@@ -492,7 +564,12 @@ class Chat {
 
         switch (method) {
             case "add":
-                if (!this.commands.includes(commandName)) return this.say(`Error ${commandName} does not exist`);
+                if (!this.commands.includes(commandName))
+                    return this.say(
+                        format(this.locale.alias.error, {
+                            command: commandName
+                        })
+                    );
 
                 // Check if already exists to replace it
                 config.twitchChat.alias.map(arr => {
@@ -514,14 +591,22 @@ class Chat {
                         config.twitchChat.alias.splice(index);
                         delete this.aliases[alias];
                         this.handleWriteToConfig();
-                        this.say(`Removed alias "${alias}"`);
+                        this.say(
+                            format(this.locale.alias.removed, {
+                                alias: alias
+                            })
+                        );
                         exists = true;
                     }
                 });
 
                 if (exists) return;
 
-                this.say(`Alias "${alias}" does not exist`);
+                this.say(
+                    format(this.locale.alias.error, {
+                        command: alias
+                    })
+                );
                 break;
             default:
                 break;
@@ -530,22 +615,26 @@ class Chat {
 
     writeAliasToConfig(alias) {
         this.handleWriteToConfig();
-        this.say(`Added alias "${alias}"`);
+        this.say(
+            format(this.locale.alias.success, {
+                alias: alias
+            })
+        );
     }
 
     async fix() {
-        this.say(`Trying to fix the stream`);
+        this.say(this.locale.fix.try);
 
         try {
             const { ip, application, key } = this.obsProps.nginxSettings;
             const response = await fetch(`http://${ip}/control/drop/subscriber?app=${application}&name=${key}`);
 
             if (response.ok) {
-                this.say(`Successfully fixed the stream`);
+                this.say(this.locale.fix.success);
             }
         } catch (e) {
             console.log(e);
-            this.say(`Error fixing the stream`);
+            this.say(this.locale.fix.error);
         }
     }
 
@@ -555,6 +644,19 @@ class Chat {
         for (const alias of config.twitchChat.alias) {
             this.aliases[alias[0]] = alias[1];
         }
+    }
+
+    getLanguage() {
+        if (config.language != null) this.language = config.language;
+
+        fs.readFile(`${__dirname}/../../locales/${this.language}.json`, "utf8", (err, data) => {
+            if (err) {
+                log.error(`Error loading language "${this.language}"`);
+                process.exit();
+            }
+
+            this.locale = JSON.parse(data);
+        });
     }
 }
 
