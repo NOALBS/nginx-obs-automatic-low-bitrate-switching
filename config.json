@@ -28,5 +28,6 @@
         "enableAutoStopStreamOnHostOrRaid": true,
         "adminUsers": ["715209", "b3ck"],
         "alias": [["r", "refresh"], ["f", "fix"], ["b", "bitrate"]]
-    }
+    },
+    "language": "en"
 }
