@@ -1,0 +1,64 @@
+{
+    "start": {
+        "success": "成功開始直播",
+        "error": "錯誤: {error}"
+    },
+    "stop": {
+        "success": "成功停止直播",
+        "error": "錯誤 {error}"
+    },
+    "switch": {
+        "success": "場景成功切換到 \"{scene}\"",
+        "error": "沒有指定場景"
+    },
+    "bitrate": {
+        "success": "目前位元率: {bitrate} Kbps",
+        "error": "目前位元率: 離線"
+    },
+    "refresh": {
+        "success": "更新畫面",
+        "error": "更新失敗",
+        "done": "更新畫面完成"
+    },
+    "trigger": {
+        "success": "觸發流量成功設置為 {number} Kbps",
+        "error": "編輯的觸發值 {number} 錯誤的",
+        "current": "目前觸發值設定為 {number} Kbps"
+    },
+    "sourceinfo": {
+        "success": "[SRC] 解析度: {height} | 幀數: {fps} | 位元率: {bitrate}",
+        "error": "[SRC] 離線"
+    },
+    "obsinfo": {
+        "success": "[OBS] 場景: {currentScene} | 幀數: {fps} | 位元率: {bitrate}",
+        "error": "[OBS] 離線"
+    },
+    "rec": {
+        "started": "開始錄影",
+        "stopped": "停止錄影",
+        "invalid": "無效選項",
+        "error": "已經 {option}"
+    },
+    "fix": {
+        "try": "嘗試修復直播",
+        "success": "成功修復直播",
+        "error": "修復直播出錯"
+    },
+    "alias": {
+        "success": "新增別名 \"{alias}\"",
+        "error": "錯誤 \"{command}\" 不存在",
+        "removed": "已刪除別名 \"{alias}\""
+    },
+    "sceneSwitch": {
+        "switch": "場景切換到 \"{scene}\""
+    },
+    "handleCommands": {
+        "public": "公用指令",
+        "mod": "Mod 指令",
+        "notify": "自動切換通知",
+        "autostop": "自動停止直播",
+        "enabled": "開啟",
+        "disabled": "關閉",
+        "already": "已經"
+    }
+}
