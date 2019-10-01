@@ -15,9 +15,9 @@ const log = signale.scope("CHT");
 
 class Chat {
     constructor(username, password, channel, obs) {
-        this.username = username; // username
+        this.username = username.toLowerCase(); // username
         this.password = password; // oauth
-        this.channel = `#${channel}`; // #channel
+        this.channel = `#${channel.toLowerCase()}`; // #channel
         this.obsProps = obs;
         this.obs = obs.obs;
         this.prefix = config.twitchChat.prefix;
