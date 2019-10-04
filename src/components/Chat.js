@@ -206,7 +206,7 @@ class Chat {
         let [commandName, ...params] = msg.message.slice(1).split(" ");
 
         if (commandName in this.aliases) {
-            commandName = this.aliases[commandName];
+            [commandName, ...params] = this.aliases[commandName].split(" ");
         }
 
         switch (true) {
