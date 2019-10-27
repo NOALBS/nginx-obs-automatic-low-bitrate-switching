@@ -362,7 +362,7 @@ class Chat {
 
             this.say(
                 format(this.locale.switch.success, {
-                    scene: sceneName
+                    scene
                 })
             );
         } catch (e) {
