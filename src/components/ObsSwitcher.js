@@ -110,38 +110,39 @@ class ObsSwitcher extends EventEmitter {
     }
 
     async getBitrate() {
-        if (!this.nginxSettings) {
-            const rtmp = /rtmp:\/\/(.*)\/(\w+)\/(\w+)/g.exec(config.nginx.rtmp);
-            this.nginxSettings = {
-                ip: rtmp[1],
-                application: rtmp[2],
-                key: rtmp[3]
-            };
-        }
+        const { server, stats, application, key } = config.rtmp;
 
-        try {
-            const response = await fetch(`http://${this.nginxSettings.ip}/stat`);
-            const data = await response.text();
+        switch (server) {
+            case "nginx":
+                try {
+                    const response = await fetch(stats);
+                    const data = await response.text();
 
-            parseString(data, (err, result) => {
-                const publish = result.rtmp.server[0].application.find(stream => {
-                    return stream.name[0] === this.nginxSettings.application;
-                }).live[0].stream;
+                    parseString(data, (err, result) => {
+                        const publish = result.rtmp.server[0].application.find(stream => {
+                            return stream.name[0] === application;
+                        }).live[0].stream;
 
-                if (publish == null) {
-                    this.nginxVideoMeta = null;
-                    this.bitrate = null;
-                } else {
-                    const stream = publish.find(stream => {
-                        return stream.name[0] === this.nginxSettings.key;
+                        if (publish == null) {
+                            this.nginxVideoMeta = null;
+                            this.bitrate = null;
+                        } else {
+                            const stream = publish.find(stream => {
+                                return stream.name[0] === key;
+                            });
+
+                            this.nginxVideoMeta = stream.meta[0].video[0];
+                            this.bitrate = Math.round(stream.bw_video[0] / 1024);
+                        }
                     });
-
-                    this.nginxVideoMeta = stream.meta[0].video[0];
-                    this.bitrate = Math.round(stream.bw_video[0] / 1024);
+                } catch (e) {
+                    log.error("[NGINX] Error fetching stats");
                 }
-            });
-        } catch (e) {
-            log.error("[NGINX] Error fetching stats");
+                break;
+
+            default:
+                log.error("[STATS] Something went wrong at getting the RTMP server, did you enter the correct name in the config?");
+                break;
         }
 
         return this.bitrate;

@@ -11,8 +11,11 @@
         "requestMs": 2000,
         "onlySwitchWhenStreaming": true
     },
-    "nginx": {
-        "rtmp": "rtmp://localhost/publish/live"
+    "rtmp": {
+        "server": "nginx",
+        "stats": "http://localhost/stats",
+        "application": "publish",
+        "key": "live"
     },
     "twitchChat": {
         "channel": "715209",
