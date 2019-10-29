@@ -625,17 +625,25 @@ class Chat {
 
     async fix() {
         this.say(this.locale.fix.try);
+        const { server, stats, application, key } = config.rtmp;
+        const site = /(\w+:\/\/[^\/]+)/g.exec(stats)[1];
 
-        try {
-            const { ip, application, key } = this.obsProps.nginxSettings;
-            const response = await fetch(`http://${ip}/control/drop/subscriber?app=${application}&name=${key}`);
+        switch (server) {
+            case "nginx":
+                try {
+                    const response = await fetch(`${site}/control/drop/subscriber?app=${application}&name=${key}`);
 
-            if (response.ok) {
-                this.say(this.locale.fix.success);
-            }
-        } catch (e) {
-            console.log(e);
-            this.say(this.locale.fix.error);
+                    if (response.ok) {
+                        this.say(this.locale.fix.success);
+                    }
+                } catch (e) {
+                    console.log(e);
+                    this.say(this.locale.fix.error);
+                }
+                break;
+            default:
+                this.say(this.locale.fix.error);
+                break;
         }
     }
 
