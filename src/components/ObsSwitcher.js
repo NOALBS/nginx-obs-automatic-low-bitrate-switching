@@ -52,55 +52,57 @@ class ObsSwitcher extends EventEmitter {
         log.info("Connecting & authenticating");
     }
 
+    async switchSceneIfNecessary() {
+        if (!this.obsStreaming && (config.obs.onlySwitchWhenStreaming == null || config.obs.onlySwitchWhenStreaming)) return;
+
+        const bitrate = await this.getBitrate();
+        const { currentScene, canSwitch } = await this.canSwitch();
+
+        if (bitrate !== null) {
+            this.isLive = true;
+
+            this.isLive &&
+                canSwitch &&
+                (bitrate === 0 &&
+                    currentScene.name !== this.previousScene &&
+                    (this.obs.setCurrentScene({
+                        "scene-name": this.previousScene
+                    }),
+                    this.switchSceneEmit("live", this.previousScene),
+                    log.info(`Stream went online switching to scene: "${this.previousScene}"`)),
+                bitrate <= this.lowBitrateTrigger &&
+                    currentScene.name !== this.lowBitrateScene &&
+                    bitrate !== 0 &&
+                    (this.obs.setCurrentScene({
+                        "scene-name": this.lowBitrateScene
+                    }),
+                    (this.previousScene = this.lowBitrateScene),
+                    this.switchSceneEmit("lowBitrateScene"),
+                    log.info(`Low bitrate detected switching to scene: "${this.lowBitrateScene}"`)),
+                bitrate > this.lowBitrateTrigger &&
+                    currentScene.name !== this.normalScene &&
+                    (this.obs.setCurrentScene({ "scene-name": this.normalScene }),
+                    (this.previousScene = this.normalScene),
+                    this.switchSceneEmit("normalScene"),
+                    log.info(`Switching to normal scene: "${this.normalScene}"`)));
+        } else {
+            this.isLive = false;
+
+            canSwitch &&
+                currentScene.name !== this.offlineScene &&
+                (this.obs.setCurrentScene({ "scene-name": this.offlineScene }),
+                this.switchSceneEmit("offlineScene"),
+                (this.streamStatus = null),
+                log.warn(`Error receiving current bitrate or stream is offline. Switching to offline scene: "${this.offlineScene}"`));
+        }
+    }
+
     onAuth() {
         log.success(`Successfully connected`);
         this.obs.SetHeartbeat({ enable: true });
         this.getSceneList();
 
-        this.interval = setInterval(async () => {
-            if (!this.obsStreaming && (config.obs.onlySwitchWhenStreaming == null || config.obs.onlySwitchWhenStreaming)) return;
-
-            const bitrate = await this.getBitrate();
-            const { currentScene, canSwitch } = await this.canSwitch();
-
-            if (bitrate !== null) {
-                this.isLive = true;
-
-                this.isLive &&
-                    canSwitch &&
-                    (bitrate === 0 &&
-                        currentScene.name !== this.previousScene &&
-                        (this.obs.setCurrentScene({
-                            "scene-name": this.previousScene
-                        }),
-                        this.switchSceneEmit("live", this.previousScene),
-                        log.info(`Stream went online switching to scene: "${this.previousScene}"`)),
-                    bitrate <= this.lowBitrateTrigger &&
-                        currentScene.name !== this.lowBitrateScene &&
-                        bitrate !== 0 &&
-                        (this.obs.setCurrentScene({
-                            "scene-name": this.lowBitrateScene
-                        }),
-                        (this.previousScene = this.lowBitrateScene),
-                        this.switchSceneEmit("lowBitrateScene"),
-                        log.info(`Low bitrate detected switching to scene: "${this.lowBitrateScene}"`)),
-                    bitrate > this.lowBitrateTrigger &&
-                        currentScene.name !== this.normalScene &&
-                        (this.obs.setCurrentScene({ "scene-name": this.normalScene }),
-                        (this.previousScene = this.normalScene),
-                        this.switchSceneEmit("normalScene"),
-                        log.info(`Switching to normal scene: "${this.normalScene}"`)));
-            } else {
-                this.isLive = false;
-
-                canSwitch &&
-                    currentScene.name !== this.offlineScene &&
-                    (this.obs.setCurrentScene({ "scene-name": this.offlineScene }),
-                    this.switchSceneEmit("offlineScene"),
-                    (this.streamStatus = null),
-                    log.warn(`Error receiving current bitrate or stream is offline. Switching to offline scene: "${this.offlineScene}"`));
-            }
-        }, config.obs.requestMs);
+        this.interval = setInterval(this.switchSceneIfNecessary.bind(this), config.obs.requestMs);
     }
 
     switchSceneEmit(sceneName, args) {
