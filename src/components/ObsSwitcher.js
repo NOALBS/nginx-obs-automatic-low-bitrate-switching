@@ -141,6 +141,17 @@ class ObsSwitcher extends EventEmitter {
                     log.error("[NGINX] Error fetching stats");
                 }
                 break;
+            
+            case "node-media-server":
+                try {
+                    const response = await fetch(`${stats}/${application}/${key}`);
+                    const data = await response.json();
+
+                    this.bitrate = data.bitrate || null;
+                } catch (e) {
+                    log.error("[NMS] Error fetching stats, is the API http server running?");
+                }
+                break;
 
             default:
                 log.error("[STATS] Something went wrong at getting the RTMP server, did you enter the correct name in the config?");

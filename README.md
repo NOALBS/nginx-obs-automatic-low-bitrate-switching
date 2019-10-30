@@ -9,7 +9,7 @@
 
 # nginx-obs-automatic-low-bitrate-switching
 
-Simple app to automatically switch scenes in OBS based on the current bitrate fetched from the NGINX stats page.
+Simple app to automatically switch scenes in OBS based on the current bitrate fetched from an RTMP server's stats page.
 
 Don't feel like setting this all up by yourself? Check out these links for similar solutions!
 
@@ -21,17 +21,23 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 -   [Git](http://git-scm.com/)
 -   [Node.js](http://nodejs.org/) (with NPM)
 
-> This script uses OBS plugin "obs-websocket" inconjuction with "OBS-Studio" and "NGINX-RTMP" (see links below).
+> This script uses OBS plugin "obs-websocket" inconjuction with "OBS-Studio". For monitoring "NGINX-RTMP" (see links below).
 
--   [NGINX-RTMP](https://github.com/arut/nginx-rtmp-module/)
 -   [OBS-Studio](https://github.com/obsproject/obs-studio/)
 -   [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
+
+> It supports monitoring streams on either NGINX-RTMP server or Node-Media-Server.
+
+-   [NGINX-RTMP](https://github.com/arut/nginx-rtmp-module/)
+-   [Node-Media-Server](https://github.com/illuspas/Node-Media-Server/)
 
 ## Installation from Source
 
 -   `git clone <repository-url>` or download from [RELEASES](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
 -   Change into the new directory.
 -   `npm install --production`
+
+If using NGINX-RTMP server
 -   Replace your `nginx.conf` with the one given here.
 -   Put `stat.xsl` in your nginx folder.
 
@@ -89,6 +95,18 @@ You can also enable/disable certain features from chat, see below:
 > |    Admins    | !mod (on/off)      | enables/disables the use of MOD commands.                  | !mod on      |
 > |    Admins    | !notify (on/off)   | enables/disables the notifications in chat.                | !notify off  |
 > |    Admins    | !autostop (on/off) | enables/disables the auto stop feature when you host/raid. | !autostop on |
+
+## Running with Node-Media-Server
+Modify the RTMP section in config.json like this to connect to a node-media-server running externally:
+
+```
+    "rtmp": {
+        "server": "node-media-server",
+        "stats": "http://localhost:8000/api/streams",
+        "application": "publish",
+        "key": "live"
+    }
+```
 
 ## Help it won't change scenes
 
