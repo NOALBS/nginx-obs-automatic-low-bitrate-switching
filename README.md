@@ -26,7 +26,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 -   [OBS-Studio](https://github.com/obsproject/obs-studio/)
 -   [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
 
-> It supports monitoring streams on either NGINX-RTMP server or Node-Media-Server.
+> It supports monitoring streams on either NGINX-RTMP server or Node-Media-Server. Node-Media-Server is also built into NOALBS for an easy all-in-one streaming solution.
 
 -   [NGINX-RTMP](https://github.com/arut/nginx-rtmp-module/)
 -   [Node-Media-Server](https://github.com/illuspas/Node-Media-Server/)
@@ -97,6 +97,33 @@ You can also enable/disable certain features from chat, see below:
 > |    Admins    | !autostop (on/off) | enables/disables the auto stop feature when you host/raid. | !autostop on |
 
 ## Running with Node-Media-Server
+### Using the inbuilt server
+Defining a nodeMediaServer block in config.json will enable a fully functional node-media-server RTMP server to accept incoming streams:
+
+```
+    "rtmp": {
+        "application": "publish",
+        "key": "live"
+    },
+    "nodeMediaServer": {
+        "rtmp": {
+            "port": 1935,
+            "chunk_size": 60000,
+            "gop_cache": true,
+            "ping": 30,
+            "ping_timeout": 60
+        },
+        "http": {
+            "port": 8000
+        }
+    }
+```
+
+> The `nodeMediaServer` object is passed directly as the node-media-server configuration, [more details here](https://github.com/illuspas/Node-Media-Server#npm-version-recommended). It will also automatically fill out the rtmp server type and stats fields.
+
+> Note: This is probably best for local connections and testing only unless you [enable authentication](https://github.com/illuspas/Node-Media-Server#authentication)
+
+### Using an external server
 Modify the RTMP section in config.json like this to connect to a node-media-server running externally:
 
 ```

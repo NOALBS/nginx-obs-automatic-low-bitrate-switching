@@ -14,6 +14,7 @@
     "dependencies": {
         "fast-fuzzy": "^1.8.4",
         "node-fetch": "^2.3.0",
+        "node-media-server": "^2.1.4",
         "obs-websocket-js": "^1.2.0",
         "signale": "^1.3.0",
         "string-template": "^1.0.0",
