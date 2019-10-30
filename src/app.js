@@ -1,5 +1,6 @@
 import ObsSwitcher from "./components/ObsSwitcher";
 import Chat from "./components/Chat";
+import NodeMediaServer from "./components/NodeMediaServer";
 import config from "../config";
 
 console.log(`
@@ -23,3 +24,5 @@ const obs = new ObsSwitcher(
 if (config.twitchChat.enable) {
     const chat = new Chat(config.twitchChat.botUsername, config.twitchChat.oauth, config.twitchChat.channel, obs);
 }
+
+const nodeMediaServer = new NodeMediaServer(config.nodeMediaServer, obs);
