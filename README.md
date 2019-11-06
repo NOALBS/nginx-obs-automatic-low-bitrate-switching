@@ -56,7 +56,7 @@ Here is an example config with comments (click to enlarge):
 
 Also if you are going to be using your Twitch BOT Account please make sure it is an 'Editor' of your channel, see example;
 
-Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Find you bot on the list, add checkmark to 'Editor', done.
+Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Find your bot on the list, add checkmark to 'Editor', done.
 
 ![alt text](https://i.imgur.com/yRlBe5U.png "Setting your bot as Editor")
 
