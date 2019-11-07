@@ -1,0 +1,28 @@
+{
+    "chatServices": {
+        "twitch": {
+            "enable": true,
+            "username": "YOUR_BOT_USERNAME_HERE",
+            "oauth": "oauth:YOUR_OAUTH_HERE",
+            "type": "normal"
+        },
+        "mixer": {
+            "enable": false
+        },
+        "youtube": {
+            "enable": false
+        }
+    },
+    "nodeMediaServer": {
+        "rtmp": {
+            "port": 1935,
+            "chunk_size": 60000,
+            "gop_cache": true,
+            "ping": 30,
+            "ping_timeout": 60
+        },
+        "http": {
+            "port": 8000
+        }
+    }
+}
