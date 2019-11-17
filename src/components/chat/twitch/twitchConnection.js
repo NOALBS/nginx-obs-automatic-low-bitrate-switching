@@ -12,6 +12,7 @@ class TwitchConnection {
     constructor(username, password) {
         this.username = username.toLowerCase();
         this.password = password;
+        this.connected = false;
         this.grow = 0;
 
         this.open();
@@ -52,11 +53,14 @@ class TwitchConnection {
 
             if (this.grow > 0) this.grow = 0;
             this.keepAlive();
+            this.connected = true;
+            if (!this.joinQueueRunning) this.joinLoop();
         }
     }
 
     onClose() {
         log.error("Disconnected from twitch server");
+        this.connected = false;
         clearInterval(this.interval);
         this.ws.removeAllListeners();
         this.reconnect();
@@ -71,6 +75,7 @@ class TwitchConnection {
     reconnect() {
         const seconds = 1 << (this.grow <= 6 ? this.grow++ : this.grow);
         log.info(`Trying to reconnect in ${seconds} seconds`);
+        this.joinQueue = Array.from(this.channels);
 
         setTimeout(() => {
             log.info("Reconnecting...");
@@ -99,7 +104,7 @@ class TwitchConnection {
                     this.ws.send(`PONG ${parsed.channel}`);
                     break;
                 case "PONG":
-                    const ms = new Date().getTime() - this.sendPing;
+                    // const ms = new Date().getTime() - this.sendPing;
                     // console.log(`Pong received after ${ms} ms`);
 
                     clearTimeout(this.pingTimeout);

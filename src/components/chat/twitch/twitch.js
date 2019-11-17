@@ -5,38 +5,59 @@ class Chat extends TwitchConnection {
         super(config.username, config.oauth);
 
         this.queue = [];
+        this.channels = [];
+        this.joinQueue = [];
         this.queueRunning = false;
         this.ratelimitHandlerRunning = false;
+        this.joinQueueRunning = false;
         this.messagesSend = 0;
         this.maxMessages = 0;
 
         this.setMaxMessages(config.type);
     }
 
+    join(channel) {
+        console.log("Joining channel", channel);
+        this.ws.send(`JOIN #${channel.toLowerCase()}`);
+    }
+
+    enqueueJoin(user) {
+        this.channels.push(user);
+        this.joinQueue.push(user);
+        if (!this.joinQueueRunning) this.joinLoop();
+    }
+
+    joinLoop() {
+        this.joinQueueRunning = true;
+
+        const interval = setInterval(() => {
+            if (this.connected) this.join(this.joinQueue.shift());
+
+            if (this.joinQueue.length == 0) {
+                this.joinQueueRunning = false;
+                clearInterval(interval);
+            }
+        }, 500);
+    }
+
     enqueue(channel, message) {
-        if (this.messagesSend < this.maxMessages && this.queue.length == 0) {
+        if (this.messagesSend < this.maxMessages && this.queue.length == 0 && this.connected) {
             this.sendMessage(channel, message);
             if (!this.ratelimitHandlerRunning) this.ratelimitHandler();
         } else {
             this.queue.push({ channel, message });
+            if (!this.queueRunning) this.sendLoop();
         }
     }
 
-    join(channel) {
-        this.ws.send(`JOIN #${channel.toLowerCase()}`);
-    }
-
-    // leave(channel) {
-    //     // leave channel
-    // }
-
     sendLoop() {
-        // just send the message don't wait
         this.queueRunning = true;
 
         const interval = setInterval(() => {
-            this.dequeueAndSendMessage();
-            if (!this.ratelimitHandlerRunning) this.ratelimitHandler();
+            if (this.connected) {
+                this.dequeueAndSendMessage();
+                if (!this.ratelimitHandlerRunning) this.ratelimitHandler();
+            }
 
             if (this.queue.length == 0 || this.messagesSend >= this.maxMessages) {
                 this.queueRunning = false;
@@ -52,7 +73,7 @@ class Chat extends TwitchConnection {
             this.messagesSend = 0;
             this.ratelimitHandlerRunning = false;
 
-            if (this.queue.length > 0) this.sendLoop();
+            if (this.queue.length > 0 && !this.queueRunning) this.sendLoop();
         }, 1000 * 30 + 1);
     }
 
@@ -79,6 +100,10 @@ class Chat extends TwitchConnection {
                 break;
         }
     }
+
+    // leave(channel) {
+    //     // leave channel
+    // }
 }
 
 export default Chat;
