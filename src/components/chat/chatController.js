@@ -4,7 +4,6 @@ import events from "../globalEvents";
 class ChatController {
     constructor(chatServices) {
         this.chatServices = chatServices;
-        this.users = users;
         this.connections = {};
 
         this.startChatServices();
@@ -18,13 +17,16 @@ class ChatController {
     }
 
     joinChannels() {
-        for (const user in this.users) {
-            if (this.users.hasOwnProperty(user)) {
-                const settings = this.users[user].chat;
+        events.once("hellopleasegivemethechannels", channels => {
+            channels.map(chn => {
+                const { provider, channel } = chn;
+                events.emit(`join:${provider}`, channel);
+            });
+        });
 
-                if (this.connections[settings.provider] != null) this.connections[settings.provider].enqueueJoin(settings.channel);
-            }
-        }
+        events.emit("db:request", "hellopleasegivemethechannels", "getChannels");
+    }
+
     send(provider, channel, message) {
         events.emit(`send:${provider}`, channel, message);
     }

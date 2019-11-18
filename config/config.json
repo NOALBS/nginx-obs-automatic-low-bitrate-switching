@@ -1,4 +1,5 @@
 {
+    "database": "file",
     "chatServices": {
         "twitch": {
             "enable": true,

@@ -1,7 +1,12 @@
 import StartMessage from "./components/startMessage";
 import ChatController from "./components/chat/chatController";
+import Db from "./components/database";
+import events from "./components/globalEvents";
 
 import config from "../config/config";
-import users from "../config/users";
 
-const chatController = new ChatController(config.chatServices, users);
+events.on("db:connected", () => {
+    const chatController = new ChatController(config.chatServices);
+});
+
+const db = new Db(config.database);

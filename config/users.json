@@ -1,36 +1,82 @@
 {
-    "715209": {
-        "chat": {
-            "provider": "twitch",
-            "channel": "715209",
-            "prefix": "!",
-            "language": "en",
-            "enablePublicCommands": false,
-            "publicCommands": ["bitrate"],
-            "enableModCommands": false,
-            "modCommands": ["refresh", "fix", "trigger", "sourceinfo", "obsinfo"],
-            "enableAutoSwitchNotification": true,
-            "enableAutoStopStreamOnHostOrRaid": true,
-            "adminUsers": ["715209", "b3ck"],
-            "alias": [["r", "refresh"], ["f", "fix"], ["b", "bitrate"], ["v", "noalbs version"]]
+    "users": [
+        {
+            "chat": {
+                "provider": "twitch",
+                "channel": "715209",
+                "prefix": "!",
+                "language": "en",
+                "enablePublicCommands": false,
+                "publicCommands": ["bitrate"],
+                "enableModCommands": false,
+                "modCommands": ["refresh", "fix", "trigger", "sourceinfo", "obsinfo"],
+                "enableAutoSwitchNotification": true,
+                "enableAutoStopStreamOnHostOrRaid": true,
+                "adminUsers": ["715209", "b3ck"],
+                "alias": [
+                    ["r", "refresh"],
+                    ["f", "fix"],
+                    ["b", "bitrate"],
+                    ["v", "noalbs version"]
+                ]
+            },
+            "obs": {
+                "ip": "localhost:4444",
+                "password": "password",
+                "normalScene": "Screen",
+                "offlineScene": "BRB",
+                "lowBitrateScene": "lowbitratedetected",
+                "refreshScene": "REFRESH",
+                "lowBitrateTrigger": 1000,
+                "refreshSceneInterval": 10000,
+                "requestMs": 2000,
+                "onlySwitchWhenStreaming": false
+            },
+            "rtmp": {
+                "server": "nginx",
+                "stats": "http://localhost/stats",
+                "application": "publish",
+                "key": "live"
+            }
         },
-        "obs": {
-            "ip": "localhost:4444",
-            "password": "password",
-            "normalScene": "Screen",
-            "offlineScene": "BRB",
-            "lowBitrateScene": "lowbitratedetected",
-            "refreshScene": "REFRESH",
-            "lowBitrateTrigger": 1000,
-            "refreshSceneInterval": 10000,
-            "requestMs": 2000,
-            "onlySwitchWhenStreaming": false
-        },
-        "rtmp": {
-            "server": "nginx",
-            "stats": "http://localhost/stats",
-            "application": "publish",
-            "key": "live"
+        {
+            "chat": {
+                "provider": "twitch",
+                "channel": "b3ck",
+                "prefix": "!",
+                "language": "en",
+                "enablePublicCommands": false,
+                "publicCommands": ["bitrate"],
+                "enableModCommands": false,
+                "modCommands": ["refresh", "fix", "trigger", "sourceinfo", "obsinfo"],
+                "enableAutoSwitchNotification": true,
+                "enableAutoStopStreamOnHostOrRaid": true,
+                "adminUsers": ["715209", "b3ck"],
+                "alias": [
+                    ["r", "refresh"],
+                    ["f", "fix"],
+                    ["b", "bitrate"],
+                    ["v", "noalbs version"]
+                ]
+            },
+            "obs": {
+                "ip": "localhost:4444",
+                "password": "password",
+                "normalScene": "Screen",
+                "offlineScene": "BRB",
+                "lowBitrateScene": "lowbitratedetected",
+                "refreshScene": "REFRESH",
+                "lowBitrateTrigger": 1000,
+                "refreshSceneInterval": 10000,
+                "requestMs": 2000,
+                "onlySwitchWhenStreaming": false
+            },
+            "rtmp": {
+                "server": "nginx",
+                "stats": "http://localhost/stats",
+                "application": "publish",
+                "key": "live"
+            }
         }
-    }
+    ]
 }

@@ -13,6 +13,7 @@
     "license": "MIT",
     "dependencies": {
         "fast-fuzzy": "^1.8.4",
+        "lowdb": "^1.0.0",
         "node-fetch": "^2.3.0",
         "node-media-server": "^2.1.4",
         "obs-websocket-js": "^1.2.0",
@@ -26,6 +27,7 @@
         "@babel/core": "^7.2.2",
         "@babel/node": "^7.2.2",
         "@babel/preset-env": "^7.2.3",
+        "babel-plugin-dynamic-import-node": "^2.3.0",
         "nodemon": "^1.18.9"
     }
 }
