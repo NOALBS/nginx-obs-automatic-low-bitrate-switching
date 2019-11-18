@@ -1,4 +1,5 @@
 import TwitchConnection from "./twitchConnection";
+import events from "../../globalEvents";
 
 class Chat extends TwitchConnection {
     constructor(config) {
@@ -14,6 +15,8 @@ class Chat extends TwitchConnection {
         this.maxMessages = 0;
 
         this.setMaxMessages(config.type);
+        events.on("join:twitch", this.enqueueJoin.bind(this));
+        events.on("send:twitch", this.enqueue.bind(this));
     }
 
     join(channel) {

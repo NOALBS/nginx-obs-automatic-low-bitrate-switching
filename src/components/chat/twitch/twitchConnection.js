@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import signale from "signale";
+import events from "../../globalEvents";
 
 signale.config({
     displayTimestamp: true,
@@ -92,6 +93,7 @@ class TwitchConnection {
             const parsed = this.parse(message.data);
             switch (parsed.command) {
                 case "PRIVMSG":
+                    events.emit("message", "twitch", parsed.channel.substring(1), parsed.username, parsed.message, !!+parsed.tags.mod);
                     // this.handleMessage(parsed);
                     break;
                 // case "HOSTTARGET":

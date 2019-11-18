@@ -1,4 +1,5 @@
 import Twitch from "./twitch/twitch";
+import events from "../globalEvents";
 
 class ChatController {
     constructor(chatServices) {
@@ -8,6 +9,8 @@ class ChatController {
 
         this.startChatServices();
         this.joinChannels();
+
+        events.on("chat:message", this.messageHandler.bind(this));
     }
 
     startChatServices() {
@@ -22,10 +25,14 @@ class ChatController {
                 if (this.connections[settings.provider] != null) this.connections[settings.provider].enqueueJoin(settings.channel);
             }
         }
+    send(provider, channel, message) {
+        events.emit(`send:${provider}`, channel, message);
     }
 
-    send(service, channel, message) {
-        if (this.connections[service] != null) this.connections[service].enqueue(channel, message);
+    messageHandler(provider, channel, username, message, isMod) {
+        console.log(provider, channel, username, message, isMod);
+    }
+
     }
 }
 
