@@ -55,7 +55,7 @@ class TwitchConnection {
             if (this.grow > 0) this.grow = 0;
             this.keepAlive();
             this.connected = true;
-            if (!this.joinQueueRunning) this.joinLoop();
+            if (!this.joinQueueRunning && this.joinQueue.length > 0) this.joinLoop();
         }
     }
 
