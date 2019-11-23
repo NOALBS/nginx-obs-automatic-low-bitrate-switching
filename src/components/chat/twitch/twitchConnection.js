@@ -93,7 +93,8 @@ class TwitchConnection {
             const parsed = this.parse(message.data);
             switch (parsed.command) {
                 case "PRIVMSG":
-                    events.emit("message", "twitch", parsed.channel.substring(1), parsed.username, parsed.message, !!+parsed.tags.mod);
+                    const channel = parsed.channel.substring(1);
+                    events.emit("chat:message", "twitch", channel, parsed.username, parsed.message, !!+parsed.tags.mod || channel == parsed.username);
                     // this.handleMessage(parsed);
                     break;
                 // case "HOSTTARGET":

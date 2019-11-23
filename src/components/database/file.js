@@ -32,3 +32,10 @@ export function getChannels() {
         .map("chat")
         .value();
 }
+
+export function getChannel(channel) {
+    return this.db
+        .get("users")
+        .find({ chat: { channel } })
+        .value().chat;
+}
