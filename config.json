@@ -13,7 +13,7 @@
     },
     "rtmp": {
         "server": "nginx",
-        "stats": "http://localhost/stats",
+        "stats": "http://localhost/stat",
         "application": "publish",
         "key": "live"
     },
