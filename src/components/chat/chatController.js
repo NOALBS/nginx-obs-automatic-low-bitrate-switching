@@ -10,6 +10,7 @@ import zh_tw from "../../../locales/zh_tw";
 class ChatController {
     constructor(chatServices) {
         this.chatServices = chatServices;
+        this.events = events;
         this.connections = {};
         this.commands = ["switch"];
 
@@ -30,25 +31,29 @@ class ChatController {
         this.chatServices.twitch.enable && (this.connections.twitch = new Twitch(this.chatServices.twitch));
     }
 
-    joinChannels() {
-        events.once("hellopleasegivemethechannels", channels => {
-            channels.map(chn => {
+    async joinChannels() {
+        try {
+            const res = await events.do("db:request", "getChannels");
+
+            res.map(chn => {
                 const { provider, channel } = chn;
                 events.emit(`join:${provider}`, channel);
             });
-        });
-
-        events.emit("db:request", "hellopleasegivemethechannels", "getChannels");
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     send(provider, channel, message) {
         events.emit(`send:${provider}`, channel, message);
     }
 
-    messageHandler(provider, channel, username, message, isMod) {
+    async messageHandler(provider, channel, username, message, isMod) {
         console.log(provider, channel, username, message, isMod);
 
-        events.once(`get:${channel}`, async chn => {
+        try {
+            const chn = await events.do("db:request", "getChannel", channel);
+
             if (!message.startsWith(chn.prefix)) return;
 
             let [commandName, ...params] = message.slice(1).split(" ");
@@ -80,9 +85,9 @@ class ChatController {
                 default:
                     break;
             }
-        });
-
-        events.emit("db:request", `get:${channel}`, "getChannel", channel);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     addCommands() {

@@ -46,7 +46,11 @@ class Database {
 
     requestHandler(id, request, ...optionalParams) {
         let response = this[request](...optionalParams);
-        events.emit(id, response);
+
+        events.emit(id, {
+            success: true,
+            data: response
+        });
     }
 }
 
