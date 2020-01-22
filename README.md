@@ -9,6 +9,11 @@
 
 # nginx-obs-automatic-low-bitrate-switching
 
+## How to video:
+[![YouTube: How to Download, Install and Run NOALBS for IRL Livestreaming](https://img.youtube.com/vi/rglDAIm73cM/0.jpg)](https://www.youtube.com/watch?v=rglDAIm73cM)
+
+---
+
 Simple app to automatically switch scenes in OBS based on the current bitrate fetched from an RTMP server's stats page.
 
 Don't feel like setting this all up by yourself? Check out these links for similar solutions!
