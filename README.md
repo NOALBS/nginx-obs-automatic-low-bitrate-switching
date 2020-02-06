@@ -10,7 +10,7 @@
 # nginx-obs-automatic-low-bitrate-switching
 
 ## How to video:
-[![YouTube: How to Download, Install and Run NOALBS for IRL Livestreaming](https://img.youtube.com/vi/rglDAIm73cM/00.jpg)](https://www.youtube.com/watch?v=rglDAIm73cM)
+[![YouTube: How to Download, Install and Run NOALBS for IRL Livestreaming](https://i.imgur.com/98sptuM.png)](https://www.youtube.com/watch?v=rglDAIm73cM)
 
 ---
 
