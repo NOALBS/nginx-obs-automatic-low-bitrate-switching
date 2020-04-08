@@ -1,0 +1,64 @@
+{
+    "start": {
+        "success": "Yayın başarıyla başlatıldı", 
+        "error": "Hata oluştu: {error}"
+    },
+    "stop": {
+        "success": "Yayın başarıyla durduruldu",
+        "error": "Hata oluştu: {error}"
+    },
+    "switch": {
+        "success": "Sahne başarıyla geçti \"{scene}\"",
+        "error": "Sahne belirtilmedi"
+    },
+    "bitrate": {
+        "success": "Mevcut bit hızı: {bitrate} Kbps",
+        "error": "Mevcut bit hızı: çevrimdışı"
+    },
+    "refresh": {
+        "success": "Yayın yenileniyor",
+        "error": "Yayın yenilenirken hata oluştu",
+        "done": "Yayın yenileme tamamlandı"
+    },
+    "trigger": {
+        "success": "Tetik başarıyla ayarlandı {number} Kbps",
+        "error": "Tetik düzenlenirken hata oluştu {number} geçerli bir değer değil",
+        "current": "Şimdiki tetik {number} Kbps"
+    },
+    "sourceinfo": {
+        "success": "[SRC] R: {height} | F: {fps} | B: {bitrate}",
+        "error": "[SRC] Çevrimdışı"
+    },
+    "obsinfo": {
+        "success": "[OBS] S: {currentScene} | F: {fps} | B: {bitrate}",
+        "error": "[OBS] Çevrimdışı"
+    },
+    "rec": {
+        "started": "Başladı",
+        "stopped": "Durduruldu",
+        "invalid": "Geçersiz seçenek",
+        "error": "Zaten {option}"
+    },
+    "fix": {
+        "try": "Yayını düzeltmeye çalışıyor",
+        "success": "Yayın başarıyla düzeltildi",
+        "error": "Yayın düzeltilirken hata oluştu"
+    },
+    "alias": {
+        "success": "Takma ad eklendi \"{alias}\"",
+        "error": "Hata oluştu: \"{command}\" bulunmuyor",
+        "removed": "Takma ad kaldırıldı \"{alias}\""
+    },
+    "sceneSwitch": {
+        "switch": "Sahne değiştirildi \"{scene}\""
+    },
+    "handleCommands": {
+        "public": "Genel komutlar",
+        "mod": "Mod komutları",
+        "notify": "Otomatik geçiş bildirimi",
+        "autostop": "Yayını otomatik durdur",
+        "enabled": "etkin",
+        "disabled": "engelli",
+        "already": "zaten"
+    }
+}
