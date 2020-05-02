@@ -547,7 +547,6 @@ class Chat {
     }
 
     handleWriteToConfig() {
-        fs.writeFile('config.json', JSON.stringify(config, null, 4), err => {
         fs.writeFile(`${__dirname}/../../config.json`, JSON.stringify(config, null, 4), (err) => {
             if (err) log.error(err);
         });
