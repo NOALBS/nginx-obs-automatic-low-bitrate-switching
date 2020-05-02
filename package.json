@@ -1,6 +1,6 @@
 {
     "name": "nginx-obs-automatic-low-bitrate-switching",
-    "version": "1.6.4",
+    "version": "1.7.0",
     "description": "Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.",
     "main": "lib/app",
     "scripts": {
@@ -26,6 +26,6 @@
         "@babel/core": "^7.2.2",
         "@babel/node": "^7.2.2",
         "@babel/preset-env": "^7.2.3",
-        "nodemon": "^1.18.9"
+        "nodemon": "^2.0.3"
     }
 }
