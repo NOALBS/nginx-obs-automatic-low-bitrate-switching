@@ -19,7 +19,8 @@ const obs = new ObsSwitcher(
     config.obs.lowBitrateScene,
     config.obs.normalScene,
     config.obs.offlineScene,
-    config.obs.lowBitrateTrigger
+    config.obs.lowBitrateTrigger,
+    config.obs.highRttTrigger
 );
 
 if (config.twitchChat.enable) {
