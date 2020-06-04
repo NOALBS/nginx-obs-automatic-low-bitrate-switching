@@ -8,7 +8,12 @@ class NodeMediaServerManager {
             return;
         }
 
-        console = signale.scope("NMS");
+        try {
+            console = signale.scope("NMS");
+        } catch(e) {
+            console.log = signale.scope("NMS").log;
+            signale.scope("NMS").warn(`Couldn't set console for node-media-server. Consider upgrading to node 10 or higher to resovle this problem (error: ${e})`);
+        }
 
         this.obsSwitcher = obsSwitcher;
 
