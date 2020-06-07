@@ -1,0 +1,64 @@
+{
+    "start": {
+        "success": "Stream erfolgreich gestartet",
+        "error": "Fehler: {error}"
+    },
+    "stop": {
+        "success": "Stream erfolgreich gestoppt",
+        "error": "Fehler: {error}"
+    },
+    "switch": {
+        "success": "Szene erfolgreich auf \"{scene}\" gewechselt",
+        "error": "Keine Szene angegeben"
+    },
+    "bitrate": {
+        "success": "Aktuelle Bitrate: {bitrate} Kbps",
+        "error": "Aktuelle Bitrate: Offline"
+    },
+    "refresh": {
+        "success": "Stream wird aktualisiert",
+        "error": "Fehler beim aktualisieren des Streams",
+        "done": "Stream wurde erfolgreich aktualisiert"
+    },
+    "trigger": {
+        "success": "Auslöser erfolgreich auf {number} Kbps gesetzt",
+        "error": "Fehler beim Bearbeiten des Auslösers, {number} ist kein gültiger Wert",
+        "current": "Aktueller Auslöser auf {number} Kbps eingestellt"
+    },
+    "sourceinfo": {
+        "success": "[SRC] R: {height} | F: {fps} | B: {bitrate}",
+        "error": "[SRC] Offline"
+    },
+    "obsinfo": {
+        "success": "[OBS] S: {currentScene} | F: {fps} | B: {bitrate}",
+        "error": "[OBS] Offline"
+    },
+    "rec": {
+        "started": "Gestartet",
+        "stopped": "Gestoppt",
+        "invalid": "Ungültige Option",
+        "error": "Bereits {option}"
+    },
+    "fix": {
+        "try": "Versuche den Fehler zu beheben",
+        "success": "Fehler wurde erfolgreich behoben",
+        "error": "Fehler konnte nicht behoben werden"
+    },
+    "alias": {
+        "success": "Alias \"{alias}\" erfolgreich hinzugefügt",
+        "error": "Fehler \"{command}\" ist nicht vorhanden",
+        "removed": "Alias \"{alias}\" erfolgreich entfernt"
+    },
+    "sceneSwitch": {
+        "switch": "Szene erfolgreich auf \"{scene}\" gewechselt"
+    },
+    "handleCommands": {
+        "public": "Öffentliche Befehle",
+        "mod": "Mod Befehle",
+        "notify": "Automatische Wechsel Benachrichtigung",
+        "autostop": "Stream automatisch gestoppt",
+        "enabled": "aktiviert",
+        "disabled": "deaktiviert",
+        "already": "bereits"
+    }
+}
