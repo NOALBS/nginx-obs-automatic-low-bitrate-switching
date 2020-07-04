@@ -141,7 +141,7 @@ Modify the RTMP section in config.json like this to connect to a node-media-serv
         "stats": "http://localhost:8000/api/streams",
         "application": "publish",
         "key": "live"
-    }
+    },
 ```
 
 ## Help it won't change scenes
