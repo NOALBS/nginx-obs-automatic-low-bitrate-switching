@@ -125,7 +125,7 @@ Defining a nodeMediaServer block in config.json will enable a fully functional n
         "http": {
             "port": 8000
         }
-    }
+    },
 ```
 
 > The `nodeMediaServer` object is passed directly as the node-media-server configuration, [more details here](https://github.com/illuspas/Node-Media-Server#npm-version-recommended). It will also automatically fill out the rtmp server type and stats fields.
@@ -141,7 +141,7 @@ Modify the RTMP section in config.json like this to connect to a node-media-serv
         "stats": "http://localhost:8000/api/streams",
         "application": "publish",
         "key": "live"
-    }
+    },
 ```
 
 ## Help it won't change scenes
