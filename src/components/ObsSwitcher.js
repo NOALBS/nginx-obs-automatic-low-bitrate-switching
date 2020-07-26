@@ -199,13 +199,15 @@ class ObsSwitcher extends EventEmitter {
                     const srtresponse = await fetch(stats + "/manage/srt_receiver_stats");
                     const srtdata = await srtresponse.json();
                     const srtreceiver = srtdata.SrtReceivers.filter(receiver => receiver.id == id)
+                    const publish = srtreceiver[0].state;
+
                     // RTMP status for bitrate. srt_receiver_stats seems to give an averaged number that isn't as useful.
                     // Probably requires nimble to be configured to make the video from SRT available on RTMP even though it's not used anywhere
-                    const rtmpresponse = await fetch(stats + "/manage/rtmp_status");
-                    const rtmpdata = await rtmpresponse.json();
-                    const rtmpstream = rtmpdata.filter(rtmp => rtmp.app == application)[0].streams.filter(stream => stream.strm == key);
-
-                    const publish = srtreceiver[0].state;
+                    if (publish !== "disconnected") {
+                        const rtmpresponse = await fetch(stats + "/manage/rtmp_status");
+                        const rtmpdata = await rtmpresponse.json();
+                        const rtmpstream = rtmpdata.filter(rtmp => rtmp.app == application)[0].streams.filter(stream => stream.strm == key);
+                    }
 
                     if (publish == "disconnected") {
                         this.bitrate = null;
