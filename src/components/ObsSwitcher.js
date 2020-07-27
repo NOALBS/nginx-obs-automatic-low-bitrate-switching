@@ -14,7 +14,7 @@ const log = signale.scope("OBS");
 const parseString = xml2js.parseString;
 
 class ObsSwitcher extends EventEmitter {
-    constructor(address, password, low, normal, offline, lowBitrateTrigger, highRttTrigger) {
+    constructor(address, password, low, normal, offline, lowBitrateTrigger, highRttTrigger = 2500) {
         super();
 
         this.obs = new OBSWebSocket();
