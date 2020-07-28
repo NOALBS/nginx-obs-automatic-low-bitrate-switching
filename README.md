@@ -144,6 +144,40 @@ Modify the RTMP section in config.json like this to connect to a node-media-serv
     }
 ```
 
+## Using nimble SRT instead of nginx rtmp
+
+Nimble must have [API access enabled](https://wmspanel.com/nimble/api) and be configured as a SRT receiver - see ["Set up receiving of SRT"](https://blog.wmspanel.com/2017/07/setup-srt-secure-reliable-transport-nimble-streamer.html) and have an outgoing stream ("Add outgoing stream" on same page)
+
+Modify the RTMP section in config.json to this:
+
+```
+    "rtmp": {
+        "server": "nimble",
+        "stats": "http://nimble:8082",
+        "id": "0.0.0.0:1234",
+        "application": "live",
+        "key": "srt"
+    },
+```
+
+- `stats`: URL to nimble API
+- `id`: UDP listener ID (Usually IP:Port)
+- `application`: Outgoing stream "Application Name"
+- `key`: Outgoing stream "Stream Name"
+
+---
+
+Switches on low bitrate or high RTT (high RTT seems to be a more accurate way of determining if the stream is bad with this)
+
+You can change the high RTT trigger value inside config.json:
+
+```
+    "obs": {
+        ...
+        "highRttTrigger": 2500,
+    },
+```
+
 ## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
