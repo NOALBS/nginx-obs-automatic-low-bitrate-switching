@@ -7,6 +7,7 @@
         "lowBitrateScene": "lowbitratedetected",
         "refreshScene": "REFRESH",
         "lowBitrateTrigger": 1000,
+        "highRttTrigger": 2500,
         "refreshSceneInterval": 10000,
         "requestMs": 2000,
         "onlySwitchWhenStreaming": true
