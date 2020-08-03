@@ -26,7 +26,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 -   [Git](http://git-scm.com/)
 -   [Node.js](http://nodejs.org/) (with NPM)
 
-> This script uses OBS plugin "obs-websocket" inconjuction with "OBS-Studio". For monitoring "NGINX-RTMP" (see links below).
+> This script uses OBS plugin "obs-websocket" in conjunction with "OBS-Studio". For monitoring "NGINX-RTMP" (see links below).
 
 -   [OBS-Studio](https://github.com/obsproject/obs-studio/)
 -   [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
