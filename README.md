@@ -18,6 +18,7 @@ Simple app to automatically switch scenes in OBS based on the current bitrate fe
 
 Don't feel like setting this all up by yourself? Check out these links for similar solutions!
 
+-   [IЯLToolkit](https://irltoolkit.com/)
 -   [psynapticmedia.com](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
 -   [norip.io](https://www.norip.io)
 -   Do you offer a solution? Want your link here? Message me on Discord [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608)
