@@ -58,7 +58,7 @@ Edit `config.json` to your own settings.
 
 Here is an example config with comments (click to enlarge):
 
-**_PLEASE NOTE CONFIG MAY NOT REPRESENT CURRENT CONFIG_**
+**_PLEASE NOTE CONFIG ARCHITECTURE MAY NOT REPRESENT CURRENT CONFIG ARCHITECTURE_**
 
 ![alt text](https://i.imgur.com/cVbz1bN.png "Configuration Comments (Click to Enlarge)")
 
@@ -92,7 +92,7 @@ This script gives you the option to enable some simple chat commands to help you
 > |    Admins    | !switch (scene)                       | switches to the provided SCENE ([fuzzy match](https://wikipedia.org/wiki/Approximate_string_matching)). | !switch INTRO        |
 > |    Admins    | !alias (add/remove) (alias) (command) | add an alias for a command                                                                              | !alias add ss switch |
 > |     MODs     | !refresh                              | changes to the REFRESH scene for the set interval.                                                      | !refresh             |
-> |     MODs     | !fix                                  | tries to fix the stream.                                                                                | !fix                 |
+> |     MODs     | !fix                                  | tries to fix the stream. (ONLY works with NGINX-RTMP server type.)                                      | !fix                 |
 > |     MODs     | !trigger (value)                      | changes the low bitrate threshold to the defined value.                                                 | !trigger 1000        |
 > |     MODs     | !sourceinfo                           | gives you details about the SOURCE in chat.                                                             | !sourceinfo          |
 > |     MODs     | !obsinfo                              | gives you details about OBS in chat.                                                                    | !obsinfo             |
@@ -111,7 +111,7 @@ You can also enable/disable certain features from chat, see below:
 ### Using the inbuilt server
 Defining a nodeMediaServer block in config.json will enable a fully functional node-media-server RTMP server to accept incoming streams:
 
-```
+```JSON
     "rtmp": {
         "application": "publish",
         "key": "live"
@@ -137,7 +137,7 @@ Defining a nodeMediaServer block in config.json will enable a fully functional n
 ### Using an external server
 Modify the RTMP section in config.json like this to connect to a node-media-server running externally:
 
-```
+```JSON
     "rtmp": {
         "server": "node-media-server",
         "stats": "http://localhost:8000/api/streams",
@@ -146,13 +146,13 @@ Modify the RTMP section in config.json like this to connect to a node-media-serv
     },
 ```
 
-## Using nimble SRT instead of nginx rtmp
+## Using Nimble Streamer Server (with SRT protocol)
 
 Nimble must have [API access enabled](https://wmspanel.com/nimble/api) and be configured as a SRT receiver - see ["Set up receiving of SRT"](https://blog.wmspanel.com/2017/07/setup-srt-secure-reliable-transport-nimble-streamer.html) and have an outgoing stream ("Add outgoing stream" on same page)
 
 Modify the RTMP section in config.json to this:
 
-```
+```JSON
     "rtmp": {
         "server": "nimble",
         "stats": "http://nimble:8082",
@@ -173,12 +173,54 @@ Switches on low bitrate or high RTT (high RTT seems to be a more accurate way of
 
 You can change the high RTT trigger value inside config.json:
 
-```
+```JSON
     "obs": {
         ...
         "highRttTrigger": 2500,
     },
 ```
+
+## Using SLS (SRT-LIVE-SERVER)
+
+If you're using [Matt's modified version](https://gitlab.com/mattwb65/srt-live-server) of SLS then follow this section;
+
+Modify the RTMP section in config.json to this:
+
+```JSON
+    "rtmp": {
+        "server": "srt-live-server",
+        "stats": "http://127.0.0.1:8181/stats",
+        "publisher": "publish/live/feed1"
+    },
+```
+
+- `server`: Type of streaming server. (ex; nginx, nms, nimble or srt-live-server )
+- `stats`: URL to SLS stats page (ex; http://127.0.0.1:8181/stats )
+- `publisher`: StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
+
+---
+
+Switches on low bitrate or high RTT (high RTT seems to be a more accurate way of determining if the stream is bad with this)
+
+You can change the high RTT trigger value inside config.json:
+
+```JSON
+    "obs": {
+        ...
+        "highRttTrigger": 2500,
+    },
+```
+
+====
+How do I publish to the SLS Server? see [HERE](https://gitlab.com/mattwb65/srt-live-server#1test-with-ffmpeg)
+
+How do I pull the feed into OBS?
+
+- Add Media Source
+- Uncheck Local File
+- In the "Input" field enter in: `srt://<SERVER-IP>:<PORT>/?streamid=<PUBLISHER>`
+- In the "Input Format" field enter in: `mpegts`
+- Check `Seekable` then click `OK`
 
 ## Help it won't change scenes
 
