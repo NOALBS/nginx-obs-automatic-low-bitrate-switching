@@ -201,7 +201,7 @@ Modify the RTMP section in config.json to this:
     - Publisher, what is a publisher? it's a combination of `domain_publisher`/`app_publisher`/`<whatever-you-want>`.
     - So if your `domain_publisher` was "uplive.sls.com", and your `app_publisher` was "live", it would be `uplive.sls.com/live/<whatever-you-want>`.
     - You could literally call you domain_publisher 'billy', app_publisher 'bob', and then set your streamid (publisher) to 'billy/bob/thorton' if you wanted to.
-    - Publisher is also what you entered in the config under `default_sid`.
+    - Publisher is also what you entered in the config under `default_sid`.  Unless you are streaming to a different 'StreamID' of course, ex; `publish/live/tinkerbell`.
 
 
 See Example Below:
