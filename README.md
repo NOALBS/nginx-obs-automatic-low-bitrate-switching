@@ -184,7 +184,9 @@ You can change the high RTT trigger value inside config.json:
 
 If you're using [Matt's modified version](https://gitlab.com/mattwb65/srt-live-server) of SLS then follow this section;
 
-Modify the RTMP section in config.json to this:
+You MUST Modify the ENTIRE RTMP section in NOALBS `config.json` file to match this:
+
+(And yes we know calling this configuration block the 'RTMP section' is rather dumb at this point, but it is what it is until it is changed.)
 
 ```JSON
     "rtmp": {
