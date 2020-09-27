@@ -206,7 +206,7 @@ You MUST Modify the ENTIRE RTMP section in NOALBS `config.json` file to match th
     - Publisher is also what you entered in the config under `default_sid`.  Unless you are streaming to a different 'StreamID' of course, ex; `publish/live/tinkerbell`.
 
 
-See Example Below:
+See Example Below from the `sls.conf` file in the SLS main directory:
     
 ![image](https://user-images.githubusercontent.com/1740542/94368739-7955b600-00ab-11eb-9946-20b66f9f4fb2.png)
 
