@@ -198,6 +198,16 @@ Modify the RTMP section in config.json to this:
 - `stats`: URL to SLS stats page (ex; http://127.0.0.1:8181/stats )
 - `publisher`: StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
 
+    - Publisher, what is a publisher? it's a combination of `domain_publisher`/`app_publisher`/`<whatever-you-want>`.
+    - So if your `domain_publisher` was "uplive.sls.com", and your `app_publisher` was "live", it would be `uplive.sls.com/live/<whatever-you-want>`.
+    - You could literally call you domain_publisher 'billy', app_publisher 'bob', and then set your streamid (publisher) to 'billy/bob/thorton' if you wanted to.
+    - Publisher is also what you entered in the config under `default_sid`.
+
+
+See Example Below:
+    
+![image](https://user-images.githubusercontent.com/1740542/94368739-7955b600-00ab-11eb-9946-20b66f9f4fb2.png)
+
 ---
 
 Switches on low bitrate or high RTT (high RTT seems to be a more accurate way of determining if the stream is bad with this)
