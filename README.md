@@ -208,6 +208,8 @@ See Example Below:
     
 ![image](https://user-images.githubusercontent.com/1740542/94368739-7955b600-00ab-11eb-9946-20b66f9f4fb2.png)
 
+So in actuality your 'publisher' is your default `StreamID`, like in the example above it's `billy/bob/thorton`.
+
 ---
 
 Switches on low bitrate or high RTT (high RTT seems to be a more accurate way of determining if the stream is bad with this)
