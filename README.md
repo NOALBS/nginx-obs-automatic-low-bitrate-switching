@@ -11,7 +11,8 @@
 Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the current bitrate fetched from the server's stats page.
 
 ---
-![image](https://b3ck.com/noalbs/readme_stop_02.png)
+# !!! PLEASE BE ADVISED !!!
+
 
 NOALBS is used as a basic DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
 
