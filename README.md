@@ -74,8 +74,8 @@ Node-Media-Server is also built into NOALBS for an easy all-in-one streaming sol
 
 -   [NGINX-RTMP](https://github.com/arut/nginx-rtmp-module/)
 -   [Node-Media-Server](https://github.com/illuspas/Node-Media-Server/)
--   Nimble Server
--   SLS (SRT-Live-Server)
+-   [Nimble Server](https://wmspanel.com/nimble/install)
+-   [SLS (SRT-Live-Server)](https://gitlab.com/mattwb65/srt-live-server)
 
 ---
 ## Installation from Source and NGINX Setup
