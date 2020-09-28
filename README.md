@@ -8,20 +8,56 @@
 ```
 
 # nginx-obs-automatic-low-bitrate-switching
-
-## How to video:
-[![YouTube: How to Download, Install and Run NOALBS for IRL Livestreaming](https://i.imgur.com/98sptuM.png)](https://www.youtube.com/watch?v=rglDAIm73cM)
+Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the current bitrate fetched from the server's stats page.
 
 ---
 
-Simple app to automatically switch scenes in OBS based on the current bitrate fetched from an RTMP server's stats page.
+![image](https://user-images.githubusercontent.com/1740542/94396269-2e798400-0127-11eb-8b4e-5b2280794dc0.png)
 
-Don't feel like setting this all up by yourself? Check out these links for similar solutions!
+NOALBS is used as a basic DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
+
+Downsides to using NOALBS vs Similar Solutions/Paid Services:
+- It's basic, no fancy stuff here.
+
+(Other similar solutions/paid services offer really cool and fancy control panels/dashboards/technology that make using it a breeze and/or better overall.)
+
+- If you lose power or internet where you run NOALBS there is no redundancy.
+
+(Unless of course you have a battery backup system/internet backup system in place.)
+
+- It takes a bit to setup, it is not for the faint of heart when it comes to installing and configuring advanced programs to get it running.
+
+(Watch video below for help)
+
+If you're okay with all of that then all I can say is if you can't figure it out, reach out to myself and/or the community if you need help, we're here for you.
+
+---
+
+## How to video (WINDOWS):
+[![YouTube: How to Download, Install and Run NOALBS for IRL Livestreaming (WINDOWS)](https://i.imgur.com/98sptuM.png)](https://www.youtube.com/watch?v=rglDAIm73cM)
+
+---
+## Similar Solutions / Paid Services:
+Don't feel like setting this all up by yourself? Check out these links for similar solutions/paid services:
 
 -   [IRLToolkit](https://irltoolkit.com/)
 -   [psynapticmedia.com](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
 -   [norip.io](https://www.norip.io)
--   Do you offer a solution? Want your link here? Message me on Discord [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608)
+-   Do you offer a similar solution or paid service? Want your link here? Message me on Discord [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608)
+---
+
+# Table of Contents:
+- [Build Prerequisities](#build-prerequisities)
+- [Installation from Source](#installation-from-source)
+- [Config](#config)
+- [How to run from source](#how-to-run-from-source)
+- [Chat Commands](#chat-commands)
+- [Running with other servers (not NGINX)](#)
+  - [Using the built-in Node-Media-Server](#)
+  - [Using an external Node-Media-Server](#)
+  - [Using Nimble Streamer Server (with SRT protocol)](#)
+  - [Using SLS (SRT-LIVE-SERVER)](#)
+- [Help it won't change scenes](#)
 
 ## Build Prerequisities
 
@@ -33,10 +69,13 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 -   [OBS-Studio](https://github.com/obsproject/obs-studio/)
 -   [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
 
-> It supports monitoring streams on either NGINX-RTMP server or Node-Media-Server. Node-Media-Server is also built into NOALBS for an easy all-in-one streaming solution.
+> It supports monitoring streams on either NGINX-RTMP server, Node-Media-Server, Nimble Server, and SLS (SRT-Live-Server).
+Node-Media-Server is also built into NOALBS for an easy all-in-one streaming solution.
 
 -   [NGINX-RTMP](https://github.com/arut/nginx-rtmp-module/)
 -   [Node-Media-Server](https://github.com/illuspas/Node-Media-Server/)
+-   Nimble Server
+-   SLS (SRT-Live-Server)
 
 ## Installation from Source
 
@@ -51,6 +90,19 @@ If you already have NGINX-RTMP server
 Otherwise here is a Windows version of NGINX+RTMP Server
 - [Hosted on Github](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/raw/master/nginx/nginx_1.7.11.3_Gryphon_With_NOALBS.config_files_03162020.zip)
 - Everything is ready to go inside this zip, just extract and click on the `nginx_start.bat` file to start NGINX, you can use `nginx_stop.bat` to stop NGINX. HTTP server runs on Port `80`, RTMP server runs on `1935`, if you need to edit the config file it's in the `/conf` folder, named `nginx.conf`.
+
+## How to pull stream into OBS Studio
+
+Install VLC, match it to your OBS (32bit/64it Respectively)
+
+1.) In OBS create the following scenes:
+- LIVE, LOW, BRB, REFRESH
+ - I highly recommend creating a STARTUP & PRIVACY scene, the STARTUP scene can contain whatever you want to start your stream on and then switch to LIVE when you're ready, the PRIVACY scene can be whatever you want to put the stream on when you need privacy, the main thing is that it's out of NOALBS scope and won't automatically switch scenes.
+- The normal flow is to have your OBS on STARTUP when you start stream and when you're ready either you or an instructed MOD can !switch LIVE, when you need privacy use !switch PRIVACY.
+
+2.) In your LIVE scene, add a VLC Video Source, if using default NGINX setup match the image below:
+![image](https://user-images.githubusercontent.com/1740542/94399602-52d85f00-012d-11eb-91b2-5045242e5c4b.png)
+
 
 ## Config
 
@@ -107,9 +159,9 @@ You can also enable/disable certain features from chat, see below:
 > |    Admins    | !notify (on/off)   | enables/disables the notifications in chat.                | !notify off  |
 > |    Admins    | !autostop (on/off) | enables/disables the auto stop feature when you host/raid. | !autostop on |
 
-## Running with Node-Media-Server
-### Using the inbuilt server
-Defining a nodeMediaServer block in config.json will enable a fully functional node-media-server RTMP server to accept incoming streams:
+## Running with other servers (not NGINX):
+### Using the built-in Node-Media-Server
+Defining a `nodeMediaServer` block in config.json will enable a fully functional node-media-server RTMP server to accept incoming streams:
 
 ```JSON
     "rtmp": {
@@ -134,7 +186,7 @@ Defining a nodeMediaServer block in config.json will enable a fully functional n
 
 > Note: This is probably best for local connections and testing only unless you [enable authentication](https://github.com/illuspas/Node-Media-Server#authentication)
 
-### Using an external server
+### Using an external Node-Media-Server
 Modify the RTMP section in config.json like this to connect to a node-media-server running externally:
 
 ```JSON
@@ -146,7 +198,7 @@ Modify the RTMP section in config.json like this to connect to a node-media-serv
     },
 ```
 
-## Using Nimble Streamer Server (with SRT protocol)
+### Using Nimble Streamer Server (with SRT protocol)
 
 Nimble must have [API access enabled](https://wmspanel.com/nimble/api) and be configured as a SRT receiver - see ["Set up receiving of SRT"](https://blog.wmspanel.com/2017/07/setup-srt-secure-reliable-transport-nimble-streamer.html) and have an outgoing stream ("Add outgoing stream" on same page)
 
@@ -180,7 +232,7 @@ You can change the high RTT trigger value inside config.json:
     },
 ```
 
-## Using SLS (SRT-LIVE-SERVER)
+### Using SLS (SRT-LIVE-SERVER)
 
 If you're using [Matt's modified version](https://gitlab.com/mattwb65/srt-live-server) of SLS then follow this section;
 
