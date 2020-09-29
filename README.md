@@ -77,6 +77,8 @@ Node-Media-Server is also built into NOALBS for an easy all-in-one streaming sol
 -   [Nimble Server](https://wmspanel.com/nimble/install)
 -   [SLS (SRT-Live-Server)](https://gitlab.com/mattwb65/srt-live-server)
 
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
 ---
 ## Installation from Source and NGINX Setup
 
@@ -91,6 +93,8 @@ If you already have NGINX-RTMP server
 Otherwise here is a Windows version of NGINX+RTMP Server
 - [Hosted on Github](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/raw/master/nginx/nginx_1.7.11.3_Gryphon_With_NOALBS.config_files_03162020.zip)
 - Everything is ready to go inside this zip, just extract and click on the `nginx_start.bat` file to start NGINX, you can use `nginx_stop.bat` to stop NGINX. HTTP server runs on Port `80`, RTMP server runs on `1935`, if you need to edit the config file it's in the `/conf` folder, named `nginx.conf`.
+
+<sub>_[(table of contents)](#table-of-contents)_</sub>
 
 ---
 ## How to pull stream into OBS Studio
@@ -110,6 +114,8 @@ Install VLC, match it to your OBS (32bit/64it Respectively)
   - Do the same transformation procedure from step (2).
 
 4.) Go over all of your scenes and make them your own.
+
+<sub>_[(table of contents)](#table-of-contents)_</sub>
 
 ---
 ## Configuring the CONFIG and Setting up Roles
@@ -131,10 +137,14 @@ Go to this URL: [Twitch User Roles](https://www.twitch.tv/dashboard/roles/), Fin
 
 ![alt text](https://i.imgur.com/yRlBe5U.png "Setting your bot as Editor")
 
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
 ---
 ## How to run from source
 
 Run the node app by running: `npm start`. Then stream to `rtmp://IPHERE/publish/live`
+
+<sub>_[(table of contents)](#table-of-contents)_</sub>
 
 ---
 ## Chat Commands
@@ -169,6 +179,8 @@ You can also enable/disable certain features from chat, see below:
 > |    Admins    | !notify (on/off)   | enables/disables the notifications in chat.                | !notify off  |
 > |    Admins    | !autostop (on/off) | enables/disables the auto stop feature when you host/raid. | !autostop on |
 
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
 ---
 ## Running with other servers (not NGINX):
 ### Using the built-in Node-Media-Server
@@ -197,6 +209,8 @@ Defining a `nodeMediaServer` block in config.json will enable a fully functional
 
 > Note: This is probably best for local connections and testing only unless you [enable authentication](https://github.com/illuspas/Node-Media-Server#authentication)
 
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
 ---
 ### Using an external Node-Media-Server
 Modify the RTMP section in config.json like this to connect to a node-media-server running externally:
@@ -209,6 +223,8 @@ Modify the RTMP section in config.json like this to connect to a node-media-serv
         "key": "live"
     },
 ```
+
+<sub>_[(table of contents)](#table-of-contents)_</sub>
 
 ---
 ### Using Nimble Streamer Server (with SRT protocol)
@@ -243,8 +259,11 @@ You can change the high RTT trigger value inside config.json:
     },
 ```
 
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
 ---
 ### Using SLS (SRT-LIVE-SERVER)
+> Big Thanks to [oozebrood](https://www.twitch.tv/oozebrood), [matthewwb2](https://www.twitch.tv/matthewwb2), and [kyle___d](https://www.twitch.tv/kyle___d) for all of the hard work they've put into getting SRT to the masses!
 
 If you're using [Matt's modified version](https://gitlab.com/mattwb65/srt-live-server) of SLS then follow this section;
 
@@ -290,7 +309,7 @@ You can change the high RTT trigger value inside config.json:
 ====
 How do I publish to the SLS Server? see [HERE](https://gitlab.com/mattwb65/srt-live-server#1test-with-ffmpeg)
 
-How do I pull the feed into OBS?
+How do I pull the SRT feed into OBS?
 
 - Add Media Source
 - Uncheck Local File
@@ -298,8 +317,12 @@ How do I pull the feed into OBS?
 - In the "Input Format" field enter in: `mpegts`
 - Check `Seekable` then click `OK`
 
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
 ---
 ## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
 (This is so that it wont change when you are on for example your 'intro' or 'locked-brb' scene)
+
+<sub>_[(table of contents)](#table-of-contents)_</sub>
