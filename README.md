@@ -51,6 +51,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 - [Configuring the CONFIG and Setting up Roles](#configuring-the-config-and-setting-up-roles)
 - [How to run from source](#how-to-run-from-source)
 - [Chat Commands](#chat-commands)
+- [How to pull RTMP stream into OBS](#how-to-pull-rtmp-stream-into-obs)
 - [Running with other servers (not NGINX)](#running-with-other-servers-not-nginx)
   - [Using the built-in Node-Media-Server](#using-the-built-in-node-media-server)
   - [Using an external Node-Media-Server](#using-an-external-node-media-server)
@@ -93,27 +94,6 @@ If you already have NGINX-RTMP server
 Otherwise here is a Windows version of NGINX+RTMP Server
 - [Hosted on Github](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/raw/master/nginx/nginx_1.7.11.3_Gryphon_With_NOALBS.config_files_03162020.zip)
 - Everything is ready to go inside this zip, just extract and click on the `nginx_start.bat` file to start NGINX, you can use `nginx_stop.bat` to stop NGINX. HTTP server runs on Port `80`, RTMP server runs on `1935`, if you need to edit the config file it's in the `/conf` folder, named `nginx.conf`.
-
-<sub>_[(table of contents)](#table-of-contents)_</sub>
-
----
-## How to pull stream into OBS Studio
-
-Install VLC, match it to your OBS (32bit/64it Respectively)
-
-1.) In OBS create the following scenes:
-- `LIVE`, `LOW`, `BRB`, `REFRESH`
- - I highly recommend creating a `STARTUP` & `PRIVACY` scene, the `STARTUP` scene can contain whatever you want to start your stream on and then switch to `LIVE` when you're ready, the `PRIVACY` scene can be whatever you want to put the stream on when you need privacy, the main thing is that it's out of NOALBS scope and won't automatically switch scenes.
-- The normal flow is to have your OBS on `STARTUP` when you start stream and when you're ready either you or an instructed MOD can !switch LIVE, when you need privacy use !switch PRIVACY.
-
-2.) In your `LIVE` scene, add a 'VLC Video Source', if using default NGINX setup match the image below:
-![image](https://user-images.githubusercontent.com/1740542/94399602-52d85f00-012d-11eb-91b2-5045242e5c4b.png)
-  - Right click on the 'VLC Video Source' > Transform > Stretch to screen (this will stretch the video source no matter the resolution, ex; 480p, 720p, 1080p etc.)
-
-3.) Copy and Paste(Refrenece) the 'VLC Video Source' from the `LIVE` scene into your `LOW` scene.
-  - Do the same transformation procedure from step (2).
-
-4.) Go over all of your scenes and make them your own.
 
 <sub>_[(table of contents)](#table-of-contents)_</sub>
 
@@ -178,6 +158,27 @@ You can also enable/disable certain features from chat, see below:
 > |    Admins    | !mod (on/off)      | enables/disables the use of MOD commands.                  | !mod on      |
 > |    Admins    | !notify (on/off)   | enables/disables the notifications in chat.                | !notify off  |
 > |    Admins    | !autostop (on/off) | enables/disables the auto stop feature when you host/raid. | !autostop on |
+
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
+---
+## How to pull RTMP stream into OBS
+
+Install VLC, match it to your OBS (32bit/64it Respectively)
+
+1.) In OBS create the following scenes:
+- `LIVE`, `LOW`, `BRB`, `REFRESH`
+ - I highly recommend creating a `STARTUP` & `PRIVACY` scene, the `STARTUP` scene can contain whatever you want to start your stream on and then switch to `LIVE` when you're ready, the `PRIVACY` scene can be whatever you want to put the stream on when you need privacy, the main thing is that it's out of NOALBS scope and won't automatically switch scenes.
+- The normal flow is to have your OBS on `STARTUP` when you start stream and when you're ready either you or an instructed MOD can !switch LIVE, when you need privacy use !switch PRIVACY.
+
+2.) In your `LIVE` scene, add a 'VLC Video Source', if using default NGINX setup match the image below:
+![image](https://user-images.githubusercontent.com/1740542/94399602-52d85f00-012d-11eb-91b2-5045242e5c4b.png)
+  - Right click on the 'VLC Video Source' > Transform > Stretch to screen (this will stretch the video source no matter the resolution, ex; 480p, 720p, 1080p etc.)
+
+3.) Copy and Paste(Reference) the 'VLC Video Source' from the `LIVE` scene into your `LOW` scene.
+  - Do the same transformation procedure from step (2).
+
+4.) Go over all of your scenes and make them your own.
 
 <sub>_[(table of contents)](#table-of-contents)_</sub>
 
