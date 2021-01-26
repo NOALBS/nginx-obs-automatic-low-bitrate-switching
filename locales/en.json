@@ -12,6 +12,7 @@
         "error": "No scene specified"
     },
     "bitrate": {
+        "success_rtt": "Current bitrate: {bitrate} Kbps, RTT {rtt} ms",
         "success": "Current bitrate: {bitrate} Kbps",
         "error": "Current bitrate: offline"
     },

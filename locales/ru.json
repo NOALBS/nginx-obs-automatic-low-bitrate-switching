@@ -12,6 +12,7 @@
 		"error": "Ошибка: сцена не указана"
 	},
 	"bitrate": {
+		"success_rtt": "Текущий битрейт: {bitrate} kbps, RTT {rtt} ms",
 		"success": "Текущий битрейт: {bitrate} kbps",
 		"error": "Текущий битрейт: Не в сети"
 	},

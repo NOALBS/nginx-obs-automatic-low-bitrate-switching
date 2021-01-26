@@ -12,6 +12,7 @@
         "error": "Sahne belirtilmedi"
     },
     "bitrate": {
+        "success_rtt": "Mevcut bit hızı: {bitrate} Kbps, RTT {rtt} ms",
         "success": "Mevcut bit hızı: {bitrate} Kbps",
         "error": "Mevcut bit hızı: çevrimdışı"
     },
