@@ -373,11 +373,20 @@ class Chat {
 
     bitrate() {
         if (this.obsProps.bitrate != null) {
-            this.say(
-                format(this.locale.bitrate.success, {
-                    bitrate: this.obsProps.bitrate
-                })
-            );
+            if (this.obsProps.rtt != null && this.locale.bitrate.success_rtt != null) {
+                this.say(
+                    format(this.locale.bitrate.success_rtt, {
+                        bitrate: this.obsProps.bitrate,
+                        rtt: this.obsProps.rtt,
+                    })
+                );
+            } else {
+                this.say(
+                    format(this.locale.bitrate.success, {
+                        bitrate: this.obsProps.bitrate,
+                    })
+                );
+           }
         } else {
             this.say(this.locale.bitrate.error);
         }

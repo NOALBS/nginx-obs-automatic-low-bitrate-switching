@@ -12,6 +12,7 @@
         "error": "沒有指定場景"
     },
     "bitrate": {
+        "success_rtt": "目前位元率: {bitrate} Kbps, RTT {rtt} ms",
         "success": "目前位元率: {bitrate} Kbps",
         "error": "目前位元率: 離線"
     },
