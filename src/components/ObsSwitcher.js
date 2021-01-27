@@ -284,7 +284,7 @@ class ObsSwitcher extends EventEmitter {
                     const stream = srtdata.publishers[publisher];
 
                     this.bitrate = stream?.bitrate || null;
-                    this.rtt = stream?.rtt || null;
+                    this.rtt = stream?.rtt ?? null;
                 } catch (e) {
                     log.error("[SLS] Error fetching stats: " + e);
                 }
