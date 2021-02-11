@@ -54,7 +54,7 @@
         "switch": "Scene switched to \"{scene}\""
     },
     "handleCommands": {
-        "public": "Public comands",
+        "public": "Public commands",
         "mod": "Mod commands",
         "notify": "Auto switch notification",
         "autostop": "Auto stop stream",
