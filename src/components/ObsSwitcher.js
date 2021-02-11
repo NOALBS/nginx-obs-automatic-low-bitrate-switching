@@ -216,6 +216,8 @@ class ObsSwitcher extends EventEmitter {
                                 return stream.name[0] === key;
                             });
 
+                            if (stream == null) return;
+
                             this.nginxVideoMeta = stream.meta[0].video[0];
                             this.bitrate = Math.round(
                                 stream.bw_video[0] / 1024
