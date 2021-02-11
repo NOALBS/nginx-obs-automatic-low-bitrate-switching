@@ -1,6 +1,6 @@
 {
     "name": "nginx-obs-automatic-low-bitrate-switching",
-    "version": "1.9.1",
+    "version": "1.9.2",
     "description": "Simple app to automatically switch scenes based on the current bitrate on the nginx stats page.",
     "main": "lib/app",
     "scripts": {
