@@ -534,7 +534,7 @@ class Chat {
 
     handleEnable(name, bool, response) {
         if (!bool) {
-            this.say(`${response} is ${config.twitchChat[name] ? this.locale.handleCommands.enabled : this.locale.handleCommands.disabled}`);
+            this.say(`${response} ${config.twitchChat[name] ? this.locale.handleCommands.enabled : this.locale.handleCommands.disabled}`);
             return;
         }
 
