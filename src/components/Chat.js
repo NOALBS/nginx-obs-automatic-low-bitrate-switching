@@ -634,25 +634,47 @@ class Chat {
 
     async fix() {
         this.say(this.locale.fix.try);
-        const { server, stats, application, key } = config.rtmp;
-        const site = /(\w+:\/\/[^\/]+)/g.exec(stats)[1];
 
-        switch (server) {
-            case "nginx":
-                try {
-                    const response = await fetch(`${site}/control/drop/subscriber?app=${application}&name=${key}`);
+		const { availableRequests } = await this.obs.send("GetVersion");
 
-                    if (response.ok) {
-                        this.say(this.locale.fix.success);
-                    }
-                } catch (e) {
-                    this.say(this.locale.fix.error);
-                }
-                break;
-            default:
-                this.say(this.locale.fix.error);
-                break;
-        }
+		if (availableRequests.includes("RestartMedia")) {
+			const s = await this.obs.send("GetMediaSourcesList");
+			s.mediaSources
+				.filter((e) => e.mediaState == "playing")
+				.forEach(async (e) => {
+					const { sourceSettings } = await this.obs.send("GetSourceSettings", {
+						sourceName: e.sourceName
+					});
+
+					if (sourceSettings.input.includes("rtmp") ||
+						sourceSettings.input.includes("srt")
+					) {
+						await this.obs.send("RestartMedia", {
+							sourceName: e.sourceName
+						});
+					}
+				});
+		} else {
+			const { server, stats, application, key } = config.rtmp;
+			const site = /(\w+:\/\/[^\/]+)/g.exec(stats)[1];
+
+			switch (server) {
+				case "nginx":
+					try {
+						const response = await fetch(`${site}/control/drop/subscriber?app=${application}&name=${key}`);
+
+						if (response.ok) {
+							this.say(this.locale.fix.success);
+						}
+					} catch (e) {
+						this.say(this.locale.fix.error);
+					}
+					break;
+				default:
+					this.say(this.locale.fix.error);
+					break;
+			}
+		}
     }
 
     registerAliases() {
