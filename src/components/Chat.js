@@ -275,7 +275,7 @@ class Chat {
     async start() {
         // start streaming
         try {
-            await this.obs.startStreaming();
+            await this.obs.send("StartStreaming");
             this.say(this.locale.start.success);
         } catch (e) {
             log.error(e);
@@ -290,7 +290,7 @@ class Chat {
     async stop() {
         // stop streaming
         try {
-            await this.obs.stopStreaming();
+            await this.obs.send("StopStreaming");
             this.say(this.locale.stop.success);
         } catch (e) {
             log.error(e.error);
@@ -324,7 +324,7 @@ class Chat {
     async startStopRec(bool) {
         if (bool) {
             try {
-                const res = await this.obs.StartRecording();
+                const res = await this.obs.send("StartRecording");
                 if (res.status === "ok") this.say(`[REC] ${this.locale.rec.started}`);
                 log.success(`Started recording`);
             } catch (error) {
@@ -336,7 +336,7 @@ class Chat {
             }
         } else {
             try {
-                const res = await this.obs.StopRecording();
+                const res = await this.obs.send("StopRecording");
                 if (res.status === "ok") this.say(`[REC] ${this.locale.rec.stopped}`);
                 log.success(`Stopped recording`);
             } catch (error) {
@@ -356,7 +356,7 @@ class Chat {
         const scene = res.length > 0 ? res[0].name : sceneName;
 
         try {
-            await this.obs.setCurrentScene({
+            await this.obs.send("SetCurrentScene", {
                 "scene-name": scene
             });
 
@@ -431,14 +431,14 @@ class Chat {
 
                 if (lastScene == null) return this.say(this.locale.refresh.error);
 
-                await this.obs.setCurrentScene({
+                await this.obs.send("SetCurrentScene", {
                     "scene-name": config.obs.refreshScene
                 });
                 this.say(this.locale.refresh.success);
                 this.isRefreshing = true;
 
                 setTimeout(() => {
-                    this.obs.setCurrentScene({
+                    this.obs.send("SetCurrentScene", {
                         "scene-name": lastScene
                     });
                     this.say(this.locale.refresh.done);
@@ -646,7 +646,6 @@ class Chat {
                         this.say(this.locale.fix.success);
                     }
                 } catch (e) {
-                    console.log(e);
                     this.say(this.locale.fix.error);
                 }
                 break;

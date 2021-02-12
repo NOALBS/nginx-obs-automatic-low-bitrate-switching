@@ -82,7 +82,7 @@ class ObsSwitcher extends EventEmitter {
                     canSwitch &&
                     (bitrate === 0 &&
                         currentScene.name !== this.previousScene &&
-                        (this.obs.setCurrentScene({
+                        (this.obs.send("SetCurrentScene", {
                             "scene-name": this.previousScene,
                         }),
                         this.switchSceneEmit("live", this.previousScene),
@@ -93,7 +93,7 @@ class ObsSwitcher extends EventEmitter {
                         bitrate <= this.lowBitrateTrigger &&
                         currentScene.name !== this.lowBitrateScene &&
                         bitrate !== 0 &&
-                        (this.obs.setCurrentScene({
+                        (this.obs.send("SetCurrentScene", {
                             "scene-name": this.lowBitrateScene,
                         }),
                         (this.previousScene = this.lowBitrateScene),
@@ -105,7 +105,7 @@ class ObsSwitcher extends EventEmitter {
                         bitrate > this.lowBitrateTrigger &&
                         currentScene.name !== this.lowBitrateScene &&
                         bitrate !== 0 &&
-                        (this.obs.setCurrentScene({
+                        (this.obs.send("SetCurrentScene", {
                             "scene-name": this.lowBitrateScene,
                         }),
                         (this.previousScene = this.lowBitrateScene),
@@ -116,7 +116,7 @@ class ObsSwitcher extends EventEmitter {
                     rtt < this.highRttTrigger &&
                         bitrate > this.lowBitrateTrigger &&
                         currentScene.name !== this.normalScene &&
-                        (this.obs.setCurrentScene({
+                        (this.obs.send("SetCurrentScene", {
                             "scene-name": this.normalScene,
                         }),
                         (this.previousScene = this.normalScene),
@@ -129,7 +129,7 @@ class ObsSwitcher extends EventEmitter {
                     canSwitch &&
                     (bitrate === 0 &&
                         currentScene.name !== this.previousScene &&
-                        (this.obs.setCurrentScene({
+                        (this.obs.send("SetCurrentScene", {
                             "scene-name": this.previousScene,
                         }),
                         this.switchSceneEmit("live", this.previousScene),
@@ -139,7 +139,7 @@ class ObsSwitcher extends EventEmitter {
                     bitrate <= this.lowBitrateTrigger &&
                         currentScene.name !== this.lowBitrateScene &&
                         bitrate !== 0 &&
-                        (this.obs.setCurrentScene({
+                        (this.obs.send("SetCurrentScene", {
                             "scene-name": this.lowBitrateScene,
                         }),
                         (this.previousScene = this.lowBitrateScene),
@@ -149,7 +149,7 @@ class ObsSwitcher extends EventEmitter {
                         )),
                     bitrate > this.lowBitrateTrigger &&
                         currentScene.name !== this.normalScene &&
-                        (this.obs.setCurrentScene({
+                        (this.obs.send("SetCurrentScene", {
                             "scene-name": this.normalScene,
                         }),
                         (this.previousScene = this.normalScene),
@@ -163,7 +163,9 @@ class ObsSwitcher extends EventEmitter {
 
             canSwitch &&
                 currentScene.name !== this.offlineScene &&
-                (this.obs.setCurrentScene({ "scene-name": this.offlineScene }),
+                (this.obs.send("SetCurrentScene", {
+                    "scene-name": this.offlineScene
+                }),
                 this.switchSceneEmit("offlineScene"),
                 (this.streamStatus = null),
                 log.warn(
@@ -174,7 +176,7 @@ class ObsSwitcher extends EventEmitter {
 
     onAuth() {
         log.success(`Successfully connected`);
-        this.obs.SetHeartbeat({ enable: true });
+        this.obs.send("SetHeartbeat", { enable: true });
         this.getSceneList();
 
         this.interval = setInterval(
@@ -340,7 +342,7 @@ class ObsSwitcher extends EventEmitter {
         const { canSwitch } = await this.canSwitch();
 
         if (canSwitch) {
-            this.obs.setCurrentScene({
+            this.obs.send("SetCurrentScene", {
                 "scene-name": this.offlineScene,
             });
         }
@@ -351,7 +353,7 @@ class ObsSwitcher extends EventEmitter {
     }
 
     async getSceneList() {
-        const list = await this.obs.GetSceneList();
+        const list = await this.obs.send("GetSceneList");
         this.scenes = list.scenes;
     }
 
@@ -365,7 +367,7 @@ class ObsSwitcher extends EventEmitter {
     }
 
     async canSwitch() {
-        const currentScene = await this.obs.GetCurrentScene();
+        const currentScene = await this.obs.send("GetCurrentScene");
         const canSwitch =
             currentScene.name == this.lowBitrateScene ||
             currentScene.name == this.normalScene ||
