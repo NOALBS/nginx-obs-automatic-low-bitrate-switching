@@ -210,21 +210,19 @@ class ObsSwitcher extends EventEmitter {
                             }
                         ).live[0].stream;
 
-                        if (publish == null) {
-                            this.nginxVideoMeta = null;
-                            this.bitrate = null;
-                        } else {
-                            const stream = publish.find((stream) => {
-                                return stream.name[0] === key;
-                            });
+						const stream = publish.find((stream) => {
+							return stream.name[0] === key;
+						});
 
-                            if (stream == null) return;
-
+						if (stream != null) {
                             this.nginxVideoMeta = stream.meta[0].video[0];
                             this.bitrate = Math.round(
-                                stream.bw_video[0] / 1024
-                            );
-                        }
+								stream.bw_video[0] / 1024
+							);
+						} else {
+							this.nginxVideoMeta = null;
+							this.bitrate = null;
+						}
                     });
                 } catch (e) {
                     log.error("[NGINX] Error fetching stats");
