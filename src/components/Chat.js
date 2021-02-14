@@ -648,7 +648,7 @@ class Chat {
 
 					const input = sourceSettings.input?.toLowerCase();
 
-					if (input?.startsWith("rtmp") || input?.startWith("srt")) {
+					if (input?.startsWith("rtmp") || input?.startsWith("srt")) {
 						await this.obs.send("RestartMedia", {
 							sourceName: e.sourceName
 						});
