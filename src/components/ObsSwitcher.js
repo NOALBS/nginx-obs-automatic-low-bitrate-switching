@@ -210,7 +210,7 @@ class ObsSwitcher extends EventEmitter {
                             }
                         ).live[0].stream;
 
-						const stream = publish.find((stream) => {
+						const stream = publish?.find((stream) => {
 							return stream.name[0] === key;
 						});
 
