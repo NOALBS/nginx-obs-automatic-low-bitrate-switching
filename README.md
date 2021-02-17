@@ -22,8 +22,7 @@ NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes
 - There is literally NO COST to you when you setup and use NOALBS using the equipment you already own and pay for.
 
 ## Downsides to using NOALBS:
-- It's DIY, meaning you have to do it all yourself, of course you can always contact us on discord @ b3ck#3517 or 715209
-#0600 and we'll do our best to help out.
+- It's DIY, meaning you have to do it all yourself, of course you can always contact us on discord @ b3ck#3517 or 715209#0600 and we'll do our best to help out.
 - If you lose power or internet where you run NOALBS there is no redundancy.
 - It takes a bit to setup, it is not for the faint of heart when it comes to installing and configuring advanced programs to get it running.
 
