@@ -14,22 +14,22 @@ Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the cu
 # !!! PLEASE BE ADVISED !!!
 
 
-NOALBS is used as a basic DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
+NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
 
-Downsides to using NOALBS vs Similar Solutions/Paid Services:
-- It's basic, no fancy stuff here.
+## Upsides to using NOALBS:
+- You did it yourself so be proud of what you have accomplished.
+- You're using a computer, internet and power you are already paying for.
+- There is literally NO COST to you when you setup and use NOALBS using the equipment you already own and pay for.
 
-(Other similar solutions/paid services offer really cool and fancy control panels/dashboards/technology that make using it a breeze and/or better overall.)
-
+## Downsides to using NOALBS:
+- It's DIY, meaning you have to do it all yourself, of course you can always contact us on discord @ b3ck#3517 or 715209
+#0600 and we'll do our best to help out.
 - If you lose power or internet where you run NOALBS there is no redundancy.
-
-(Unless of course you have a battery backup system/internet backup system in place.)
-
 - It takes a bit to setup, it is not for the faint of heart when it comes to installing and configuring advanced programs to get it running.
 
 (Watch video below for help)
 
-If you're okay with all of that then all I can say is if you can't figure it out, reach out to myself and/or the community if you need help, we're here for you.
+If you're okay with all of that then all I can say is if you can't figure it out, reach out to us or the community if you need help, we're here for you.
 
 ---
 ## How to video (WINDOWS):
@@ -70,7 +70,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 -   [OBS-Studio](https://github.com/obsproject/obs-studio/)
 -   [OBS-WEBSOCKET](https://github.com/Palakis/obs-websocket/)
 
-> It supports monitoring streams on either NGINX-RTMP server, Node-Media-Server, Nimble Server, and SLS (SRT-Live-Server).
+> NOALBS supports monitoring streams on either NGINX-RTMP server, Node-Media-Server, Nimble Server, and even SLS (SRT-Live-Server).
 Node-Media-Server is also built into NOALBS for an easy all-in-one streaming solution.
 
 -   [NGINX-RTMP](https://github.com/arut/nginx-rtmp-module/)
@@ -164,18 +164,18 @@ You can also enable/disable certain features from chat, see below:
 ---
 ## How to pull RTMP stream into OBS
 
-Install VLC, match it to your OBS (32bit/64it Respectively)
+Update your OBS to v26+ and follow the steps below:
 
 1.) In OBS create the following scenes:
 - `LIVE`, `LOW`, `BRB`, `REFRESH`
  - I highly recommend creating a `STARTUP` & `PRIVACY` scene, the `STARTUP` scene can contain whatever you want to start your stream on and then switch to `LIVE` when you're ready, the `PRIVACY` scene can be whatever you want to put the stream on when you need privacy, the main thing is that it's out of NOALBS scope and won't automatically switch scenes.
 - The normal flow is to have your OBS on `STARTUP` when you start stream and when you're ready either you or an instructed MOD can !switch LIVE, when you need privacy use !switch PRIVACY.
 
-2.) In your `LIVE` scene, add a 'VLC Video Source', if using default NGINX setup match the image below:
-![image](https://user-images.githubusercontent.com/1740542/94399602-52d85f00-012d-11eb-91b2-5045242e5c4b.png)
-  - Right click on the 'VLC Video Source' > Transform > Stretch to screen (this will stretch the video source no matter the resolution, ex; 480p, 720p, 1080p etc.)
+2.) In your `LIVE` scene, add a 'Media Source', match the image below:
+![image](https://user-images.githubusercontent.com/1740542/108275687-54d2a700-713c-11eb-8ee0-22142cfc02a6.png)
+  - Right click on the 'Media Source' > Transform > Stretch to screen (this will stretch the video source no matter the resolution, ex; 480p, 720p, 1080p etc.)
 
-3.) Copy and Paste(Reference) the 'VLC Video Source' from the `LIVE` scene into your `LOW` scene.
+3.) Copy and Paste(Reference) the 'Media Source' from the `LIVE` scene into your `LOW` scene.
   - Do the same transformation procedure from step (2).
 
 4.) Go over all of your scenes and make them your own.
