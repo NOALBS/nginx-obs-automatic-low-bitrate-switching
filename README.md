@@ -89,7 +89,7 @@ Node-Media-Server is also built into NOALBS for an easy all-in-one streaming sol
 
 If you already have NGINX-RTMP server
 -   Replace your `nginx.conf` with the one given here.
--   Put `stat.xsl` in your nginx folder.
+-   Put `stat.xsl` in your nginx `html` folder.
 
 Otherwise here is a Windows version of NGINX+RTMP Server
 - [Hosted on Github](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/raw/master/nginx/nginx_1.7.11.3_Gryphon_With_NOALBS.config_files_03162020.zip)
