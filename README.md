@@ -171,6 +171,7 @@ Update your OBS to v26+ and follow the steps below:
 - The normal flow is to have your OBS on `STARTUP` when you start stream and when you're ready either you or an instructed MOD can !switch LIVE, when you need privacy use !switch PRIVACY.
 
 2.) In your `LIVE` scene, add a 'Media Source', match the image below:
+
 ![image](https://user-images.githubusercontent.com/1740542/108275687-54d2a700-713c-11eb-8ee0-22142cfc02a6.png)
   - Right click on the 'Media Source' > Transform > Stretch to screen (this will stretch the video source no matter the resolution, ex; 480p, 720p, 1080p etc.)
 
