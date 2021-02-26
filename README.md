@@ -315,6 +315,7 @@ How do I pull the SRT feed into OBS?
 - Add Media Source
 - Uncheck Local File
 - In the "Input" field enter in: `srt://<SERVER-IP>:<PORT>/?streamid=<PUBLISHER>`
+   - Using the example from the above image, it would be `srt://<SERVER-IP>:<PORT>/?streamid=jojo/bob/thorton`
 - In the "Input Format" field enter in: `mpegts`
 - Check `Seekable` then click `OK`
 
