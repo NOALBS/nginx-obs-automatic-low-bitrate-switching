@@ -1,3 +1,5 @@
+### >> NOALBS ONLY SUPPORTS TWITCH CHAT, OTHER PLATFORMS WILL BE SUPPORTED... SOME DAY. <<
+
 ```
     ███╗   ██╗ ██████╗  █████╗ ██╗     ██████╗ ███████╗
     ████╗  ██║██╔═══██╗██╔══██╗██║     ██╔══██╗██╔════╝
@@ -11,9 +13,6 @@
 Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the current bitrate fetched from the server stats.
 
 ---
-# !!! PLEASE BE ADVISED !!!
-
-
 NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
 
 ## Upsides to using NOALBS:
