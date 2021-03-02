@@ -1,5 +1,5 @@
 ### NOALBS ONLY SUPPORTS TWITCH CHAT
-OTHER PLATFORMS WILL BE SUPPORTED... SOME DAY.
+### OTHER PLATFORMS WILL BE SUPPORTED... SOME DAY.
 
 ```
     ███╗   ██╗ ██████╗  █████╗ ██╗     ██████╗ ███████╗
