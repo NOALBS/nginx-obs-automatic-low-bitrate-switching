@@ -1,4 +1,8 @@
-use crate::{broadcasting_software::SwitchingScenes, Error};
+use crate::{
+    broadcasting_software::SwitchingScenes,
+    stream_servers::{self, SwitchType},
+    Error,
+};
 use futures::{Stream, StreamExt};
 use log::{info, warn};
 use obws::{events::EventType, Client};
@@ -8,7 +12,7 @@ use tokio::sync::{mpsc, Mutex, Notify};
 pub struct Obs {
     wrapped_client: WrappedClient,
     pub event_handler: tokio::task::JoinHandle<()>,
-    pub switching: SwitchingScenes,
+    pub switching: Arc<Mutex<SwitchingScenes>>,
     pub obs_state: Arc<Mutex<State>>,
 }
 
@@ -167,7 +171,7 @@ impl Obs {
             wrapped_client,
             event_handler,
             obs_state: state,
-            switching,
+            switching: Arc::new(Mutex::new(switching)),
         })
     }
 
@@ -231,10 +235,10 @@ impl Obs {
         self.obs_state.lock().await.curent_scene.to_string()
     }
 
-    pub fn can_switch(&self, scene: &str) -> bool {
-        scene == self.switching.normal
-            || scene == self.switching.low
-            || scene == self.switching.offline
+    pub async fn can_switch(&self, scene: &str) -> bool {
+        let switching = self.switching.lock().await;
+
+        scene == switching.normal || scene == switching.low || scene == switching.offline
     }
 
     pub async fn set_prev_scene(&self, scene: String) {
@@ -249,5 +253,17 @@ impl Obs {
     // TODO: Do i really need this?
     pub fn get_inner_client_clone(&self) -> Arc<Mutex<Client>> {
         self.wrapped_client.client.clone()
+    }
+
+    pub async fn type_to_scene(&self, s_type: &stream_servers::SwitchType) -> String {
+        let switching = self.switching.lock().await;
+
+        match s_type {
+            // Safety: Should be safe to unwrap since we are handling the previous.
+            SwitchType::Normal | SwitchType::Low | SwitchType::Offline => {
+                switching.type_to_scene(s_type).unwrap()
+            }
+            SwitchType::Previous => self.prev_scene().await,
+        }
     }
 }

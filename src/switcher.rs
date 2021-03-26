@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use crate::{
     broadcasting_software::obs::Obs,
@@ -8,20 +8,6 @@ use crate::{
 };
 use log::{debug, error, info};
 use tokio::sync::Mutex;
-
-pub struct Switcher {
-    // Nginx, Srt-live... etc
-    pub stream_server: Box<dyn BSL>,
-
-    // Obs etc..
-    pub broadcasting_software: Arc<Obs>,
-
-    // TODO: Maybe replace chat with just a Tx so it will send msg's to anyone who's receiving
-    // probably also make use of a mpms channel
-    pub chat: Option<Twitch>,
-
-    pub state: Arc<Mutex<SwitcherState>>,
-}
 
 /// All the data that can be changed outside of the switcher
 pub struct SwitcherState {
@@ -36,9 +22,49 @@ pub struct SwitcherState {
 
     /// Triggers to switch to the low or offline scenes
     pub triggers: Triggers,
+
+    /// Add multiple stream servers to watch before switching to low or offline
+    pub stream_servers: Vec<Box<dyn BSL>>,
+}
+
+impl SwitcherState {
+    pub fn add_stream_server(&mut self, stream_server: Box<dyn BSL>) {
+        &self.stream_servers.push(stream_server);
+    }
+}
+
+impl Default for SwitcherState {
+    fn default() -> Self {
+        Self {
+            request_interval: Duration::from_secs(2),
+            bitrate_switcher_enabled: true,
+            only_switch_when_streaming: true,
+            triggers: Triggers::default(),
+            stream_servers: Vec::new(),
+        }
+    }
+}
+
+pub struct Switcher {
+    // Obs etc..
+    pub broadcasting_software: Arc<Obs>,
+
+    // TODO: Maybe replace chat with just a Tx so it will send msg's to anyone who's receiving
+    // probably also make use of a mpms channel
+    pub chat: Option<Twitch>,
+
+    pub state: Arc<Mutex<SwitcherState>>,
 }
 
 impl Switcher {
+    pub fn new(broadcasting_software: Arc<Obs>, state: Arc<Mutex<SwitcherState>>) -> Self {
+        Self {
+            broadcasting_software,
+            chat: None, // TODO
+            state,
+        }
+    }
+
     pub async fn run(self) -> Result<(), error::Error> {
         loop {
             let mut state = self.state.lock().await;
@@ -72,7 +98,7 @@ impl Switcher {
 
             let bs = &self.broadcasting_software;
             let current_scene = bs.get_current_scene().await;
-            let can_switch = bs.can_switch(&current_scene);
+            let can_switch = bs.can_switch(&current_scene).await;
             debug!("Can switch: {}", can_switch);
             debug!("Current scene: {}", current_scene);
 
@@ -85,34 +111,45 @@ impl Switcher {
     }
 
     pub async fn next_switch_type(&self) -> SwitchType {
-        let triggers = &self.state.lock().await.triggers;
-        self.stream_server.switch(&triggers).await
+        let state = &self.state.lock().await;
+        let triggers = &state.triggers;
+
+        for s in &state.stream_servers {
+            let t = s.switch(&triggers).await;
+
+            if t != SwitchType::Offline {
+                return t;
+            }
+        }
+
+        SwitchType::Offline
+    }
+
+    // TODO: Make returned message better
+    pub async fn get_bitrate_info(&self) -> String {
+        let state = &self.state.lock().await;
+        let mut msg = String::new();
+
+        for s in &state.stream_servers {
+            let t = s.bitrate().await;
+            msg += &format!("{} ", &t);
+        }
+
+        msg
     }
 
     pub async fn switch(&self) -> Result<(), error::Error> {
         let switch = self.next_switch_type().await;
+        let scene = &self.broadcasting_software.type_to_scene(&switch).await;
 
         match switch {
-            SwitchType::Normal => {
-                let scene = &self.broadcasting_software.switching.normal;
+            SwitchType::Normal | SwitchType::Low => {
                 self.switch_if_necessary(&scene).await?;
 
                 let scene = scene.to_owned();
                 self.broadcasting_software.set_prev_scene(scene).await;
             }
-            SwitchType::Low => {
-                let scene = &self.broadcasting_software.switching.low;
-                self.switch_if_necessary(&scene).await?;
-
-                let scene = scene.to_owned();
-                self.broadcasting_software.set_prev_scene(scene).await;
-            }
-            SwitchType::Previous => {
-                let scene = &self.broadcasting_software.prev_scene().await;
-                self.switch_if_necessary(&scene).await?;
-            }
-            SwitchType::Offline => {
-                let scene = &self.broadcasting_software.switching.offline;
+            _ => {
                 self.switch_if_necessary(&scene).await?;
             }
         };
@@ -137,7 +174,7 @@ impl Switcher {
         let msg = format!(
             "Switch to: {:?}, current stats: {}",
             switch_scene,
-            self.stream_server.bitrate().await
+            self.get_bitrate_info().await
         );
         info!("{}", msg);
 

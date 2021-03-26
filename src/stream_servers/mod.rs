@@ -5,7 +5,7 @@ pub mod nginx;
 pub mod nimble;
 pub mod sls;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum SwitchType {
     Normal,
     Low,
@@ -38,4 +38,14 @@ pub struct Triggers {
 
     /// Trigger to switch to the offline scene
     pub offline: Option<u32>,
+}
+
+impl Default for Triggers {
+    fn default() -> Self {
+        Self {
+            low: Some(800),
+            rtt: Some(2500),
+            offline: None,
+        }
+    }
 }

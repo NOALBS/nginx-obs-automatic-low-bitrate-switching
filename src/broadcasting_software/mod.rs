@@ -1,3 +1,5 @@
+use crate::{error, stream_servers::SwitchType};
+
 pub mod obs;
 
 pub struct SwitchingScenes {
@@ -18,5 +20,16 @@ impl SwitchingScenes {
             low: low.into(),
             offline: offline.into(),
         }
+    }
+
+    fn type_to_scene(&self, s_type: &SwitchType) -> Result<String, error::Error> {
+        let str = match s_type {
+            SwitchType::Normal => &self.normal,
+            SwitchType::Low => &self.low,
+            SwitchType::Offline => &self.offline,
+            _ => return Err(error::Error::SwitchTypeNotSupported),
+        };
+
+        Ok(str.to_string())
     }
 }
