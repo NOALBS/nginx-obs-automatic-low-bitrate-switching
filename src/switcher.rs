@@ -5,7 +5,7 @@ use crate::{
     chat::twitch::Twitch,
     error,
     stream_servers::{SwitchType, Triggers, BSL},
-    BroadcastMessage,
+    AutomaticSwitchMessage,
 };
 use log::{debug, error, info};
 use tokio::sync::{broadcast, mpsc, Mutex};
@@ -55,7 +55,7 @@ pub struct Switcher {
     //pub chat: Option<Twitch>,
     state: Arc<Mutex<SwitcherState>>,
 
-    notification: broadcast::Sender<BroadcastMessage>,
+    notification: broadcast::Sender<AutomaticSwitchMessage>,
 
     for_channel: String,
 }
@@ -65,7 +65,7 @@ impl Switcher {
         for_channel: C,
         broadcasting_software: Arc<Obs>,
         state: Arc<Mutex<SwitcherState>>,
-        notification: broadcast::Sender<BroadcastMessage>,
+        notification: broadcast::Sender<AutomaticSwitchMessage>,
     ) -> Self
     where
         C: Into<String>,
@@ -82,10 +82,11 @@ impl Switcher {
 
     pub async fn run(self) -> Result<(), error::Error> {
         loop {
-            let mut state = self.state.lock().await;
+            let sleep = { self.state.lock().await.request_interval };
+            tokio::time::sleep(sleep).await;
 
-            tokio::time::sleep(state.request_interval).await;
             debug!("Running loop");
+            let mut state = self.state.lock().await;
 
             if !self.broadcasting_software.is_connected().await {
                 // Drop the mutex since this could take a long time and
@@ -141,19 +142,6 @@ impl Switcher {
         SwitchType::Offline
     }
 
-    // TODO: Make returned message better
-    pub async fn get_bitrate_info(&self) -> String {
-        let state = &self.state.lock().await;
-        let mut msg = String::new();
-
-        for s in &state.stream_servers {
-            let t = s.bitrate().await;
-            msg += &format!("{} ", &t);
-        }
-
-        msg
-    }
-
     pub async fn switch(&self) -> Result<(), error::Error> {
         let switch = self.next_switch_type().await;
         let scene = &self.broadcasting_software.type_to_scene(&switch).await;
@@ -187,21 +175,10 @@ impl Switcher {
             return Ok(());
         }
 
-        let msg = format!(
-            "Switch to: {:?}, current stats: {}",
-            switch_scene,
-            self.get_bitrate_info().await
-        );
-        info!("{}", msg);
-
-        // if let Some(chat) = &self.chat {
-        //     chat.send_message(&msg);
-        // }
-
         if bs.is_streaming().await {
-            let _ = self.notification.send(BroadcastMessage {
-                message: msg,
+            let _ = self.notification.send(AutomaticSwitchMessage {
                 channel: self.for_channel.to_string(),
+                scene: switch_scene.to_string(),
             });
         }
 
