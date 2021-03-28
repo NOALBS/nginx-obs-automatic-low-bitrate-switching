@@ -5,9 +5,10 @@ use crate::{
     chat::twitch::Twitch,
     error,
     stream_servers::{SwitchType, Triggers, BSL},
+    BroadcastMessage,
 };
 use log::{debug, error, info};
-use tokio::sync::Mutex;
+use tokio::sync::{broadcast, mpsc, Mutex};
 
 /// All the data that can be changed outside of the switcher
 pub struct SwitcherState {
@@ -29,7 +30,7 @@ pub struct SwitcherState {
 
 impl SwitcherState {
     pub fn add_stream_server(&mut self, stream_server: Box<dyn BSL>) {
-        &self.stream_servers.push(stream_server);
+        self.stream_servers.push(stream_server);
     }
 }
 
@@ -47,21 +48,35 @@ impl Default for SwitcherState {
 
 pub struct Switcher {
     // Obs etc..
-    pub broadcasting_software: Arc<Obs>,
+    broadcasting_software: Arc<Obs>,
 
     // TODO: Maybe replace chat with just a Tx so it will send msg's to anyone who's receiving
     // probably also make use of a mpms channel
-    pub chat: Option<Twitch>,
+    //pub chat: Option<Twitch>,
+    state: Arc<Mutex<SwitcherState>>,
 
-    pub state: Arc<Mutex<SwitcherState>>,
+    notification: broadcast::Sender<BroadcastMessage>,
+
+    for_channel: String,
 }
 
 impl Switcher {
-    pub fn new(broadcasting_software: Arc<Obs>, state: Arc<Mutex<SwitcherState>>) -> Self {
+    pub fn new<C>(
+        for_channel: C,
+        broadcasting_software: Arc<Obs>,
+        state: Arc<Mutex<SwitcherState>>,
+        notification: broadcast::Sender<BroadcastMessage>,
+    ) -> Self
+    where
+        C: Into<String>,
+    {
+        let for_channel = for_channel.into();
+
         Self {
             broadcasting_software,
-            chat: None, // TODO
             state,
+            notification,
+            for_channel,
         }
     }
 
@@ -85,13 +100,13 @@ impl Switcher {
 
             if !state.bitrate_switcher_enabled {
                 continue;
+                // TODO: Maybe also add a wait for enabled to continue
             }
 
-            if state.only_switch_when_streaming {
-                if !self.broadcasting_software.is_streaming().await {
-                    debug!("Not streaming from OBS");
-                    continue;
-                }
+            if state.only_switch_when_streaming && !self.broadcasting_software.is_streaming().await
+            {
+                debug!("Not streaming from OBS");
+                continue;
             }
 
             drop(state);
@@ -110,6 +125,7 @@ impl Switcher {
         }
     }
 
+    /// Returns the type of the first stream server that is not offline
     pub async fn next_switch_type(&self) -> SwitchType {
         let state = &self.state.lock().await;
         let triggers = &state.triggers;
@@ -178,8 +194,15 @@ impl Switcher {
         );
         info!("{}", msg);
 
-        if let Some(chat) = &self.chat {
-            chat.send_message(&msg);
+        // if let Some(chat) = &self.chat {
+        //     chat.send_message(&msg);
+        // }
+
+        if bs.is_streaming().await {
+            let _ = self.notification.send(BroadcastMessage {
+                message: msg,
+                channel: self.for_channel.to_string(),
+            });
         }
 
         Ok(())
