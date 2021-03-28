@@ -104,7 +104,7 @@ impl StreamServersCommands for SrtLiveServer {
             return "Offline".to_string();
         };
 
-        format!("bitrate {} Kbps, RTT {} ms", stats.bitrate, stats.rtt)
+        format!("{} Kbps RTT {} ms", stats.bitrate, stats.rtt.round())
     }
 
     async fn source_info(&self) -> String {

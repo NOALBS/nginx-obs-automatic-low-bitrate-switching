@@ -158,7 +158,7 @@ impl StreamServersCommands for Nginx {
 
         let bitrate = stats.bw_video / 1024;
 
-        format!("bitrate {} Kbps", bitrate)
+        format!("{} Kbps", bitrate)
     }
 
     async fn source_info(&self) -> String {
