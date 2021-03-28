@@ -1,53 +1,72 @@
 use anyhow::Result;
 use noalbs::{
-    broadcasting_software::{obs::Obs, SwitchingScenes},
+    broadcasting_software::{
+        obs::{self, Obs},
+        SwitchingScenes,
+    },
     chat::twitch,
     print_logo,
     stream_servers::*,
-    switcher,
+    switcher, BroadcastMessage,
 };
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::broadcast::Sender;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     print_logo();
     alto_logger::init_alt_term_logger()?;
 
-    let ss = SwitchingScenes::new("Scene", "Scene 2", "Brb");
-    // TODO: Not hardcode obs details lol oops
-    let obs = Arc::new(Obs::connect(ss).await?);
+    let (tx, _rx) = tokio::sync::broadcast::channel(69);
 
-    let nginx = nginx::Nginx {
-        stats_url: String::from("http://localhost/stats"),
-        application: String::from("publish"),
-        key: String::from("live"),
+    let twitch_client = run_twitch_chat(tx.clone());
+    twitch_client.join("715209");
+
+    // Now user:
+    let obs_config = obs::Config {
+        host: "localhost".to_string(),
+        port: 4444,
     };
+    let switching_scenes = SwitchingScenes::new("Scene", "Scene 2", "Brb");
+    let broadcasting_software = Obs::connect(obs_config, switching_scenes).await?;
+    let switcher_state = switcher::SwitcherState::default();
+
+    let mut _user = noalbs::Noalbs::new(
+        "715209".to_string(),
+        broadcasting_software,
+        switcher_state,
+        tx.clone(),
+    );
+
+    _user
+        .add_stream_server(nginx::Nginx {
+            stats_url: String::from("http://localhost/stats"),
+            application: String::from("publish"),
+            key: String::from("live"),
+        })
+        .await;
 
     // srt://localhost:8080?mode=caller&streamid=publish/live/feed1
-    let sls = sls::SrtLiveServer {
-        stats_url: "http://127.0.0.1:8181/stats".to_string(),
-        publisher: "publish/live/feed1".to_string(),
-    };
+    _user
+        .add_stream_server(sls::SrtLiveServer {
+            stats_url: "http://127.0.0.1:8181/stats".to_string(),
+            publisher: "publish/live/feed1".to_string(),
+        })
+        .await;
 
-    let _chat = twitch::Twitch {};
+    _user.create_switcher();
 
-    let mut switcher_state = switcher::SwitcherState::default();
-    switcher_state.add_stream_server(Box::new(nginx));
-    switcher_state.add_stream_server(Box::new(sls));
-    let switcher_state = Arc::new(Mutex::new(switcher_state));
-
-    let switcher = noalbs::Switcher {
-        broadcasting_software: obs.clone(),
-        chat: None,
-        state: switcher_state,
-    };
-
-    // let switcher_handler = tokio::spawn(switcher.run());
-    // let _ = switcher_handler.await;
-
-    switcher.run().await?;
+    let _ = _user.switcher_handler.unwrap().await;
+    let _ = twitch_client.reader_handle.await;
     println!("Program finished");
-
     Ok(())
+}
+
+fn run_twitch_chat(tx: Sender<BroadcastMessage>) -> twitch::Twitch {
+    let config =
+        twitch_irc::ClientConfig::new_simple(twitch_irc::login::StaticLoginCredentials::new(
+            "715209".to_string(),
+            Some("OAUTH".to_string()),
+        ));
+
+    twitch::Twitch::run(config, tx.subscribe())
 }
