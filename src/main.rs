@@ -1,3 +1,5 @@
+use std::{collections::HashMap, sync::Arc};
+
 use anyhow::Result;
 use noalbs::{
     broadcasting_software::{
@@ -7,21 +9,26 @@ use noalbs::{
     chat::twitch,
     print_logo,
     stream_servers::*,
-    switcher, BroadcastMessage,
+    switcher, AutomaticSwitchMessage,
 };
-use tokio::sync::broadcast::Sender;
+use tokio::sync::{broadcast::Sender, Mutex};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     print_logo();
     alto_logger::init_alt_term_logger()?;
 
+    let db = Arc::new(Mutex::new(HashMap::new()));
+
     let (tx, _rx) = tokio::sync::broadcast::channel(69);
 
-    let twitch_client = run_twitch_chat(tx.clone());
-    twitch_client.join("715209");
+    let twitch_client = run_twitch_chat(tx.clone(), db.clone());
+    let chat_state = noalbs::chat::State::default();
 
     // Now user:
+    let username = "715209".to_string();
+    twitch_client.join(&username);
+
     let obs_config = obs::Config {
         host: "localhost".to_string(),
         port: 4444,
@@ -30,14 +37,15 @@ async fn main() -> Result<()> {
     let broadcasting_software = Obs::connect(obs_config, switching_scenes).await?;
     let switcher_state = switcher::SwitcherState::default();
 
-    let mut _user = noalbs::Noalbs::new(
-        "715209".to_string(),
+    let mut noalbs_user = noalbs::Noalbs::new(
+        username.to_owned(),
         broadcasting_software,
         switcher_state,
+        chat_state,
         tx.clone(),
     );
 
-    _user
+    noalbs_user
         .add_stream_server(nginx::Nginx {
             stats_url: String::from("http://localhost/stats"),
             application: String::from("publish"),
@@ -46,27 +54,35 @@ async fn main() -> Result<()> {
         .await;
 
     // srt://localhost:8080?mode=caller&streamid=publish/live/feed1
-    _user
+    noalbs_user
         .add_stream_server(sls::SrtLiveServer {
             stats_url: "http://127.0.0.1:8181/stats".to_string(),
             publisher: "publish/live/feed1".to_string(),
         })
         .await;
 
-    _user.create_switcher();
+    noalbs_user.create_switcher();
 
-    let _ = _user.switcher_handler.unwrap().await;
+    {
+        let mut lock = db.lock().await;
+        lock.insert(username.to_owned(), noalbs_user);
+    }
+
+    //let _ = _user.switcher_handler.unwrap().await;
     let _ = twitch_client.reader_handle.await;
-    println!("Program finished");
-    Ok(())
+
+    unreachable!();
 }
 
-fn run_twitch_chat(tx: Sender<BroadcastMessage>) -> twitch::Twitch {
+fn run_twitch_chat(
+    tx: Sender<AutomaticSwitchMessage>,
+    db: Arc<Mutex<HashMap<String, noalbs::Noalbs>>>,
+) -> twitch::Twitch {
     let config =
         twitch_irc::ClientConfig::new_simple(twitch_irc::login::StaticLoginCredentials::new(
             "715209".to_string(),
             Some("OAUTH".to_string()),
         ));
 
-    twitch::Twitch::run(config, tx.subscribe())
+    twitch::Twitch::run(config, tx.subscribe(), db)
 }

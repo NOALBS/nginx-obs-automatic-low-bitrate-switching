@@ -55,9 +55,9 @@ pub fn print_logo() {
 }
 
 #[derive(Debug, Clone)]
-pub struct BroadcastMessage {
-    message: String,
+pub struct AutomaticSwitchMessage {
     channel: String,
+    scene: String,
 }
 
 pub enum ChatLanguage {
@@ -68,7 +68,8 @@ pub struct Noalbs {
     username: String,
     pub broadcasting_software: Arc<Obs>,
     pub switcher_state: Arc<Mutex<switcher::SwitcherState>>,
-    pub broadcast_sender: Sender<BroadcastMessage>,
+    pub chat_state: Arc<Mutex<chat::State>>,
+    pub broadcast_sender: Sender<AutomaticSwitchMessage>,
     pub language: ChatLanguage,
 
     pub switcher_handler: Option<tokio::task::JoinHandle<Result<(), Error>>>,
@@ -79,15 +80,18 @@ impl Noalbs {
         username: String,
         broadcasting_software: Obs,
         switcher_state: switcher::SwitcherState,
-        broadcast_sender: Sender<BroadcastMessage>,
+        chat_state: chat::State,
+        broadcast_sender: Sender<AutomaticSwitchMessage>,
     ) -> Noalbs {
         let broadcasting_software = Arc::new(broadcasting_software);
         let switcher_state = Arc::new(Mutex::new(switcher_state));
+        let chat_state = Arc::new(Mutex::new(chat_state));
 
         Self {
             username,
             broadcasting_software,
             switcher_state,
+            chat_state,
             broadcast_sender,
             language: ChatLanguage::En,
             switcher_handler: None,
