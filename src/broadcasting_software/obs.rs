@@ -9,24 +9,11 @@ use obws::{events::EventType, Client};
 use std::{sync::Arc, time::Duration};
 use tokio::sync::{mpsc, Mutex, Notify};
 
-pub struct Obs {
-    wrapped_client: WrappedClient,
-    pub event_handler: tokio::task::JoinHandle<()>,
-    pub switching: Arc<Mutex<SwitchingScenes>>,
-    pub obs_state: Arc<Mutex<State>>,
-}
-
 pub struct State {
     prev_scene: String,
     curent_scene: String,
     status: ClientStatus,
     is_streaming: bool,
-}
-
-// TODO: Maybe remove the client Arc<Mutex<Client>>
-pub struct WrappedClient {
-    client: Arc<Mutex<obws::Client>>,
-    notify: Arc<Notify>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -35,12 +22,27 @@ pub enum ClientStatus {
     Disconnected,
 }
 
+#[derive(Clone)]
+pub struct Config {
+    /// The hostname
+    pub host: String,
+    /// Port to connect to
+    pub port: u16,
+}
+
+// TODO: Maybe remove the client Arc<Mutex<Client>>
+pub struct WrappedClient {
+    client: Arc<Mutex<obws::Client>>,
+    notify: Arc<Notify>,
+}
+
 impl WrappedClient {
     async fn run(
         event_sender: mpsc::Sender<obws::events::Event>,
         state: Arc<Mutex<State>>,
+        config: Config,
     ) -> Self {
-        let client = Self::get_client().await;
+        let client = Self::get_client(&config).await;
         let wrapped_client = Self {
             client: Arc::new(Mutex::new(client)),
             notify: Arc::new(Notify::new()),
@@ -51,6 +53,7 @@ impl WrappedClient {
             state,
             event_sender,
             wrapped_client.notify.clone(),
+            config,
         ));
 
         wrapped_client
@@ -60,12 +63,12 @@ impl WrappedClient {
         self.notify.clone()
     }
 
-    async fn get_client() -> Client {
+    async fn get_client(config: &Config) -> Client {
         let mut retry_grow = 1;
 
         loop {
             info!("Connecting");
-            if let Ok(client) = Client::connect("localhost", 4444).await {
+            if let Ok(client) = Client::connect(&config.host, config.port).await {
                 info!("Connected");
                 break client;
             };
@@ -86,6 +89,7 @@ impl WrappedClient {
         obs_state: Arc<Mutex<State>>,
         event_sender: mpsc::Sender<obws::events::Event>,
         connected_notifier: Arc<Notify>,
+        config: Config,
     ) {
         // Should be safe to unwrap since it literally just connected.
         let mut event_stream = client.lock().await.events().unwrap();
@@ -117,7 +121,7 @@ impl WrappedClient {
                 obs_state.lock().await.status = ClientStatus::Disconnected;
             }
 
-            let new_client = Self::get_client().await;
+            let new_client = Self::get_client(&config).await;
             event_stream = new_client.events().unwrap();
 
             *client.lock().await = new_client;
@@ -152,8 +156,15 @@ impl WrappedClient {
     }
 }
 
+pub struct Obs {
+    wrapped_client: WrappedClient,
+    pub event_handler: tokio::task::JoinHandle<()>,
+    pub switching: Arc<Mutex<SwitchingScenes>>,
+    pub obs_state: Arc<Mutex<State>>,
+}
+
 impl Obs {
-    pub async fn connect(switching: SwitchingScenes) -> Result<Self, Error> {
+    pub async fn connect(config: Config, switching: SwitchingScenes) -> Result<Self, Error> {
         let (tx, rx) = mpsc::channel(69);
         let state = State {
             prev_scene: switching.normal.to_owned(),
@@ -162,7 +173,7 @@ impl Obs {
             is_streaming: false,
         };
         let state = Arc::new(Mutex::new(state));
-        let wrapped_client = WrappedClient::run(tx, state.clone()).await;
+        let wrapped_client = WrappedClient::run(tx, state.clone(), config).await;
 
         let event_handler_wants_the_state = state.clone();
         let event_handler = tokio::spawn(Obs::event_handler(rx, event_handler_wants_the_state));
