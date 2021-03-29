@@ -1,7 +1,7 @@
 use crate::{chat::chat_handler, AutomaticSwitchMessage, Noalbs};
 use std::{collections::HashMap, sync::Arc};
 use tokio::{
-    sync::{broadcast, Mutex},
+    sync::{broadcast, Mutex, RwLock},
     task,
 };
 use twitch_irc::{
@@ -13,26 +13,32 @@ use twitch_irc::{
 pub struct Twitch {
     client: TwitchIRCClient<TCPTransport, StaticLoginCredentials>,
     pub reader_handle: task::JoinHandle<()>,
-    db: Arc<Mutex<HashMap<String, Noalbs>>>,
+
+    // Do i need this?
+    _db: Arc<RwLock<HashMap<String, Noalbs>>>,
 }
 
 impl Twitch {
-    // Please login can't send message as anononemymysouss
     pub fn run(
         config: ClientConfig<StaticLoginCredentials>,
         mut switcher_messages: broadcast::Receiver<AutomaticSwitchMessage>,
-        db: Arc<Mutex<HashMap<String, Noalbs>>>,
+        db: Arc<RwLock<HashMap<String, Noalbs>>>,
+        chat_handler: Arc<chat_handler::ChatHandler>,
     ) -> Self {
         let (mut incoming_messages, client) =
             TwitchIRCClient::<TCPTransport, StaticLoginCredentials>::new(config);
 
-        let chat_handler = Arc::new(chat_handler::ChatHandler { db: db.clone() });
         let chat_client = client.clone();
         let reader_handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
                 // println!("Received message: {:?}", message);
+                let cc = chat_client.clone();
+                let ch = chat_handler.clone();
+
                 if let ServerMessage::Privmsg(msg) = message {
-                    Self::handle_message(&chat_client, msg, &chat_handler).await;
+                    tokio::spawn(async move {
+                        Self::handle_message(cc, msg, ch).await;
+                    });
                 }
             }
         });
@@ -50,10 +56,13 @@ impl Twitch {
 
                 let mut message = format!("Scene switched to \"{}\", ", sm.scene);
 
-                if let Some(user) = &db2.lock().await.get(&sm.channel) {
-                    message += &chat_handler::ChatHandler::bitrate(user)
-                        .await
-                        .to_lowercase();
+                {
+                    let dbr = &db2.read().await;
+                    if let Some(user) = &dbr.get(&sm.channel) {
+                        message += &chat_handler::ChatHandler::bitrate(user)
+                            .await
+                            .to_lowercase();
+                    }
                 }
 
                 let _ = client2.say(sm.channel, message).await;
@@ -63,7 +72,7 @@ impl Twitch {
         Self {
             client,
             reader_handle,
-            db,
+            _db: db,
         }
     }
 
@@ -77,9 +86,9 @@ impl Twitch {
     }
 
     pub async fn handle_message(
-        client: &TwitchIRCClient<TCPTransport, StaticLoginCredentials>,
+        client: TwitchIRCClient<TCPTransport, StaticLoginCredentials>,
         message: PrivmsgMessage,
-        chat_handler: &chat_handler::ChatHandler,
+        chat_handler: Arc<chat_handler::ChatHandler>,
     ) {
         //println!("Received message: {:#?}", message);
         let is_owner = message.badges.contains(&twitch_irc::message::Badge {
