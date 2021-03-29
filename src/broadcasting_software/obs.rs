@@ -138,22 +138,6 @@ impl WrappedClient {
             let _ = event_sender.send(event).await;
         }
     }
-
-    pub async fn switch_scene(&self, scene: &str) -> Result<(), Error> {
-        let c = self.client.lock().await;
-        Ok(c.scenes().set_current_scene(scene).await?)
-    }
-
-    pub async fn get_scene_list(&self) -> Result<obws::responses::SceneList, Error> {
-        let c = self.client.lock().await;
-        Ok(c.scenes().get_scene_list().await?)
-    }
-
-    pub async fn is_streaming(&self) -> Result<bool, Error> {
-        let c = self.client.lock().await;
-        let st = c.streaming().get_streaming_status().await?;
-        Ok(st.streaming)
-    }
 }
 
 pub struct Obs {
@@ -217,39 +201,30 @@ impl Obs {
         //     this.obs.on("ScenesChanged", this.scenesChanged.bind(this));
     }
 
-    pub async fn switch_scene(&self, scene: &str) -> Result<(), Error> {
-        self.wrapped_client.switch_scene(scene).await
-    }
-
-    pub async fn get_scene_list(&self) -> Result<obws::responses::SceneList, Error> {
-        self.wrapped_client.get_scene_list().await
-    }
-
-    pub async fn is_streaming(&self) -> bool {
-        self.obs_state.lock().await.is_streaming
-    }
-
-    pub async fn is_connected(&self) -> bool {
-        self.get_connection_status().await == ClientStatus::Connected
-    }
-
-    pub async fn get_connection_status(&self) -> ClientStatus {
-        self.obs_state.lock().await.status.to_owned()
-    }
-
     pub async fn wait_to_connect(&self) {
         self.wrapped_client.notifier().notified().await;
-    }
-
-    pub async fn get_current_scene(&self) -> String {
-        //self.curent_scene.lock().await.to_string()
-        self.obs_state.lock().await.curent_scene.to_string()
     }
 
     pub async fn can_switch(&self, scene: &str) -> bool {
         let switching = self.switching.lock().await;
 
         scene == switching.normal || scene == switching.low || scene == switching.offline
+    }
+
+    pub async fn is_connected(&self) -> bool {
+        self.get_connection_status().await == ClientStatus::Connected
+    }
+
+    pub async fn is_streaming(&self) -> bool {
+        self.obs_state.lock().await.is_streaming
+    }
+
+    pub async fn get_connection_status(&self) -> ClientStatus {
+        self.obs_state.lock().await.status.to_owned()
+    }
+
+    pub async fn get_current_scene(&self) -> String {
+        self.obs_state.lock().await.curent_scene.to_string()
     }
 
     pub async fn set_prev_scene(&self, scene: String) {
@@ -276,5 +251,30 @@ impl Obs {
             }
             SwitchType::Previous => self.prev_scene().await,
         }
+    }
+
+    pub async fn switch_scene(&self, scene: &str) -> Result<(), Error> {
+        let c = self.wrapped_client.client.lock().await;
+        Ok(c.scenes().set_current_scene(scene).await?)
+    }
+
+    pub async fn get_scene_list(&self) -> Result<obws::responses::SceneList, Error> {
+        let c = self.wrapped_client.client.lock().await;
+        Ok(c.scenes().get_scene_list().await?)
+    }
+
+    pub async fn start_streaming(&self) -> Result<(), Error> {
+        let c = self.wrapped_client.client.lock().await;
+        Ok(c.streaming().start_streaming(None).await?)
+    }
+
+    pub async fn stop_streaming(&self) -> Result<(), Error> {
+        let c = self.wrapped_client.client.lock().await;
+        Ok(c.streaming().stop_streaming().await?)
+    }
+
+    pub async fn stream_status(&self) -> Result<obws::responses::StreamingStatus, Error> {
+        let c = self.wrapped_client.client.lock().await;
+        Ok(c.streaming().get_streaming_status().await?)
     }
 }
