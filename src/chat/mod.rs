@@ -1,4 +1,4 @@
-mod chat_handler;
+pub mod chat_handler;
 pub mod twitch;
 
 pub struct State {
