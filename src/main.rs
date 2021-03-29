@@ -11,23 +11,35 @@ use noalbs::{
     stream_servers::*,
     switcher, AutomaticSwitchMessage,
 };
-use tokio::sync::{broadcast::Sender, Mutex};
+use tokio::sync::{broadcast::Sender, RwLock};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     print_logo();
     alto_logger::init_alt_term_logger()?;
 
-    let db = Arc::new(Mutex::new(HashMap::new()));
+    // move this into lib?
+    // TODO: How to do this better?
+    let db = Arc::new(RwLock::new(HashMap::new()));
+    let (tx, _) = tokio::sync::broadcast::channel(69);
 
-    let (tx, _rx) = tokio::sync::broadcast::channel(69);
+    let chat_handler = Arc::new(noalbs::chat::chat_handler::ChatHandler { db: db.clone() });
+    let twitch_client = run_twitch_chat(tx.clone(), db.clone(), chat_handler.clone());
 
-    let twitch_client = run_twitch_chat(tx.clone(), db.clone());
+    let _ = create_user("715209".into(), &twitch_client, tx.clone(), db.clone()).await;
+
+    let _ = twitch_client.reader_handle.await;
+    unreachable!();
+}
+
+// Just for testing
+async fn create_user(
+    username: String,
+    twitch_client: &twitch::Twitch,
+    tx: Sender<AutomaticSwitchMessage>,
+    db: Arc<RwLock<HashMap<String, noalbs::Noalbs>>>,
+) -> Result<()> {
     let chat_state = noalbs::chat::State::default();
-
-    // Now user:
-    let username = "715209".to_string();
-    twitch_client.join(&username);
 
     let obs_config = obs::Config {
         host: "localhost".to_string(),
@@ -64,19 +76,19 @@ async fn main() -> Result<()> {
     noalbs_user.create_switcher();
 
     {
-        let mut lock = db.lock().await;
+        let mut lock = db.write().await;
         lock.insert(username.to_owned(), noalbs_user);
     }
 
-    //let _ = _user.switcher_handler.unwrap().await;
-    let _ = twitch_client.reader_handle.await;
+    twitch_client.join(&username);
 
-    unreachable!();
+    Ok(())
 }
 
 fn run_twitch_chat(
     tx: Sender<AutomaticSwitchMessage>,
-    db: Arc<Mutex<HashMap<String, noalbs::Noalbs>>>,
+    db: Arc<RwLock<HashMap<String, noalbs::Noalbs>>>,
+    chat_handler: Arc<noalbs::chat::chat_handler::ChatHandler>,
 ) -> twitch::Twitch {
     let config =
         twitch_irc::ClientConfig::new_simple(twitch_irc::login::StaticLoginCredentials::new(
@@ -84,5 +96,5 @@ fn run_twitch_chat(
             Some("OAUTH".to_string()),
         ));
 
-    twitch::Twitch::run(config, tx.subscribe(), db)
+    twitch::Twitch::run(config, tx.subscribe(), db, chat_handler)
 }
