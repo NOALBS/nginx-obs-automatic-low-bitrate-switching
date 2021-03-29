@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     let db = Arc::new(RwLock::new(HashMap::new()));
     let (tx, _) = tokio::sync::broadcast::channel(69);
 
-    let chat_handler = Arc::new(noalbs::chat::chat_handler::ChatHandler { db: db.clone() });
+    let chat_handler = Arc::new(noalbs::chat::chat_handler::ChatHandler::new(db.clone()));
     let twitch_client = run_twitch_chat(tx.clone(), db.clone(), chat_handler.clone());
 
     let _ = create_user("715209".into(), &twitch_client, tx.clone(), db.clone()).await;

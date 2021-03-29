@@ -16,6 +16,10 @@ pub struct ChatHandler {
 }
 
 impl ChatHandler {
+    pub fn new(db: Arc<RwLock<HashMap<String, Noalbs>>>) -> Self {
+        Self { db }
+    }
+
     // TODO: Handle permissions per channel and prefix for command
     pub async fn handle_command(&self, msg: ChatHandlerMessage) -> Option<String> {
         dbg!(&msg);
