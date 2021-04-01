@@ -170,7 +170,7 @@ Update your OBS to v26+ and follow the steps below:
 
 2.) In your `LIVE` scene, add a 'Media Source', match the image below:
 
-![image](https://user-images.githubusercontent.com/1740542/108275687-54d2a700-713c-11eb-8ee0-22142cfc02a6.png)
+![image](https://user-images.githubusercontent.com/1740542/113238763-05b97f00-926f-11eb-86d2-d9aabf94bf08.png)
   - Right click on the 'Media Source' > Transform > Stretch to screen (this will stretch the video source no matter the resolution, ex; 480p, 720p, 1080p etc.)
 
 3.) Copy and Paste(Reference) the 'Media Source' from the `LIVE` scene into your `LOW` scene.
