@@ -28,6 +28,12 @@ pub trait StreamServersCommands {
 
 pub trait BSL: SwitchLogic + StreamServersCommands + Send + Sync {}
 
+pub enum TriggerType {
+    Low,
+    Rtt,
+    Offline,
+}
+
 #[derive(Debug)]
 pub struct Triggers {
     /// Trigger to switch to the low scene
@@ -38,6 +44,12 @@ pub struct Triggers {
 
     /// Trigger to switch to the offline scene
     pub offline: Option<u32>,
+}
+
+impl Triggers {
+    pub fn set_low(&mut self, value: Option<u32>) {
+        self.low = value;
+    }
 }
 
 impl Default for Triggers {

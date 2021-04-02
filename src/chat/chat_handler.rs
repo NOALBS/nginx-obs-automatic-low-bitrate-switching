@@ -1,5 +1,6 @@
-use crate::Noalbs;
+use crate::{stream_servers, Noalbs};
 use std::{collections::HashMap, sync::Arc};
+use stream_servers::TriggerType;
 use tokio::sync::RwLock;
 
 #[derive(Debug)]
@@ -37,7 +38,12 @@ impl ChatHandler {
             "!start" => Self::start(&user_data).await,
             "!stop" => Self::stop(&user_data).await,
             "!noalbs" => Self::noalbs(split_message.next())?,
-            "!trigger" => Self::trigger(&user_data, split_message.next()).await,
+
+            "!trigger" => Self::trigger(&user_data, TriggerType::Low, split_message.next()).await,
+            "!otrigger" => {
+                Self::trigger(&user_data, TriggerType::Offline, split_message.next()).await
+            }
+            "!rtrigger" => Self::trigger(&user_data, TriggerType::Rtt, split_message.next()).await,
 
             "!host" => todo!(),
             "!unhost" => todo!(),
@@ -131,13 +137,47 @@ impl ChatHandler {
         }
     }
 
-    // TODO: Safe to file or handle that somewhere else
-    pub async fn trigger(data: &Noalbs, value_string: Option<&str>) -> String {
+    async fn get_trigger(data: &Noalbs, kind: stream_servers::TriggerType) -> Option<u32> {
+        let triggers = &data.switcher_state.lock().await.triggers;
+        dbg!(&triggers);
+
+        match kind {
+            TriggerType::Low => triggers.low,
+            TriggerType::Rtt => triggers.rtt,
+            TriggerType::Offline => triggers.offline,
+        }
+    }
+
+    async fn update_trigger(
+        data: &Noalbs,
+        kind: stream_servers::TriggerType,
+        value: u32,
+    ) -> String {
+        let mut state = data.switcher_state.lock().await;
+        let real_value = if value == 0 { None } else { Some(value) };
+
+        match kind {
+            TriggerType::Low => state.triggers.low = real_value,
+            TriggerType::Rtt => state.triggers.rtt = real_value,
+            TriggerType::Offline => state.triggers.offline = real_value,
+        }
+
+        format!("Trigger successfully set to {:?} Kbps", real_value)
+    }
+
+    // TODO: Save to file or handle that somewhere else
+    pub async fn trigger(
+        data: &Noalbs,
+        kind: stream_servers::TriggerType,
+        value_string: Option<&str>,
+    ) -> String {
         let value = match value_string {
             Some(name) => name,
             None => {
-                let low_trigger = data.switcher_state.lock().await.triggers.low;
-                return format!("Current trigger set at {:?} Kbps", low_trigger);
+                return format!(
+                    "Current trigger set at {:?} Kbps",
+                    Self::get_trigger(data, kind).await
+                );
             }
         };
 
@@ -146,10 +186,7 @@ impl ChatHandler {
             Err(_) => return format!("Error editing trigger {} is not a valid value", value),
         };
 
-        let mut state = data.switcher_state.lock().await;
-        let real_value = if value == 0 { None } else { Some(value) };
-        state.triggers.low = real_value;
-        format!("Trigger successfully set to {:?} Kbps", real_value)
+        Self::update_trigger(data, kind, value).await
     }
 
     pub fn noalbs(command: Option<&str>) -> Option<String> {
