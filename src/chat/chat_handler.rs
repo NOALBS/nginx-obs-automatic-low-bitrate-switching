@@ -4,12 +4,18 @@ use stream_servers::TriggerType;
 use tokio::sync::RwLock;
 
 #[derive(Debug)]
+pub enum SupportedChat {
+    Twitch,
+}
+
+#[derive(Debug)]
 pub struct ChatHandlerMessage {
     pub message: String,
     pub channel: String,
     pub user: String,
     pub is_owner: bool,
     pub is_mod: bool,
+    pub platform: SupportedChat,
 }
 
 pub struct ChatHandler {
@@ -25,55 +31,67 @@ impl ChatHandler {
     pub async fn handle_command(&self, msg: ChatHandlerMessage) -> Option<String> {
         dbg!(&msg);
 
-        let mut split_message = msg.message.split_ascii_whitespace();
-        let command = split_message.next().unwrap().to_lowercase();
-
+        // Get the current channel settings from the database
         let dbr = self.db.read().await;
         let user_data = dbr.get(&msg.channel).unwrap();
 
-        Some(match command.as_ref() {
-            "!bitrate" => Self::bitrate(&user_data).await,
-            "!test" => "it just works".to_string(),
-            "!switch" => Self::switch(&user_data, split_message.next()).await,
-            "!start" => Self::start(&user_data).await,
-            "!stop" => Self::stop(&user_data).await,
-            "!noalbs" => Self::noalbs(split_message.next())?,
+        // TODO: Can probably do this differently
+        let prefix = {
+            let lock = user_data.chat_state.lock().await;
+            lock.prefix.to_owned()
+        };
 
-            "!trigger" => Self::trigger(&user_data, TriggerType::Low, split_message.next()).await,
-            "!otrigger" => {
+        if msg.message.is_empty() || !msg.message.starts_with(&prefix) {
+            return None;
+        }
+
+        let mut split_message = msg
+            .message
+            .strip_prefix(&prefix)
+            .unwrap()
+            .split_ascii_whitespace();
+
+        // unwrap should be safe since there are no empty messages and already
+        // checked if message starts with prefix
+        let command = split_message.next().unwrap().to_lowercase();
+
+        // First check if command is platform specific
+        match msg.platform {
+            SupportedChat::Twitch => {
+                if let Some(msg) =
+                    TwitchChatHandler::handle_command(&command, split_message.by_ref()).await
+                {
+                    return Some(msg);
+                }
+            }
+        }
+
+        Some(match command.as_ref() {
+            "bitrate" => Self::bitrate(&user_data).await,
+            "switch" => Self::switch(&user_data, split_message.next()).await,
+            "start" => Self::start(&user_data).await,
+            "stop" => Self::stop(&user_data).await,
+            "noalbs" => Self::noalbs(&user_data, split_message.next(), split_message).await?,
+
+            "trigger" => Self::trigger(&user_data, TriggerType::Low, split_message.next()).await,
+            "otrigger" => {
                 Self::trigger(&user_data, TriggerType::Offline, split_message.next()).await
             }
-            "!rtrigger" => Self::trigger(&user_data, TriggerType::Rtt, split_message.next()).await,
+            "rtrigger" => Self::trigger(&user_data, TriggerType::Rtt, split_message.next()).await,
 
-            "!host" => todo!(),
-            "!unhost" => todo!(),
-            "!raid" => todo!(),
-
-            "!obsinfo" => todo!(),
-            "!refresh" => todo!(),
-            "!sourceinfo" => todo!(),
-            "!public" => todo!(),
-            "!mod" => todo!(),
-            "!notify" => todo!(),
-            "!autostop" => todo!(),
-            "!rec" => todo!(),
-            "!fix" => todo!(),
-            "!alias" => todo!(),
+            "obsinfo" => todo!(),
+            "refresh" => todo!(),
+            "sourceinfo" => todo!(),
+            "public" => todo!(),
+            "mod" => todo!(),
+            "notify" => todo!(),
+            "autostop" => todo!(),
+            "rec" => todo!(),
+            "fix" => todo!(),
+            "alias" => todo!(),
 
             _ => return None,
         })
-    }
-
-    pub async fn host(data: &Noalbs) -> String {
-        todo!();
-    }
-
-    pub async fn unhost(data: &Noalbs) -> String {
-        todo!();
-    }
-
-    pub async fn raid(data: &Noalbs) -> String {
-        todo!();
     }
 
     pub async fn start(data: &Noalbs) -> String {
@@ -189,18 +207,50 @@ impl ChatHandler {
         Self::update_trigger(data, kind, value).await
     }
 
-    pub fn noalbs(command: Option<&str>) -> Option<String> {
+    pub async fn noalbs<'a, I>(data: &Noalbs, command: Option<&str>, args: I) -> Option<String>
+    where
+        I: IntoIterator<Item = &'a str>,
+    {
         let command = match command {
             Some(command) => command,
             None => return None,
         };
 
+        let mut args = args.into_iter();
+
         match command {
-            "version" | "v" => {
-                let msg = format!("Running NOALBS v{}", crate::VERSION);
-                Some(msg)
+            "version" | "v" => Some(format!("Running NOALBS v{}", crate::VERSION)),
+            "prefix" => {
+                if let Some(prefix) = args.next() {
+                    Self::set_prefix(data, prefix.to_owned()).await;
+                    Some(format!("NOALBS prefix updated to {}", prefix))
+                } else {
+                    None
+                }
             }
             _ => None,
         }
+    }
+
+    pub async fn set_prefix(data: &Noalbs, prefix: String) {
+        let mut lock = data.chat_state.lock().await;
+        lock.prefix = prefix;
+    }
+}
+
+struct TwitchChatHandler {}
+impl TwitchChatHandler {
+    pub async fn handle_command<'a, I>(command: &str, args: I) -> Option<String>
+    where
+        I: IntoIterator<Item = &'a str>,
+    {
+        let mut args = args.into_iter();
+
+        Some(match command {
+            "host" => format!("/host {}", args.next()?),
+            "unhost" => "/unhost".to_string(),
+            "raid" => format!("/raid {}", args.next()?),
+            _ => return None,
+        })
     }
 }

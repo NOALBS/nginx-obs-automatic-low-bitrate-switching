@@ -1,4 +1,5 @@
 use crate::{chat::chat_handler, AutomaticSwitchMessage, Noalbs};
+use log::{debug, error, info};
 use std::{collections::HashMap, sync::Arc};
 use tokio::{
     sync::{broadcast, Mutex, RwLock},
@@ -35,10 +36,19 @@ impl Twitch {
                 let cc = chat_client.clone();
                 let ch = chat_handler.clone();
 
-                if let ServerMessage::Privmsg(msg) = message {
-                    tokio::spawn(async move {
-                        Self::handle_message(cc, msg, ch).await;
-                    });
+                match message {
+                    ServerMessage::Notice(msg) => {
+                        if msg.message_text == "Login authentication failed" {
+                            error!("Twitch authentication failed");
+                            panic!("Twitch authentication failed");
+                        }
+                    }
+                    ServerMessage::Privmsg(msg) => {
+                        tokio::spawn(async move {
+                            Self::handle_message(cc, msg, ch).await;
+                        });
+                    }
+                    _ => {}
                 }
             }
         });
@@ -107,10 +117,11 @@ impl Twitch {
             user: message.sender.login.to_string(),
             is_owner,
             is_mod,
+            platform: chat_handler::SupportedChat::Twitch,
         };
 
         if let Some(reply) = chat_handler.handle_command(chm).await {
-            let _ = client.say(message.channel_login, reply).await;
+            let _ = client.privmsg(message.channel_login, reply).await;
         }
     }
 }
