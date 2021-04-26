@@ -33,7 +33,7 @@ pub struct Config {
 // TODO: Maybe remove the client Arc<Mutex<Client>>
 pub struct WrappedClient {
     client: Arc<Mutex<obws::Client>>,
-    notify: Arc<Notify>,
+    connected_notify: Arc<Notify>,
 }
 
 impl WrappedClient {
@@ -45,22 +45,18 @@ impl WrappedClient {
         let client = Self::get_client(&config).await;
         let wrapped_client = Self {
             client: Arc::new(Mutex::new(client)),
-            notify: Arc::new(Notify::new()),
+            connected_notify: Arc::new(Notify::new()),
         };
 
         tokio::spawn(Self::connection_loop(
             wrapped_client.client.clone(),
             state,
             event_sender,
-            wrapped_client.notify.clone(),
+            wrapped_client.connected_notify.clone(),
             config,
         ));
 
         wrapped_client
-    }
-
-    fn notifier(&self) -> Arc<Notify> {
-        self.notify.clone()
     }
 
     async fn get_client(config: &Config) -> Client {
@@ -145,6 +141,7 @@ pub struct Obs {
     pub event_handler: tokio::task::JoinHandle<()>,
     pub switching: Arc<Mutex<SwitchingScenes>>,
     pub obs_state: Arc<Mutex<State>>,
+    start_streaming_notify: Arc<Notify>,
 }
 
 impl Obs {
@@ -159,20 +156,27 @@ impl Obs {
         let state = Arc::new(Mutex::new(state));
         let wrapped_client = WrappedClient::run(tx, state.clone(), config).await;
 
+        let start_streaming_notify = Arc::new(Notify::new());
         let event_handler_wants_the_state = state.clone();
-        let event_handler = tokio::spawn(Obs::event_handler(rx, event_handler_wants_the_state));
+        let event_handler = tokio::spawn(Obs::event_handler(
+            rx,
+            event_handler_wants_the_state,
+            start_streaming_notify.clone(),
+        ));
 
         Ok(Obs {
             wrapped_client,
             event_handler,
             obs_state: state,
             switching: Arc::new(Mutex::new(switching)),
+            start_streaming_notify,
         })
     }
 
     async fn event_handler(
         mut events: mpsc::Receiver<obws::events::Event>,
         state: Arc<Mutex<State>>,
+        start_streaming_notifier: Arc<Notify>,
     ) {
         while let Some(event) = events.recv().await {
             match event.ty {
@@ -186,6 +190,8 @@ impl Obs {
                 EventType::StreamStarted => {
                     let mut l = state.lock().await;
                     l.is_streaming = true;
+
+                    start_streaming_notifier.notify_waiters();
                 }
                 EventType::StreamStopped => {
                     let mut l = state.lock().await;
@@ -201,8 +207,21 @@ impl Obs {
         //     this.obs.on("ScenesChanged", this.scenesChanged.bind(this));
     }
 
+    pub fn connected_notifier(&self) -> Arc<Notify> {
+        self.wrapped_client.connected_notify.clone()
+    }
+
     pub async fn wait_to_connect(&self) {
-        self.wrapped_client.notifier().notified().await;
+        self.connected_notifier().notified().await;
+    }
+
+    pub fn start_streaming_notifier(&self) -> Arc<Notify> {
+        self.start_streaming_notify.clone()
+    }
+
+    /// Waits until OBS starts streaming.
+    pub async fn wait_till_streaming(&self) {
+        self.start_streaming_notifier().notified().await;
     }
 
     pub async fn can_switch(&self, scene: &str) -> bool {

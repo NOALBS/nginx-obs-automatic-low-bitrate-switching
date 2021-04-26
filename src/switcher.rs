@@ -8,7 +8,7 @@ use crate::{
     AutomaticSwitchMessage,
 };
 use log::{debug, error, info};
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{broadcast, mpsc, Mutex, Notify};
 
 /// All the data that can be changed outside of the switcher
 pub struct SwitcherState {
@@ -26,11 +26,29 @@ pub struct SwitcherState {
 
     /// Add multiple stream servers to watch before switching to low or offline
     pub stream_servers: Vec<Box<dyn BSL>>,
+
+    switcher_enabled_notifier: Arc<Notify>,
 }
 
 impl SwitcherState {
     pub fn add_stream_server(&mut self, stream_server: Box<dyn BSL>) {
         self.stream_servers.push(stream_server);
+    }
+
+    pub fn set_bitrate_switcher_enabled(&mut self, enabled: bool) {
+        self.bitrate_switcher_enabled = enabled;
+
+        if enabled {
+            self.switcher_enabled_notifier.notify_waiters();
+        }
+    }
+
+    fn switcher_enabled_notifier(&self) -> Arc<Notify> {
+        self.switcher_enabled_notifier.clone()
+    }
+
+    pub async fn wait_till_enabled(&self) {
+        self.switcher_enabled_notifier().notified().await;
     }
 }
 
@@ -42,6 +60,7 @@ impl Default for SwitcherState {
             only_switch_when_streaming: true,
             triggers: Triggers::default(),
             stream_servers: Vec::new(),
+            switcher_enabled_notifier: Arc::new(Notify::new()),
         }
     }
 }
@@ -86,31 +105,10 @@ impl Switcher {
             tokio::time::sleep(sleep).await;
 
             debug!("Running loop");
-            let mut state = self.state.lock().await;
-
-            if !self.broadcasting_software.is_connected().await {
-                // Drop the mutex since this could take a long time and
-                // it should still be possible to change the state.
-                drop(state);
-
-                debug!("Loop waiting for OBS connection before continuing");
-                self.broadcasting_software.wait_to_connect().await;
-
-                state = self.state.lock().await;
-            }
-
-            if !state.bitrate_switcher_enabled {
-                continue;
-                // TODO: Maybe also add a wait for enabled to continue
-            }
-
-            if state.only_switch_when_streaming && !self.broadcasting_software.is_streaming().await
-            {
-                debug!("Not streaming from OBS");
+            if let Some(notifier) = self.get_sleep_notifier_if_necessary().await {
+                notifier.notified().await;
                 continue;
             }
-
-            drop(state);
 
             let bs = &self.broadcasting_software;
             let current_scene = bs.get_current_scene().await;
@@ -122,8 +120,31 @@ impl Switcher {
                 continue;
             }
 
+            info!("Running switcher for {}", self.for_channel);
             self.switch().await?;
         }
+    }
+
+    async fn get_sleep_notifier_if_necessary(&self) -> Option<Arc<Notify>> {
+        let state = self.state.lock().await;
+
+        if !state.bitrate_switcher_enabled {
+            info!("Switcher disabled waiting till enabled");
+            return Some(state.switcher_enabled_notifier());
+        }
+
+        if !self.broadcasting_software.is_connected().await {
+            info!("Waiting for OBS connection");
+            return Some(self.broadcasting_software.connected_notifier());
+        }
+
+        // Yes this will wait even if you change `only_switch_when_streaming`
+        if state.only_switch_when_streaming && !self.broadcasting_software.is_streaming().await {
+            info!("Waiting till OBS starts streaming");
+            return Some(self.broadcasting_software.start_streaming_notifier());
+        }
+
+        None
     }
 
     /// Returns the type of the first stream server that is not offline
