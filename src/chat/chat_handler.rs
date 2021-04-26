@@ -1,4 +1,5 @@
 use crate::{stream_servers, Noalbs};
+use log::error;
 use std::{collections::HashMap, sync::Arc};
 use stream_servers::TriggerType;
 use tokio::sync::RwLock;
@@ -228,8 +229,21 @@ impl ChatHandler {
                     None
                 }
             }
+            "start" => {
+                Self::set_bitrate_switcher_state(data, true).await;
+                Some("Successfully enabled the switcher".to_string())
+            }
+            "stop" => {
+                Self::set_bitrate_switcher_state(data, false).await;
+                Some("Successfully disabled the switcher".to_string())
+            }
             _ => None,
         }
+    }
+
+    pub async fn set_bitrate_switcher_state(data: &Noalbs, enabled: bool) {
+        let mut lock = data.switcher_state.lock().await;
+        lock.set_bitrate_switcher_enabled(enabled);
     }
 
     pub async fn set_prefix(data: &Noalbs, prefix: String) {
