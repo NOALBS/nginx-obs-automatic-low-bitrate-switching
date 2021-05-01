@@ -1,4 +1,6 @@
-use super::{StreamServersCommands, SwitchLogic, SwitchType, Triggers, BSL};
+use crate::db;
+
+use super::{Bsl, StreamServersCommands, SwitchLogic, SwitchType, Triggers};
 use async_trait::async_trait;
 use log::{error, trace};
 use serde::Deserialize;
@@ -112,4 +114,13 @@ impl StreamServersCommands for SrtLiveServer {
     }
 }
 
-impl BSL for SrtLiveServer {}
+impl Bsl for SrtLiveServer {}
+
+impl From<db::StreamServer> for SrtLiveServer {
+    fn from(item: db::StreamServer) -> Self {
+        Self {
+            stats_url: item.stats_url,
+            publisher: item.application,
+        }
+    }
+}

@@ -14,4 +14,10 @@ pub enum Error {
 
     #[error("SwitchType conversion not allowed")]
     SwitchTypeNotSupported,
+
+    #[error("Sql error {0}")]
+    SqlError(#[from] sqlx::error::Error),
+
+    #[error("Migrate error {0}")]
+    MigrateError(#[from] sqlx::migrate::MigrateError),
 }

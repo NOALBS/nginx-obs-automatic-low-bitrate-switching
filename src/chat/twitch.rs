@@ -1,4 +1,4 @@
-use crate::{chat::chat_handler, AutomaticSwitchMessage, Noalbs};
+use crate::{chat::chat_handler, db::Platform, AutomaticSwitchMessage, Noalbs};
 use log::{debug, error, info};
 use std::{collections::HashMap, sync::Arc};
 use tokio::{
@@ -16,14 +16,14 @@ pub struct Twitch {
     pub reader_handle: task::JoinHandle<()>,
 
     // Do i need this?
-    _db: Arc<RwLock<HashMap<String, Noalbs>>>,
+    _db: Arc<RwLock<HashMap<i64, Noalbs>>>,
 }
 
 impl Twitch {
     pub fn run(
         config: ClientConfig<StaticLoginCredentials>,
         mut switcher_messages: broadcast::Receiver<AutomaticSwitchMessage>,
-        db: Arc<RwLock<HashMap<String, Noalbs>>>,
+        db: Arc<RwLock<HashMap<i64, Noalbs>>>,
         chat_handler: Arc<chat_handler::ChatHandler>,
     ) -> Self {
         let (mut incoming_messages, client) =
@@ -66,16 +66,20 @@ impl Twitch {
 
                 let mut message = format!("Scene switched to \"{}\", ", sm.scene);
 
-                {
-                    let dbr = &db2.read().await;
-                    if let Some(user) = &dbr.get(&sm.channel) {
-                        message += &chat_handler::ChatHandler::bitrate(user)
-                            .await
-                            .to_lowercase();
+                let dbr = &db2.read().await;
+                if let Some(user) = &dbr.get(&sm.channel) {
+                    message += &chat_handler::ChatHandler::bitrate(user)
+                        .await
+                        .to_lowercase();
+
+                    if let Some(user) = user
+                        .connections
+                        .iter()
+                        .find(|u| u.platform == Platform::Twitch)
+                    {
+                        let _ = client2.say(user.channel.to_owned(), message).await;
                     }
                 }
-
-                let _ = client2.say(sm.channel, message).await;
             }
         });
 
@@ -117,7 +121,7 @@ impl Twitch {
             user: message.sender.login.to_string(),
             is_owner,
             is_mod,
-            platform: chat_handler::SupportedChat::Twitch,
+            platform: Platform::Twitch,
         };
 
         if let Some(reply) = chat_handler.handle_command(chm).await {

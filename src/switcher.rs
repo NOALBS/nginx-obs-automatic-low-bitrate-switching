@@ -3,8 +3,8 @@ use std::{sync::Arc, time::Duration};
 use crate::{
     broadcasting_software::obs::Obs,
     chat::twitch::Twitch,
-    error,
-    stream_servers::{SwitchType, Triggers, BSL},
+    db, error,
+    stream_servers::{Bsl, SwitchType, Triggers},
     AutomaticSwitchMessage,
 };
 use log::{debug, error, info};
@@ -25,13 +25,13 @@ pub struct SwitcherState {
     pub triggers: Triggers,
 
     /// Add multiple stream servers to watch before switching to low or offline
-    pub stream_servers: Vec<Box<dyn BSL>>,
+    pub stream_servers: Vec<Box<dyn Bsl>>,
 
     switcher_enabled_notifier: Arc<Notify>,
 }
 
 impl SwitcherState {
-    pub fn add_stream_server(&mut self, stream_server: Box<dyn BSL>) {
+    pub fn add_stream_server(&mut self, stream_server: Box<dyn Bsl>) {
         self.stream_servers.push(stream_server);
     }
 
@@ -65,6 +65,23 @@ impl Default for SwitcherState {
     }
 }
 
+impl From<db::SwitcherState> for SwitcherState {
+    fn from(item: db::SwitcherState) -> Self {
+        let interval = if item.request_interval < 0 {
+            2
+        } else {
+            item.request_interval as u64
+        };
+
+        Self {
+            request_interval: Duration::from_secs(interval),
+            bitrate_switcher_enabled: item.bitrate_switcher_enabled,
+            only_switch_when_streaming: item.only_switch_when_streaming,
+            ..Default::default()
+        }
+    }
+}
+
 pub struct Switcher {
     // Obs etc..
     broadcasting_software: Arc<Obs>,
@@ -76,21 +93,16 @@ pub struct Switcher {
 
     notification: broadcast::Sender<AutomaticSwitchMessage>,
 
-    for_channel: String,
+    for_channel: i64,
 }
 
 impl Switcher {
-    pub fn new<C>(
-        for_channel: C,
+    pub fn new(
+        for_channel: i64,
         broadcasting_software: Arc<Obs>,
         state: Arc<Mutex<SwitcherState>>,
         notification: broadcast::Sender<AutomaticSwitchMessage>,
-    ) -> Self
-    where
-        C: Into<String>,
-    {
-        let for_channel = for_channel.into();
-
+    ) -> Self {
         Self {
             broadcasting_software,
             state,
@@ -101,6 +113,8 @@ impl Switcher {
 
     pub async fn run(self) -> Result<(), error::Error> {
         loop {
+            info!("Running switcher for {}", self.for_channel);
+
             let sleep = { self.state.lock().await.request_interval };
             tokio::time::sleep(sleep).await;
 
@@ -120,7 +134,6 @@ impl Switcher {
                 continue;
             }
 
-            info!("Running switcher for {}", self.for_channel);
             self.switch().await?;
         }
     }
@@ -198,7 +211,7 @@ impl Switcher {
 
         if bs.is_streaming().await {
             let _ = self.notification.send(AutomaticSwitchMessage {
-                channel: self.for_channel.to_string(),
+                channel: self.for_channel,
                 scene: switch_scene.to_string(),
             });
         }

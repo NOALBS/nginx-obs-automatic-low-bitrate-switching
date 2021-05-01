@@ -1,4 +1,6 @@
-use super::{StreamServersCommands, SwitchLogic, SwitchType, Triggers, BSL};
+use crate::db;
+
+use super::{Bsl, StreamServersCommands, SwitchLogic, SwitchType, Triggers};
 use async_trait::async_trait;
 use log::{error, trace};
 use serde::Deserialize;
@@ -166,4 +168,14 @@ impl StreamServersCommands for Nginx {
     }
 }
 
-impl BSL for Nginx {}
+impl Bsl for Nginx {}
+
+impl From<db::StreamServer> for Nginx {
+    fn from(item: db::StreamServer) -> Self {
+        Self {
+            stats_url: item.stats_url,
+            application: item.application,
+            key: item.key,
+        }
+    }
+}

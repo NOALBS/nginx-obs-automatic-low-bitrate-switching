@@ -22,10 +22,12 @@ pub enum ClientStatus {
     Disconnected,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, sqlx::FromRow)]
 pub struct Config {
     /// The hostname
     pub host: String,
+    /// The password
+    pub password: String,
     /// Port to connect to
     pub port: u16,
 }
@@ -72,7 +74,7 @@ impl WrappedClient {
             let wait = 1 << retry_grow;
             warn!("Unable to connect");
             info!("trying to connect again in {} seconds", wait);
-            std::thread::sleep(Duration::from_secs(wait));
+            tokio::time::sleep(Duration::from_secs(wait)).await;
 
             if retry_grow < 2 {
                 retry_grow += 1;
@@ -145,7 +147,7 @@ pub struct Obs {
 }
 
 impl Obs {
-    pub async fn connect(config: Config, switching: SwitchingScenes) -> Result<Self, Error> {
+    pub async fn connect(config: Config, switching: SwitchingScenes) -> Self {
         let (tx, rx) = mpsc::channel(69);
         let state = State {
             prev_scene: switching.normal.to_owned(),
@@ -164,13 +166,13 @@ impl Obs {
             start_streaming_notify.clone(),
         ));
 
-        Ok(Obs {
+        Obs {
             wrapped_client,
             event_handler,
             obs_state: state,
             switching: Arc::new(Mutex::new(switching)),
             start_streaming_notify,
-        })
+        }
     }
 
     async fn event_handler(

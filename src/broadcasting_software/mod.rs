@@ -2,6 +2,7 @@ use crate::{error, stream_servers::SwitchType};
 
 pub mod obs;
 
+#[derive(Debug, sqlx::FromRow)]
 pub struct SwitchingScenes {
     pub normal: String,
     pub low: String,

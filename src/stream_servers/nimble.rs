@@ -1,7 +1,7 @@
-use crate::stream_servers::SwitchLogic;
+use crate::{db, stream_servers::SwitchLogic};
 use async_trait::async_trait;
 
-use super::Triggers;
+use super::{Bsl, StreamServersCommands, Triggers};
 
 pub struct Nimble {
     /// UDP listener ID (Usually IP:Port)
@@ -15,12 +15,6 @@ pub struct Nimble {
 
     /// Outgoing stream "Stream Name"
     pub key: String,
-
-    /// Lowbitrate trigger
-    pub trigger: u64,
-
-    /// HighRtt trigger
-    pub rtt_trigger: u64,
 }
 
 impl Nimble {
@@ -33,5 +27,29 @@ impl Nimble {
 impl SwitchLogic for Nimble {
     async fn switch(&self, triggers: &Triggers) -> super::SwitchType {
         todo!()
+    }
+}
+
+#[async_trait]
+impl StreamServersCommands for Nimble {
+    async fn bitrate(&self) -> String {
+        todo!()
+    }
+
+    async fn source_info(&self) -> String {
+        todo!()
+    }
+}
+
+impl Bsl for Nimble {}
+
+impl From<db::StreamServer> for Nimble {
+    fn from(item: db::StreamServer) -> Self {
+        Self {
+            id: item.udp_listener_id,
+            stats_url: item.stats_url,
+            application: item.application,
+            key: item.key,
+        }
     }
 }

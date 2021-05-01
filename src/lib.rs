@@ -1,12 +1,13 @@
 pub mod broadcasting_software;
 pub mod chat;
+pub mod db;
 pub mod error;
 pub mod stream_servers;
 pub mod switcher;
 
 use broadcasting_software::obs::Obs;
 use std::sync::Arc;
-use stream_servers::BSL;
+use stream_servers::Bsl;
 use tokio::sync::{broadcast::Sender, Mutex};
 
 pub use error::Error;
@@ -59,20 +60,23 @@ pub fn print_logo() {
 
 #[derive(Debug, Clone)]
 pub struct AutomaticSwitchMessage {
-    channel: String,
+    channel: i64,
     scene: String,
 }
 
+#[derive(Debug, sqlx::Type)]
+#[sqlx(rename_all = "lowercase")]
 pub enum ChatLanguage {
     En,
 }
 
 pub struct Noalbs {
-    username: String,
+    username: i64,
     pub broadcasting_software: Arc<Obs>,
     pub switcher_state: Arc<Mutex<switcher::SwitcherState>>,
     pub chat_state: Arc<Mutex<chat::State>>,
     pub broadcast_sender: Sender<AutomaticSwitchMessage>,
+    pub connections: Vec<db::Connection>,
     pub language: ChatLanguage,
 
     pub switcher_handler: Option<tokio::task::JoinHandle<Result<(), Error>>>,
@@ -80,11 +84,12 @@ pub struct Noalbs {
 
 impl Noalbs {
     pub fn new(
-        username: String,
+        username: i64,
         broadcasting_software: Obs,
         switcher_state: switcher::SwitcherState,
         chat_state: chat::State,
         broadcast_sender: Sender<AutomaticSwitchMessage>,
+        connections: Vec<db::Connection>,
     ) -> Noalbs {
         let broadcasting_software = Arc::new(broadcasting_software);
         let switcher_state = Arc::new(Mutex::new(switcher_state));
@@ -98,12 +103,13 @@ impl Noalbs {
             broadcast_sender,
             language: ChatLanguage::En,
             switcher_handler: None,
+            connections,
         }
     }
 
     pub async fn add_stream_server<T>(&self, server: T)
     where
-        T: BSL + 'static,
+        T: Bsl + 'static,
     {
         let mut state = self.switcher_state.lock().await;
         state.stream_servers.push(Box::new(server));

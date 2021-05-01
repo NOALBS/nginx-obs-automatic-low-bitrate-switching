@@ -1,4 +1,6 @@
-use super::{StreamServersCommands, SwitchLogic, SwitchType, Triggers, BSL};
+use crate::db;
+
+use super::{Bsl, StreamServersCommands, SwitchLogic, SwitchType, Triggers};
 use async_trait::async_trait;
 use log::{error, trace};
 use serde::Deserialize;
@@ -104,4 +106,13 @@ impl StreamServersCommands for Belabox {
     }
 }
 
-impl BSL for Belabox {}
+impl Bsl for Belabox {}
+
+impl From<db::StreamServer> for Belabox {
+    fn from(item: db::StreamServer) -> Self {
+        Self {
+            stats_url: item.stats_url,
+            publisher: item.application,
+        }
+    }
+}

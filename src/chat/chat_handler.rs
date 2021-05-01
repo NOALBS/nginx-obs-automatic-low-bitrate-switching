@@ -1,4 +1,5 @@
-use crate::{stream_servers, Noalbs};
+use crate::{db, stream_servers, Noalbs};
+use db::Platform;
 use log::error;
 use std::{collections::HashMap, sync::Arc};
 use stream_servers::TriggerType;
@@ -16,15 +17,15 @@ pub struct ChatHandlerMessage {
     pub user: String,
     pub is_owner: bool,
     pub is_mod: bool,
-    pub platform: SupportedChat,
+    pub platform: Platform,
 }
 
 pub struct ChatHandler {
-    pub db: Arc<RwLock<HashMap<String, Noalbs>>>,
+    pub db: Arc<RwLock<HashMap<i64, Noalbs>>>,
 }
 
 impl ChatHandler {
-    pub fn new(db: Arc<RwLock<HashMap<String, Noalbs>>>) -> Self {
+    pub fn new(db: Arc<RwLock<HashMap<i64, Noalbs>>>) -> Self {
         Self { db }
     }
 
@@ -34,7 +35,20 @@ impl ChatHandler {
 
         // Get the current channel settings from the database
         let dbr = self.db.read().await;
-        let user_data = dbr.get(&msg.channel).unwrap();
+        let user_id = dbr
+            .iter()
+            .find_map(|(a, b)| {
+                if b.connections
+                    .iter()
+                    .any(|u| u.platform == msg.platform && u.channel == msg.channel)
+                {
+                    Some(a)
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+        let user_data = dbr.get(&user_id).unwrap();
 
         // TODO: Can probably do this differently
         let prefix = {
@@ -58,13 +72,14 @@ impl ChatHandler {
 
         // First check if command is platform specific
         match msg.platform {
-            SupportedChat::Twitch => {
+            Platform::Twitch => {
                 if let Some(msg) =
                     TwitchChatHandler::handle_command(&command, split_message.by_ref()).await
                 {
                     return Some(msg);
                 }
             }
+            Platform::Youtube => {}
         }
 
         Some(match command.as_ref() {
@@ -99,7 +114,8 @@ impl ChatHandler {
         match data.broadcasting_software.start_streaming().await {
             Ok(_) => "Successfully started the stream".to_string(),
             Err(error) => {
-                format!("Error: {}", error)
+                error!("Error: {}", error);
+                "Stream already started or no connection to OBS".to_string()
             }
         }
     }
@@ -108,7 +124,8 @@ impl ChatHandler {
         match data.broadcasting_software.stop_streaming().await {
             Ok(_) => "Successfully stopped the stream".to_string(),
             Err(error) => {
-                format!("Error: {}", error)
+                error!("Error: {}", error);
+                "Stream already stopped or no connection to OBS".to_string()
             }
         }
     }

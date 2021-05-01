@@ -26,7 +26,7 @@ pub trait StreamServersCommands {
     async fn source_info(&self) -> String;
 }
 
-pub trait BSL: SwitchLogic + StreamServersCommands + Send + Sync {}
+pub trait Bsl: SwitchLogic + StreamServersCommands + Send + Sync {}
 
 pub enum TriggerType {
     Low,
@@ -34,7 +34,7 @@ pub enum TriggerType {
     Offline,
 }
 
-#[derive(Debug)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct Triggers {
     /// Trigger to switch to the low scene
     pub low: Option<u32>,

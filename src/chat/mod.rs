@@ -1,3 +1,5 @@
+use crate::db;
+
 pub mod chat_handler;
 pub mod twitch;
 
@@ -15,6 +17,17 @@ impl Default for State {
             enable_mod_commands: false,
             admin_users: Vec::new(),
             prefix: "!".to_string(),
+        }
+    }
+}
+
+impl From<db::ChatSettings> for State {
+    fn from(item: db::ChatSettings) -> Self {
+        Self {
+            enable_public_commands: item.enable_public_commands,
+            enable_mod_commands: item.enable_mod_commands,
+            prefix: item.prefix,
+            ..Default::default()
         }
     }
 }
