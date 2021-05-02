@@ -14,7 +14,10 @@ pub struct Db {
 impl Db {
     pub async fn connect() -> Result<Self, error::Error> {
         let pool = SqlitePoolOptions::new().connect(DB_NAME).await?;
-        sqlx::migrate!().run(&pool).await?;
+
+        if let Err(e) = sqlx::migrate!().run(&pool).await {
+            println!("Couldn't run migrations: {}", e);
+        }
 
         Ok(Self { pool })
     }
