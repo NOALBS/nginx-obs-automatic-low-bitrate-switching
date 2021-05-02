@@ -13,14 +13,20 @@ async fn main() -> Result<()> {
     print_logo();
     alto_logger::init_alt_term_logger()?;
 
-    let db_con = noalbs::db::Db::connect(false).await?;
+    let db_con = noalbs::db::Db::connect().await?;
     let all_clients = Arc::new(RwLock::new(HashMap::<i64, noalbs::Noalbs>::new()));
     let (tx, _) = tokio::sync::broadcast::channel(69);
 
     let chat_handler = Arc::new(ChatHandler::new(all_clients.clone()));
     let twitch_client = run_twitch_chat(tx.clone(), all_clients.clone(), chat_handler.clone());
 
-    for user in db_con.get_users().await? {
+    let users = db_con.get_users().await?;
+
+    if users.is_empty() {
+        panic!("No users in the database")
+    };
+
+    for user in users {
         println!("Loaded user: [{}] {}", user.id, user.username);
 
         // Join chat on all services

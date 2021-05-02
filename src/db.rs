@@ -4,7 +4,7 @@ use crate::{
 };
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 
-const DB_NAME: &str = "sqlite:database.db";
+const DB_NAME: &str = "sqlite:database.db?mode=rwc";
 
 #[derive(Clone)]
 pub struct Db {
@@ -12,15 +12,9 @@ pub struct Db {
 }
 
 impl Db {
-    pub async fn connect(migrate: bool) -> Result<Self, error::Error> {
-        let pool = SqlitePoolOptions::new()
-            .max_connections(5)
-            .connect(DB_NAME)
-            .await?;
-
-        if migrate {
-            sqlx::migrate!().run(&pool).await?;
-        }
+    pub async fn connect() -> Result<Self, error::Error> {
+        let pool = SqlitePoolOptions::new().connect(DB_NAME).await?;
+        sqlx::migrate!().run(&pool).await?;
 
         Ok(Self { pool })
     }
