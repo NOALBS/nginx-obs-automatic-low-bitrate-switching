@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS broadcasting_software
     id          INTEGER PRIMARY KEY NOT NULL UNIQUE,
     user_id     INTEGER             NOT NULL UNIQUE,
     host        TEXT                NOT NULL,
-    port        INTEGER             NOT NULL,
+    port        INTEGER             NOT NULL DEFAULT 4444,
     password    TEXT,
     FOREIGN KEY (user_id) REFERENCES user (id)
         ON UPDATE CASCADE ON DELETE CASCADE
