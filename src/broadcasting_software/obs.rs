@@ -34,19 +34,18 @@ pub struct Config {
 
 // TODO: Maybe remove the client Arc<Mutex<Client>>
 pub struct WrappedClient {
-    client: Arc<Mutex<obws::Client>>,
+    client: Arc<Mutex<Option<obws::Client>>>,
     connected_notify: Arc<Notify>,
 }
 
 impl WrappedClient {
-    async fn run(
+    fn run(
         event_sender: mpsc::Sender<obws::events::Event>,
         state: Arc<Mutex<State>>,
         config: Config,
     ) -> Self {
-        let client = Self::get_client(&config).await;
         let wrapped_client = Self {
-            client: Arc::new(Mutex::new(client)),
+            client: Arc::new(Mutex::new(None)),
             connected_notify: Arc::new(Notify::new()),
         };
 
@@ -83,20 +82,26 @@ impl WrappedClient {
     }
 
     async fn connection_loop(
-        client: Arc<Mutex<Client>>,
+        client: Arc<Mutex<Option<Client>>>,
         obs_state: Arc<Mutex<State>>,
         event_sender: mpsc::Sender<obws::events::Event>,
         connected_notifier: Arc<Notify>,
         config: Config,
     ) {
+        if client.lock().await.is_none() {
+            let new_client = Self::get_client(&config).await;
+            *client.lock().await = Some(new_client);
+        }
+
         // Should be safe to unwrap since it literally just connected.
-        let mut event_stream = client.lock().await.events().unwrap();
+        let mut event_stream = client.lock().await.as_ref().unwrap().events().unwrap();
 
         loop {
             {
                 // TODO: possibly want to store the scene list or replace this with just a
                 // current scene call
-                let client_lock = client.lock().await;
+                let c = client.lock().await;
+                let client_lock = c.as_ref().unwrap();
                 let scenes = client_lock.scenes().get_scene_list().await.unwrap();
                 let streaming_status = client_lock
                     .streaming()
@@ -122,7 +127,7 @@ impl WrappedClient {
             let new_client = Self::get_client(&config).await;
             event_stream = new_client.events().unwrap();
 
-            *client.lock().await = new_client;
+            *client.lock().await = Some(new_client);
         }
     }
 
@@ -156,7 +161,7 @@ impl Obs {
             is_streaming: false,
         };
         let state = Arc::new(Mutex::new(state));
-        let wrapped_client = WrappedClient::run(tx, state.clone(), config).await;
+        let wrapped_client = WrappedClient::run(tx, state.clone(), config);
 
         let start_streaming_notify = Arc::new(Notify::new());
         let event_handler_wants_the_state = state.clone();
@@ -258,7 +263,7 @@ impl Obs {
     }
 
     // TODO: Do i really need this?
-    pub fn get_inner_client_clone(&self) -> Arc<Mutex<Client>> {
+    pub fn get_inner_client_clone(&self) -> Arc<Mutex<Option<Client>>> {
         self.wrapped_client.client.clone()
     }
 
@@ -275,27 +280,42 @@ impl Obs {
     }
 
     pub async fn switch_scene(&self, scene: &str) -> Result<(), Error> {
-        let c = self.wrapped_client.client.lock().await;
-        Ok(c.scenes().set_current_scene(scene).await?)
+        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+            Ok(c.scenes().set_current_scene(scene).await?)
+        } else {
+            Err(Error::UnableInitialConnection)
+        }
     }
 
     pub async fn get_scene_list(&self) -> Result<obws::responses::SceneList, Error> {
-        let c = self.wrapped_client.client.lock().await;
-        Ok(c.scenes().get_scene_list().await?)
+        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+            Ok(c.scenes().get_scene_list().await?)
+        } else {
+            Err(Error::UnableInitialConnection)
+        }
     }
 
     pub async fn start_streaming(&self) -> Result<(), Error> {
-        let c = self.wrapped_client.client.lock().await;
-        Ok(c.streaming().start_streaming(None).await?)
+        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+            Ok(c.streaming().start_streaming(None).await?)
+        } else {
+            Err(Error::UnableInitialConnection)
+        }
     }
 
     pub async fn stop_streaming(&self) -> Result<(), Error> {
-        let c = self.wrapped_client.client.lock().await;
-        Ok(c.streaming().stop_streaming().await?)
+        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+            Ok(c.streaming().stop_streaming().await?)
+        } else {
+            Err(Error::UnableInitialConnection)
+        }
     }
 
     pub async fn stream_status(&self) -> Result<obws::responses::StreamingStatus, Error> {
-        let c = self.wrapped_client.client.lock().await;
-        Ok(c.streaming().get_streaming_status().await?)
+        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+            Ok(c.streaming().get_streaming_status().await?)
+        } else {
+            Err(Error::UnableInitialConnection)
+        }
     }
 }

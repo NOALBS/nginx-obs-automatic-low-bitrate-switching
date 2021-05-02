@@ -20,4 +20,7 @@ pub enum Error {
 
     #[error("Migrate error {0}")]
     MigrateError(#[from] sqlx::migrate::MigrateError),
+
+    #[error("Unable to connect to OBS")]
+    UnableInitialConnection,
 }
