@@ -35,20 +35,20 @@ impl ChatHandler {
 
         // Get the current channel settings from the database
         let dbr = self.db.read().await;
-        let user_id = dbr
+        let user_data = dbr
             .iter()
-            .find_map(|(a, b)| {
+            .find_map(|(_, b)| {
                 if b.connections
                     .iter()
                     .any(|u| u.platform == msg.platform && u.channel == msg.channel)
                 {
-                    Some(a)
+                    Some(b)
                 } else {
                     None
                 }
             })
             .unwrap();
-        let user_data = dbr.get(&user_id).unwrap();
+        //let user_data = dbr.get(&msg.channel).unwrap();
 
         // TODO: Can probably do this differently
         let prefix = {
