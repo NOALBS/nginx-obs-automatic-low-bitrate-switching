@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 use crate::{
     broadcasting_software::{obs, SwitchingScenes},
+    chat::chat_handler::{Command, Permission},
     error, stream_servers, ChatLanguage,
 };
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
@@ -96,6 +99,26 @@ impl Db {
         )
     }
 
+    pub async fn get_command_permissions(
+        &self,
+        id: i64,
+    ) -> Result<HashMap<Command, Permission>, error::Error> {
+        let mut permissions = HashMap::new();
+
+        let command_permissions: Vec<CommandPermission> = sqlx::query_as::<_, CommandPermission>(
+            "SELECT * FROM command_permission WHERE user_id = ?",
+        )
+        .bind(id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        for commands in command_permissions {
+            permissions.insert(commands.command, commands.permission);
+        }
+
+        Ok(permissions)
+    }
+
     // pub async fn get_everything(&self) -> Result<(), error::Error> {
     //     Ok(
     //         sqlx::query_as::<_, ???>("
@@ -166,4 +189,10 @@ pub struct ChatSettings {
     pub enable_mod_commands: bool,
     pub prefix: String,
     pub language: ChatLanguage,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+pub struct CommandPermission {
+    command: Command,
+    permission: Permission,
 }

@@ -83,7 +83,8 @@ async fn load_user(
     switcher_state.triggers = db_con.get_triggers(user.id).await?;
 
     // TODO: what do i want to do with channel_admin
-    let chat_state = noalbs::chat::State::from(db_con.get_chat_settings(user.id).await?);
+    let mut chat_state = noalbs::chat::State::from(db_con.get_chat_settings(user.id).await?);
+    chat_state.commands_permissions = db_con.get_command_permissions(user.id).await?;
 
     let mut noalbs_user = noalbs::Noalbs::new(
         user.id,

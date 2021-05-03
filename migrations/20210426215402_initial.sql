@@ -95,3 +95,13 @@ CREATE TABLE IF NOT EXISTS triggers
     FOREIGN KEY (user_id) REFERENCES user (id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS command_permission
+(
+    user_id       INTEGER    NOT NULL,
+    command       TEXT       NOT NULL,
+    permission    TEXT       NOT NULL,
+    PRIMARY KEY (user_id, command),
+    FOREIGN KEY (user_id) REFERENCES user (id)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);

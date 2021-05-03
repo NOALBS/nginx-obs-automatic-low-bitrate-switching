@@ -1,4 +1,7 @@
 use crate::db;
+use std::collections::HashMap;
+
+use self::chat_handler::{Command, Permission};
 
 pub mod chat_handler;
 pub mod twitch;
@@ -8,6 +11,7 @@ pub struct State {
     pub enable_mod_commands: bool,
     pub admin_users: Vec<String>,
     pub prefix: String,
+    pub commands_permissions: HashMap<Command, Permission>,
 }
 
 impl Default for State {
@@ -17,6 +21,7 @@ impl Default for State {
             enable_mod_commands: false,
             admin_users: Vec::new(),
             prefix: "!".to_string(),
+            commands_permissions: HashMap::new(),
         }
     }
 }
