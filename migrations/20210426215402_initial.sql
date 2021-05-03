@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS switcher_state
     request_interval              INTEGER             NOT NULL DEFAULT 2,
     bitrate_switcher_enabled      INTEGER             NOT NULL DEFAULT 1,
     only_switch_when_streaming    INTEGER             NOT NULL DEFAULT 1,
+    auto_switch_notification      INTEGER             NOT NULL DEFAULT 1,
     FOREIGN KEY (user_id) REFERENCES user (id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );

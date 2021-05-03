@@ -139,6 +139,7 @@ pub struct SwitcherState {
     pub request_interval: i64,
     pub bitrate_switcher_enabled: bool,
     pub only_switch_when_streaming: bool,
+    pub auto_switch_notification: bool,
 }
 
 #[derive(Debug, sqlx::FromRow)]

@@ -21,6 +21,9 @@ pub struct SwitcherState {
     /// Only enable the switcher when actually streaming from OBS
     pub only_switch_when_streaming: bool,
 
+    /// Enable auto switch chat notfication
+    pub auto_switch_notification: bool,
+
     /// Triggers to switch to the low or offline scenes
     pub triggers: Triggers,
 
@@ -58,6 +61,7 @@ impl Default for SwitcherState {
             request_interval: Duration::from_secs(2),
             bitrate_switcher_enabled: true,
             only_switch_when_streaming: true,
+            auto_switch_notification: true,
             triggers: Triggers::default(),
             stream_servers: Vec::new(),
             switcher_enabled_notifier: Arc::new(Notify::new()),
@@ -77,6 +81,7 @@ impl From<db::SwitcherState> for SwitcherState {
             request_interval: Duration::from_secs(interval),
             bitrate_switcher_enabled: item.bitrate_switcher_enabled,
             only_switch_when_streaming: item.only_switch_when_streaming,
+            auto_switch_notification: item.auto_switch_notification,
             ..Default::default()
         }
     }
@@ -209,7 +214,8 @@ impl Switcher {
             return Ok(());
         }
 
-        if bs.is_streaming().await {
+        let state = &self.state.lock().await;
+        if bs.is_streaming().await && state.auto_switch_notification {
             let _ = self.notification.send(AutomaticSwitchMessage {
                 channel: self.for_channel,
                 scene: switch_scene.to_string(),
