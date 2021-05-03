@@ -23,4 +23,7 @@ pub enum Error {
 
     #[error("Unable to connect to OBS")]
     UnableInitialConnection,
+
+    #[error("Unable to convert enabled to bool")]
+    EnabledToBoolConversionError,
 }

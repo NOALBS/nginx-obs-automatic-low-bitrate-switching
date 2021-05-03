@@ -391,6 +391,45 @@ impl ChatHandler {
         let mut lock = data.chat_state.lock().await;
         lock.prefix = prefix;
     }
+
+    pub async fn notify(data: &Noalbs, enabled: Option<&str>) -> String {
+        let mut lock = data.switcher_state.lock().await;
+        let asn = "Auto switch notification";
+
+        if let Some(enabled) = enabled {
+            if let Ok(b) = enabled_to_bool(enabled) {
+                lock.auto_switch_notification = b;
+
+                return if b {
+                    format!("{} enabled", asn)
+                } else {
+                    format!("{} disabled", asn)
+                };
+            }
+        }
+
+        format!(
+            "{} is {}",
+            asn,
+            if lock.auto_switch_notification {
+                "enabled"
+            } else {
+                "disabled"
+            }
+        )
+    }
+}
+
+fn enabled_to_bool(enabled: &str) -> Result<bool, Error> {
+    if enabled.to_lowercase() == "on" {
+        return Ok(true);
+    }
+
+    if enabled.to_lowercase() == "off" {
+        return Ok(false);
+    }
+
+    Err(Error::EnabledToBoolConversionError)
 }
 
 struct TwitchChatHandler {}
