@@ -10,7 +10,7 @@ pub enum SupportedChat {
     Twitch,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, sqlx::Type)]
+#[derive(Debug, PartialEq, Eq, Hash, sqlx::Type, Clone, Copy)]
 #[sqlx(rename_all = "lowercase")]
 pub enum Command {
     Test,
@@ -156,9 +156,15 @@ impl ChatHandler {
         // unwrap should be safe since there are no empty messages and already
         // checked if message starts with prefix
         let command = split_message.next().unwrap().to_lowercase();
-        let command: Command = match command.parse() {
-            Ok(command) => command,
-            Err(_) => return None,
+
+        // Check aliases
+        let command = if let Some(command) = udcs_lock.commands_aliases.get(&command) {
+            command.to_owned()
+        } else {
+            match command.parse() {
+                Ok(command) => command,
+                Err(_) => return None,
+            }
         };
 
         if !msg.is_owner {

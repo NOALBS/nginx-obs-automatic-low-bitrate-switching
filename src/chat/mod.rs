@@ -12,6 +12,7 @@ pub struct State {
     pub admin_users: Vec<String>,
     pub prefix: String,
     pub commands_permissions: HashMap<Command, Permission>,
+    pub commands_aliases: HashMap<String, Command>,
 }
 
 impl Default for State {
@@ -22,6 +23,7 @@ impl Default for State {
             admin_users: Vec::new(),
             prefix: "!".to_string(),
             commands_permissions: HashMap::new(),
+            commands_aliases: HashMap::new(),
         }
     }
 }

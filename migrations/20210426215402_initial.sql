@@ -106,3 +106,13 @@ CREATE TABLE IF NOT EXISTS command_permission
     FOREIGN KEY (user_id) REFERENCES user (id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS command_alias
+(
+    id            INTEGER PRIMARY KEY NOT NULL UNIQUE,
+    user_id       INTEGER             NOT NULL,
+    command       TEXT                NOT NULL,
+    alias         TEXT                NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);

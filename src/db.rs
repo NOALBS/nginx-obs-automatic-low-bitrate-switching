@@ -119,6 +119,25 @@ impl Db {
         Ok(permissions)
     }
 
+    pub async fn get_command_aliases(
+        &self,
+        id: i64,
+    ) -> Result<HashMap<String, Command>, error::Error> {
+        let mut aliases = HashMap::new();
+
+        let command_aliases: Vec<CommandAlias> =
+            sqlx::query_as::<_, CommandAlias>("SELECT * FROM command_alias WHERE user_id = ?")
+                .bind(id)
+                .fetch_all(&self.pool)
+                .await?;
+
+        for alias in command_aliases {
+            aliases.insert(alias.alias, alias.command);
+        }
+
+        Ok(aliases)
+    }
+
     // pub async fn get_everything(&self) -> Result<(), error::Error> {
     //     Ok(
     //         sqlx::query_as::<_, ???>("
@@ -196,4 +215,10 @@ pub struct ChatSettings {
 pub struct CommandPermission {
     command: Command,
     permission: Permission,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+pub struct CommandAlias {
+    command: Command,
+    alias: String,
 }
