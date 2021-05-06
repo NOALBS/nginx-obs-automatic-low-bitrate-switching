@@ -119,6 +119,24 @@ impl ChatHandler {
         }
     }
 
+    pub async fn username_to_db_user_number(&self, platform: &Platform, channel: &str) -> i64 {
+        let dbr = self.db.read().await;
+        // Unwrap should be fine since there should be no users that are
+        // connected to chat without being in the db
+        dbr.iter()
+            .find_map(|(k, b)| {
+                if b.connections
+                    .iter()
+                    .any(|u| &u.platform == platform && u.channel == channel)
+                {
+                    Some(k.to_owned())
+                } else {
+                    None
+                }
+            })
+            .unwrap()
+    }
+
     // TODO: Handle permissions per channel and prefix for command
     pub async fn handle_command(&self, msg: ChatHandlerMessage) -> Option<String> {
         dbg!(&msg);
@@ -126,17 +144,11 @@ impl ChatHandler {
         // Get the current channel settings from the database
         let dbr = self.db.read().await;
         let user_data = dbr
-            .iter()
-            .find_map(|(_, b)| {
-                if b.connections
-                    .iter()
-                    .any(|u| u.platform == msg.platform && u.channel == msg.channel)
-                {
-                    Some(b)
-                } else {
-                    None
-                }
-            })
+            .get(
+                &self
+                    .username_to_db_user_number(&msg.platform, &msg.channel)
+                    .await,
+            )
             .unwrap();
 
         let udcs_lock = user_data.chat_state.lock().await;
@@ -216,7 +228,7 @@ impl ChatHandler {
             Command::Public => todo!(),
             Command::Mod => todo!(),
             Command::Notify => Self::notify(&user_data, split_message.next()).await,
-            Command::Autostop => todo!(),
+            Command::Autostop => Self::autostop(&user_data, split_message.next()).await,
             Command::Rec => todo!(),
             Command::Fix => todo!(),
             Command::Alias => todo!(),
@@ -400,29 +412,40 @@ impl ChatHandler {
 
     pub async fn notify(data: &Noalbs, enabled: Option<&str>) -> String {
         let mut lock = data.switcher_state.lock().await;
-        let asn = "Auto switch notification";
+        Self::handle_enable(
+            &mut lock.auto_switch_notification,
+            enabled,
+            "Auto switch notification",
+        )
+        .await
+    }
 
+    pub async fn autostop(data: &Noalbs, enabled: Option<&str>) -> String {
+        let mut lock = data.chat_state.lock().await;
+
+        Self::handle_enable(
+            &mut lock.enable_auto_stop_stream,
+            enabled,
+            "Auto stop stream",
+        )
+        .await
+    }
+
+    async fn handle_enable(edit: &mut bool, enabled: Option<&str>, res: &str) -> String {
         if let Some(enabled) = enabled {
             if let Ok(b) = enabled_to_bool(enabled) {
-                lock.auto_switch_notification = b;
+                *edit = b;
 
                 return if b {
-                    format!("{} enabled", asn)
+                    format!("{} enabled", res)
                 } else {
-                    format!("{} disabled", asn)
+                    format!("{} disabled", res)
                 };
             }
         }
 
-        format!(
-            "{} is {}",
-            asn,
-            if lock.auto_switch_notification {
-                "enabled"
-            } else {
-                "disabled"
-            }
-        )
+        format!("{} is {}", res, if *edit { "enabled" } else { "disabled" })
+    }
     }
 }
 

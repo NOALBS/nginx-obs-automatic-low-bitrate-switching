@@ -207,6 +207,7 @@ pub enum StreamServerKind {
 pub struct ChatSettings {
     pub enable_public_commands: bool,
     pub enable_mod_commands: bool,
+    pub enable_auto_stop_stream: bool,
     pub prefix: String,
     pub language: ChatLanguage,
 }

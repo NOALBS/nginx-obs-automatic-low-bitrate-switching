@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS chat_settings
     user_id                   INTEGER             NOT NULL,
     enable_public_commands    INTEGER             NOT NULL DEFAULT 0,
     enable_mod_commands       INTEGER             NOT NULL DEFAULT 0,
+    enable_auto_stop_stream   INTEGER             NOT NULL DEFAULT 1,
     prefix                    TEXT                NOT NULL DEFAULT "!",
     language                  TEXT                NOT NULL DEFAULT "en",
     FOREIGN KEY (user_id) REFERENCES user (id)

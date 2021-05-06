@@ -30,17 +30,38 @@ impl Twitch {
             TwitchIRCClient::<TCPTransport, StaticLoginCredentials>::new(config);
 
         let chat_client = client.clone();
+        let db3 = db.clone();
         let reader_handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
                 // println!("Received message: {:?}", message);
                 let cc = chat_client.clone();
                 let ch = chat_handler.clone();
+                let db = db3.clone();
 
                 match message {
                     ServerMessage::Notice(msg) => {
                         if msg.message_text == "Login authentication failed" {
                             error!("Twitch authentication failed");
                             panic!("Twitch authentication failed");
+                        }
+
+                        if msg.message_id == Some("host_on".to_string()) {
+                            tokio::spawn(async move {
+                                let dbr = db.read().await;
+                                let chan = &msg.channel_login.unwrap();
+                                let user = dbr
+                                    .get(
+                                        &ch.username_to_db_user_number(&Platform::Twitch, &chan)
+                                            .await,
+                                    )
+                                    .unwrap();
+
+                                if user.chat_state.lock().await.enable_auto_stop_stream {
+                                    log::debug!("Channel started hosting, stopping the stream");
+                                    let res = chat_handler::ChatHandler::stop(user).await;
+                                    let _ = cc.say(chan.to_string(), res).await;
+                                }
+                            });
                         }
                     }
                     ServerMessage::Privmsg(msg) => {
