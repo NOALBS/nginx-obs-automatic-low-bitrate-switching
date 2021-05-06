@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS stream_server
 (
     id                 INTEGER PRIMARY KEY NOT NULL UNIQUE,
     user_id            INTEGER             NOT NULL,
+    name               TEXT                NOT NULL,
     server             TEXT                NOT NULL,
     stats_url          TEXT                NOT NULL,
     application        TEXT                NOT NULL,

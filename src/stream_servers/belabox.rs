@@ -20,6 +20,9 @@ pub struct Belabox {
 
     /// StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
     pub publisher: String,
+
+    /// A name to differentiate in case of multiple stream servers
+    pub name: String,
 }
 
 impl Belabox {
@@ -113,6 +116,7 @@ impl From<db::StreamServer> for Belabox {
         Self {
             stats_url: item.stats_url,
             publisher: item.application,
+            name: item.name,
         }
     }
 }

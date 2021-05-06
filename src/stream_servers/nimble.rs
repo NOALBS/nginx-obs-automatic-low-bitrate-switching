@@ -15,6 +15,9 @@ pub struct Nimble {
 
     /// Outgoing stream "Stream Name"
     pub key: String,
+
+    /// A name to differentiate in case of multiple stream servers
+    pub name: String,
 }
 
 impl Nimble {
@@ -50,6 +53,7 @@ impl From<db::StreamServer> for Nimble {
             stats_url: item.stats_url,
             application: item.application,
             key: item.key,
+            name: item.name,
         }
     }
 }

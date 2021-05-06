@@ -67,6 +67,9 @@ pub struct Nginx {
 
     /// Stream key
     pub key: String,
+
+    /// A name to differentiate in case of multiple stream servers
+    pub name: String,
 }
 
 impl Nginx {
@@ -155,12 +158,12 @@ impl StreamServersCommands for Nginx {
         let stats = if let Some(stats) = self.get_stats().await {
             stats
         } else {
-            return "Offline".to_string();
+            return format!("{}: offline", self.name);
         };
 
         let bitrate = stats.bw_video / 1024;
 
-        format!("{} Kbps", bitrate)
+        format!("{}: {} Kbps", self.name, bitrate)
     }
 
     async fn source_info(&self) -> String {
@@ -176,6 +179,7 @@ impl From<db::StreamServer> for Nginx {
             stats_url: item.stats_url,
             application: item.application,
             key: item.key,
+            name: item.name,
         }
     }
 }

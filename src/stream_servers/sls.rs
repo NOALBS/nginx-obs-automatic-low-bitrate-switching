@@ -27,6 +27,9 @@ pub struct SrtLiveServer {
 
     /// StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
     pub publisher: String,
+
+    /// A name to differentiate in case of multiple stream servers
+    pub name: String,
 }
 
 impl SrtLiveServer {
@@ -121,6 +124,7 @@ impl From<db::StreamServer> for SrtLiveServer {
         Self {
             stats_url: item.stats_url,
             publisher: item.application,
+            name: item.name,
         }
     }
 }
