@@ -4,7 +4,7 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS user
 (
     id          INTEGER PRIMARY KEY NOT NULL UNIQUE,
-    username    TEXT                NOT NULL
+    username    TEXT                NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS connection
