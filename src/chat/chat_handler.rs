@@ -231,7 +231,7 @@ impl ChatHandler {
             Command::Autostop => Self::autostop(&user_data, split_message.next()).await,
             Command::Rec => todo!(),
             Command::Fix => todo!(),
-            Command::Alias => todo!(),
+            Command::Alias => Self::alias(&user_data, split_message).await,
             _ => return None,
         })
     }
@@ -446,6 +446,46 @@ impl ChatHandler {
 
         format!("{} is {}", res, if *edit { "enabled" } else { "disabled" })
     }
+
+    pub async fn alias<'a, I>(data: &Noalbs, args: I) -> String
+    where
+        I: IntoIterator<Item = &'a str>,
+    {
+        let mut args = args.into_iter();
+        let a1 = args.next();
+        let a2 = args.next();
+
+        if a1.is_none() || a2.is_none() {
+            return "Error incorrect arguments given".to_string();
+        }
+
+        let a1 = a1.unwrap();
+        let a2 = a2.unwrap();
+
+        let mut lock = data.chat_state.lock().await;
+
+        // remove alias
+        if dbg!(a1) == "rem" {
+            if !lock.commands_aliases.contains_key(a2) {
+                return format!("Alias {} doesn't exist", a2);
+            }
+
+            lock.commands_aliases.remove(a2);
+            return format!("Alias {} removed", a2);
+        }
+
+        // add alias
+        if lock.commands_aliases.contains_key(a1) {
+            return format!("{} already used as alias", a1);
+        }
+
+        let command: Command = match a2.parse() {
+            Ok(command) => command,
+            Err(_) => return format!("Command {} doesn't exist", a2),
+        };
+
+        lock.commands_aliases.insert(a1.to_string(), command);
+        format!("Added alias {} -> {}", a1, a2)
     }
 }
 
