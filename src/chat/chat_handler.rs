@@ -13,7 +13,6 @@ pub enum SupportedChat {
 #[derive(Debug, PartialEq, Eq, Hash, sqlx::Type, Clone, Copy)]
 #[sqlx(rename_all = "lowercase")]
 pub enum Command {
-    Test,
     Bitrate,
     Switch,
     Start,
@@ -32,8 +31,9 @@ pub enum Command {
     Rec,
     Fix,
     Alias,
+    Version,
 
-    // Where should i put platform specific
+    // FIXME: Where should i put platform specific
     Host,
     Unhost,
     Raid,
@@ -44,7 +44,6 @@ impl std::str::FromStr for Command {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "test" => Ok(Command::Test),
             "bitrate" => Ok(Command::Bitrate),
             "switch" => Ok(Command::Switch),
             "start" => Ok(Command::Start),
@@ -63,6 +62,11 @@ impl std::str::FromStr for Command {
             "rec" => Ok(Command::Rec),
             "fix" => Ok(Command::Fix),
             "alias" => Ok(Command::Alias),
+            "noalbsversion" => Ok(Command::Version),
+
+            "host" => Ok(Command::Host),
+            "unhost" => Ok(Command::Unhost),
+            "raid" => Ok(Command::Raid),
             _ => Err(format!("'{}' is not a valid command", s)),
         }
     }
@@ -137,7 +141,7 @@ impl ChatHandler {
             .unwrap()
     }
 
-    // TODO: Handle permissions per channel and prefix for command
+    /// Handles all chat commands.
     pub async fn handle_command(&self, msg: ChatHandlerMessage) -> Option<String> {
         dbg!(&msg);
 
@@ -159,14 +163,13 @@ impl ChatHandler {
             return None;
         }
 
-        let mut split_message = msg
-            .message
-            .strip_prefix(prefix)
-            .unwrap()
-            .split_ascii_whitespace();
+        let strip_message = msg.message.strip_prefix(prefix).unwrap();
 
-        // unwrap should be safe since there are no empty messages and already
-        // checked if message starts with prefix
+        if strip_message.is_empty() {
+            return None;
+        }
+
+        let mut split_message = strip_message.split_ascii_whitespace();
         let command = split_message.next().unwrap().to_lowercase();
 
         // Check aliases
@@ -205,7 +208,6 @@ impl ChatHandler {
         }
 
         Some(match command {
-            Command::Test => "hello test".to_string(),
             Command::Bitrate => Self::bitrate(&user_data).await,
             Command::Switch => Self::switch(&user_data, split_message.next()).await,
             Command::Start => Self::start(&user_data).await,
@@ -222,9 +224,9 @@ impl ChatHandler {
             Command::Rtrigger => {
                 Self::trigger(&user_data, TriggerType::Rtt, split_message.next()).await
             }
-            Command::Obsinfo => todo!(),
+            Command::Obsinfo => Self::obs_info(&user_data).await,
             Command::Refresh => todo!(),
-            Command::Sourceinfo => todo!(),
+            Command::Sourceinfo => Self::obs_info(&user_data).await,
             Command::Public => todo!(),
             Command::Mod => todo!(),
             Command::Notify => Self::notify(&user_data, split_message.next()).await,
@@ -232,6 +234,7 @@ impl ChatHandler {
             Command::Rec => todo!(),
             Command::Fix => todo!(),
             Command::Alias => Self::alias(&user_data, split_message).await,
+            Command::Version => Self::version(),
             _ => return None,
         })
     }
@@ -379,7 +382,7 @@ impl ChatHandler {
         let mut args = args.into_iter();
 
         match command {
-            "version" | "v" => Some(format!("Running NOALBS v{}", crate::VERSION)),
+            "version" => Some(Self::version()),
             "prefix" => {
                 if let Some(prefix) = args.next() {
                     Self::set_prefix(data, prefix.to_owned()).await;
@@ -398,6 +401,10 @@ impl ChatHandler {
             }
             _ => None,
         }
+    }
+
+    pub fn version() -> String {
+        format!("Running NOALBS v{}", crate::VERSION)
     }
 
     pub async fn set_bitrate_switcher_state(data: &Noalbs, enabled: bool) {
@@ -445,6 +452,10 @@ impl ChatHandler {
         }
 
         format!("{} is {}", res, if *edit { "enabled" } else { "disabled" })
+    }
+
+    pub async fn obs_info(_data: &Noalbs) -> String {
+        "Does anyone use this command?".to_string()
     }
 
     pub async fn alias<'a, I>(data: &Noalbs, args: I) -> String
@@ -501,6 +512,7 @@ fn enabled_to_bool(enabled: &str) -> Result<bool, Error> {
     Err(Error::EnabledToBoolConversionError)
 }
 
+/// Twitch specific command handler
 struct TwitchChatHandler {}
 impl TwitchChatHandler {
     pub async fn handle_command<'a, I>(command: &Command, args: I) -> Option<String>
