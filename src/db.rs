@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
     broadcasting_software::{obs, SwitchingScenes},
     chat::chat_handler::{Command, Permission},
-    error, stream_servers, ChatLanguage,
+    error, stream_servers, ChatLanguage, Noalbs,
 };
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 
@@ -155,6 +155,152 @@ impl Db {
     //             .await?,
     //     )
     // }
+
+    /// Creates an user with defaults
+    pub async fn create_user(&self, username: &str) -> Result<i64, error::Error> {
+        let user_id = sqlx::query!("INSERT INTO 'USER' (username) VALUES (?)", username)
+            .execute(&self.pool)
+            .await?
+            .last_insert_rowid();
+
+        sqlx::query!(
+            r#"
+            INSERT INTO broadcasting_software (user_id, host) 
+            VALUES(?, ?)
+            "#,
+            user_id,
+            "localhost",
+        )
+        .execute(&self.pool)
+        .await?;
+
+        sqlx::query!("INSERT INTO chat_settings (user_id) VALUES(?);", user_id)
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query!(
+            r#"
+            INSERT INTO stream_server
+            (user_id, name, server, stats_url, application, "key")
+            VALUES(?, 'N','nginx', 'http://localhost/stats', 'publish', 'live')
+            "#,
+            user_id
+        )
+        .execute(&self.pool)
+        .await?;
+
+        sqlx::query!("INSERT INTO switcher_state (user_id) VALUES(?);", user_id)
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query!("INSERT INTO switching_scenes (user_id) VALUES(?);", user_id)
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query!("INSERT INTO triggers (user_id) VALUES(?);", user_id)
+            .execute(&self.pool)
+            .await?;
+
+        self.add_default_aliases(user_id).await?;
+
+        Ok(user_id)
+    }
+
+    pub async fn add_default_aliases(&self, id: i64) -> Result<(), error::Error> {
+        self.add_alias(
+            id,
+            CommandAlias {
+                command: Command::Refresh,
+                alias: "r".to_string(),
+            },
+        )
+        .await?;
+
+        self.add_alias(
+            id,
+            CommandAlias {
+                command: Command::Fix,
+                alias: "f".to_string(),
+            },
+        )
+        .await?;
+
+        self.add_alias(
+            id,
+            CommandAlias {
+                command: Command::Bitrate,
+                alias: "b".to_string(),
+            },
+        )
+        .await?;
+
+        self.add_alias(
+            id,
+            CommandAlias {
+                command: Command::Refresh,
+                alias: "r".to_string(),
+            },
+        )
+        .await?;
+
+        self.add_alias(
+            id,
+            CommandAlias {
+                command: Command::Switch,
+                alias: "ss".to_string(),
+            },
+        )
+        .await?;
+
+        Ok(())
+    }
+
+    // TODO: Check if alias already exists?
+    pub async fn add_alias(
+        &self,
+        id: i64,
+        command_alias: CommandAlias,
+    ) -> Result<(), error::Error> {
+        sqlx::query!(
+            r#"
+            INSERT INTO command_alias (user_id, command, alias)
+            VALUES(?,?,?);"#,
+            id,
+            command_alias.command,
+            command_alias.alias,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn add_connection(
+        &self,
+        id: i64,
+        connection: Connection,
+    ) -> Result<(), error::Error> {
+        sqlx::query!(
+            r#"
+            INSERT INTO connection (user_id, channel, platform)
+            VALUES(?,?,?);"#,
+            id,
+            connection.channel,
+            connection.platform
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_user(&self, id: i64) -> Result<(), error::Error> {
+        sqlx::query!("DELETE FROM 'user' WHERE id = ?", id,)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, sqlx::FromRow)]
