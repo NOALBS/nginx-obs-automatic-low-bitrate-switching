@@ -59,7 +59,7 @@ impl std::str::FromStr for Command {
             "mod" => Ok(Command::Mod),
             "notify" => Ok(Command::Notify),
             "autostop" => Ok(Command::Autostop),
-            "rec" => Ok(Command::Rec),
+            "record" => Ok(Command::Rec),
             "fix" => Ok(Command::Fix),
             "alias" => Ok(Command::Alias),
             "noalbsversion" => Ok(Command::Version),
@@ -231,7 +231,7 @@ impl ChatHandler {
             Command::Mod => todo!(),
             Command::Notify => Self::notify(&user_data, split_message.next()).await,
             Command::Autostop => Self::autostop(&user_data, split_message.next()).await,
-            Command::Rec => todo!(),
+            Command::Rec => Self::record(&user_data).await,
             Command::Fix => todo!(),
             Command::Alias => Self::alias(&user_data, split_message).await,
             Command::Version => Self::version(),
@@ -497,6 +497,23 @@ impl ChatHandler {
 
         lock.commands_aliases.insert(a1.to_string(), command);
         format!("Added alias {} -> {}", a1, a2)
+    }
+
+    // Record is a toggle
+    async fn record(data: &Noalbs) -> String {
+        let status = data.broadcasting_software.recording_status().await;
+        data.broadcasting_software.toggle_recording().await;
+
+        match status {
+            Ok(rs) => {
+                if rs.is_recording {
+                    return "Recording stopped".to_string();
+                }
+
+                "Recording started".to_string()
+            }
+            Err(_) => "Error getting recording status".to_string(),
+        }
     }
 }
 

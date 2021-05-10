@@ -318,4 +318,20 @@ impl Obs {
             Err(Error::UnableInitialConnection)
         }
     }
+
+    pub async fn toggle_recording(&self) -> Result<(), Error> {
+        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+            Ok(c.recording().start_stop_recording().await?)
+        } else {
+            Err(Error::UnableInitialConnection)
+        }
+    }
+
+    pub async fn recording_status(&self) -> Result<obws::responses::RecordingStatus, Error> {
+        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+            Ok(c.recording().get_recording_status().await?)
+        } else {
+            Err(Error::UnableInitialConnection)
+        }
+    }
 }
