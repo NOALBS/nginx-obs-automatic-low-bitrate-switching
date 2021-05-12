@@ -8,7 +8,7 @@ pub mod switcher;
 use broadcasting_software::obs::Obs;
 use std::sync::Arc;
 use stream_servers::Bsl;
-use tokio::sync::{broadcast::Sender, Mutex};
+use tokio::sync::{broadcast::Sender, Mutex, RwLock};
 
 pub use error::Error;
 pub use switcher::Switcher;
@@ -72,7 +72,7 @@ pub enum ChatLanguage {
 
 pub struct Noalbs {
     username: i64,
-    pub broadcasting_software: Arc<Obs>,
+    pub broadcasting_software: Arc<RwLock<Obs>>,
     pub switcher_state: Arc<Mutex<switcher::SwitcherState>>,
     pub chat_state: Arc<Mutex<chat::State>>,
     pub broadcast_sender: Sender<AutomaticSwitchMessage>,
@@ -91,7 +91,7 @@ impl Noalbs {
         broadcast_sender: Sender<AutomaticSwitchMessage>,
         connections: Vec<db::Connection>,
     ) -> Noalbs {
-        let broadcasting_software = Arc::new(broadcasting_software);
+        let broadcasting_software = Arc::new(RwLock::new(broadcasting_software));
         let switcher_state = Arc::new(Mutex::new(switcher_state));
         let chat_state = Arc::new(Mutex::new(chat_state));
 

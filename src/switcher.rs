@@ -2,13 +2,12 @@ use std::{sync::Arc, time::Duration};
 
 use crate::{
     broadcasting_software::obs::Obs,
-    chat::twitch::Twitch,
     db, error,
     stream_servers::{Bsl, SwitchType, Triggers},
     AutomaticSwitchMessage,
 };
 use log::{debug, error, info};
-use tokio::sync::{broadcast, mpsc, Mutex, Notify};
+use tokio::sync::{broadcast, Mutex, Notify, RwLock};
 
 /// All the data that can be changed outside of the switcher
 pub struct SwitcherState {
@@ -89,7 +88,7 @@ impl From<db::SwitcherState> for SwitcherState {
 
 pub struct Switcher {
     // Obs etc..
-    broadcasting_software: Arc<Obs>,
+    broadcasting_software: Arc<RwLock<Obs>>,
 
     // TODO: Maybe replace chat with just a Tx so it will send msg's to anyone who's receiving
     // probably also make use of a mpms channel
@@ -104,7 +103,7 @@ pub struct Switcher {
 impl Switcher {
     pub fn new(
         for_channel: i64,
-        broadcasting_software: Arc<Obs>,
+        broadcasting_software: Arc<RwLock<Obs>>,
         state: Arc<Mutex<SwitcherState>>,
         notification: broadcast::Sender<AutomaticSwitchMessage>,
     ) -> Self {
@@ -118,7 +117,7 @@ impl Switcher {
 
     pub async fn run(self) -> Result<(), error::Error> {
         loop {
-            info!("Running switcher for {}", self.for_channel);
+            debug!("Running switcher for {}", self.for_channel);
 
             let sleep = { self.state.lock().await.request_interval };
             tokio::time::sleep(sleep).await;
@@ -129,9 +128,10 @@ impl Switcher {
                 continue;
             }
 
-            let bs = &self.broadcasting_software;
+            let bs = &self.broadcasting_software.read().await;
             let current_scene = bs.get_current_scene().await;
             let can_switch = bs.can_switch(&current_scene).await;
+            drop(bs);
             debug!("Can switch: {}", can_switch);
             debug!("Current scene: {}", current_scene);
 
@@ -151,15 +151,17 @@ impl Switcher {
             return Some(state.switcher_enabled_notifier());
         }
 
-        if !self.broadcasting_software.is_connected().await {
+        let bs = self.broadcasting_software.read().await;
+
+        if !bs.is_connected().await {
             info!("Waiting for OBS connection");
-            return Some(self.broadcasting_software.connected_notifier());
+            return Some(bs.connected_notifier());
         }
 
         // Yes this will wait even if you change `only_switch_when_streaming`
-        if state.only_switch_when_streaming && !self.broadcasting_software.is_streaming().await {
+        if state.only_switch_when_streaming && !bs.is_streaming().await {
             info!("Waiting till OBS starts streaming");
-            return Some(self.broadcasting_software.start_streaming_notifier());
+            return Some(bs.start_streaming_notifier());
         }
 
         None
@@ -183,14 +185,15 @@ impl Switcher {
 
     pub async fn switch(&self) -> Result<(), error::Error> {
         let switch = self.next_switch_type().await;
-        let scene = &self.broadcasting_software.type_to_scene(&switch).await;
+        let bs = &self.broadcasting_software.read().await;
+        let scene = &bs.type_to_scene(&switch).await;
 
         match switch {
             SwitchType::Normal | SwitchType::Low => {
                 self.switch_if_necessary(&scene).await?;
 
                 let scene = scene.to_owned();
-                self.broadcasting_software.set_prev_scene(scene).await;
+                bs.set_prev_scene(scene).await;
             }
             _ => {
                 self.switch_if_necessary(&scene).await?;
@@ -201,7 +204,7 @@ impl Switcher {
     }
 
     pub async fn switch_if_necessary(&self, switch_scene: &str) -> Result<(), error::Error> {
-        let bs = &self.broadcasting_software;
+        let bs = &self.broadcasting_software.read().await;
         let current_scene = bs.get_current_scene().await;
 
         if current_scene == switch_scene {
