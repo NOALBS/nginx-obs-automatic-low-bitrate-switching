@@ -4,7 +4,6 @@ use crate::{
     broadcasting_software::obs::Obs,
     db, error,
     stream_servers::{Bsl, SwitchType, Triggers},
-    AutomaticSwitchMessage,
 };
 use log::{debug, error, info};
 use tokio::sync::{broadcast, Mutex, Notify, RwLock};
@@ -184,26 +183,30 @@ impl Switcher {
     }
 
     pub async fn switch(&self) -> Result<(), error::Error> {
-        let switch = self.next_switch_type().await;
+        let switch_type = self.next_switch_type().await;
         let bs = &self.broadcasting_software.read().await;
-        let scene = &bs.type_to_scene(&switch).await;
+        let scene = &bs.type_to_scene(&switch_type).await;
 
-        match switch {
+        match switch_type {
             SwitchType::Normal | SwitchType::Low => {
-                self.switch_if_necessary(&scene).await?;
+                self.switch_if_necessary(&scene, switch_type).await?;
 
                 let scene = scene.to_owned();
                 bs.set_prev_scene(scene).await;
             }
             _ => {
-                self.switch_if_necessary(&scene).await?;
+                self.switch_if_necessary(&scene, switch_type).await?;
             }
         };
 
         Ok(())
     }
 
-    pub async fn switch_if_necessary(&self, switch_scene: &str) -> Result<(), error::Error> {
+    pub async fn switch_if_necessary(
+        &self,
+        switch_scene: &str,
+        switch_type: SwitchType,
+    ) -> Result<(), error::Error> {
         let bs = &self.broadcasting_software.read().await;
         let current_scene = bs.get_current_scene().await;
 
@@ -222,9 +225,17 @@ impl Switcher {
             let _ = self.notification.send(AutomaticSwitchMessage {
                 channel: self.for_channel,
                 scene: switch_scene.to_string(),
+                switch_type,
             });
         }
 
         Ok(())
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct AutomaticSwitchMessage {
+    pub channel: i64,
+    pub scene: String,
+    pub switch_type: SwitchType,
 }

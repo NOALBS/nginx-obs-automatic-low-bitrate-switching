@@ -1,4 +1,4 @@
-use crate::{db, error::Error, stream_servers, Noalbs};
+use crate::{db, error::Error, noalbs::Noalbs, stream_servers, switcher};
 use db::Platform;
 use log::error;
 use std::{collections::HashMap, sync::Arc};
@@ -509,6 +509,24 @@ impl ChatHandler {
             }
             Err(_) => "Error getting recording status".to_string(),
         }
+    }
+
+    pub async fn auto_switch_message(
+        user: &Noalbs,
+        asm: switcher::AutomaticSwitchMessage,
+    ) -> String {
+        let mut message = format!(r#"Scene switched to "{}""#, asm.scene);
+
+        use stream_servers::SwitchType::*;
+        match asm.switch_type {
+            Normal | Low => {
+                let bitrate = Self::bitrate(user).await;
+                message += &format!(" | {}", bitrate);
+            }
+            Previous | Offline => {}
+        }
+
+        message
     }
 }
 
