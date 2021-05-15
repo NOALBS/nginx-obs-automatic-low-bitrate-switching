@@ -2,10 +2,18 @@ use std::collections::HashMap;
 
 use crate::{
     broadcasting_software::{obs, SwitchingScenes},
-    chat::chat_handler::{Command, Permission},
-    error, stream_servers, ChatLanguage, Noalbs,
+    chat::{
+        self,
+        chat_handler::{Command, Permission},
+        ChatLanguage,
+    },
+    error,
+    noalbs::Noalbs,
+    stream_servers,
+    switcher::{self, AutomaticSwitchMessage},
 };
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
+use tokio::sync::broadcast::Sender;
 
 const DB_NAME: &str = "sqlite:database.db?mode=rwc";
 
@@ -300,6 +308,110 @@ impl Db {
             .await?;
 
         Ok(())
+    }
+
+    pub async fn update_switcher_state(
+        &self,
+        id: i64,
+        switcher_state: &switcher::SwitcherState,
+    ) -> Result<(), error::Error> {
+        let req_int = switcher_state.request_interval.as_secs() as u32;
+        sqlx::query!(
+            r#"
+            UPDATE switcher_state
+            SET request_interval=?, bitrate_switcher_enabled=?,
+            only_switch_when_streaming=?, auto_switch_notification=?
+            WHERE id=?"#,
+            req_int,
+            switcher_state.bitrate_switcher_enabled,
+            switcher_state.only_switch_when_streaming,
+            switcher_state.auto_switch_notification,
+            id,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn update_triggers(
+        &self,
+        id: i64,
+        triggers: &stream_servers::Triggers,
+    ) -> Result<(), error::Error> {
+        sqlx::query!(
+            r#"
+            UPDATE triggers
+            SET low=?, rtt=?, offline=?
+            WHERE id=?"#,
+            triggers.low,
+            triggers.rtt,
+            triggers.offline,
+            id,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn load_user(
+        &self,
+        user_id: i64,
+        tx: Sender<AutomaticSwitchMessage>,
+    ) -> Result<Noalbs, error::Error> {
+        let obs_config = self.get_broadcasting_software_details(user_id).await?;
+        let switching_scenes = self.get_switching_scenes(user_id).await?;
+        let broadcasting_software = obs::Obs::connect(obs_config, switching_scenes).await;
+
+        let mut switcher_state =
+            switcher::SwitcherState::from(self.get_switcher_state(user_id).await?);
+        switcher_state.triggers = self.get_triggers(user_id).await?;
+
+        // TODO: what do i want to do with channel_admin
+        let connections = self.get_connections(user_id).await?;
+        let mut chat_state = chat::State::from(self.get_chat_settings(user_id).await?);
+        chat_state.commands_permissions = self.get_command_permissions(user_id).await?;
+        chat_state.commands_aliases = self.get_command_aliases(user_id).await?;
+
+        let noalbs_user = Noalbs::new(
+            user_id,
+            broadcasting_software,
+            switcher_state,
+            chat_state,
+            tx.clone(),
+            connections,
+            self.clone(),
+        );
+
+        // TODO: Please refactor this
+        use StreamServerKind::*;
+        for stream_servers in self.get_stream_servers(user_id).await? {
+            match stream_servers.server {
+                Belabox => {
+                    noalbs_user
+                        .add_stream_server(stream_servers::belabox::Belabox::from(stream_servers))
+                        .await
+                }
+                Nginx => {
+                    noalbs_user
+                        .add_stream_server(stream_servers::nginx::Nginx::from(stream_servers))
+                        .await
+                }
+                Nimble => {
+                    noalbs_user
+                        .add_stream_server(stream_servers::nimble::Nimble::from(stream_servers))
+                        .await
+                }
+                Sls => {
+                    noalbs_user
+                        .add_stream_server(stream_servers::sls::SrtLiveServer::from(stream_servers))
+                        .await
+                }
+            };
+        }
+
+        Ok(noalbs_user)
     }
 }
 
