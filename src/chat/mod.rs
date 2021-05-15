@@ -6,6 +6,12 @@ use self::chat_handler::{Command, Permission};
 pub mod chat_handler;
 pub mod twitch;
 
+#[derive(Debug, sqlx::Type)]
+#[sqlx(rename_all = "lowercase")]
+pub enum ChatLanguage {
+    En,
+}
+
 pub struct State {
     pub enable_public_commands: bool,
     pub enable_mod_commands: bool,
@@ -14,6 +20,7 @@ pub struct State {
     pub prefix: String,
     pub commands_permissions: HashMap<Command, Permission>,
     pub commands_aliases: HashMap<String, Command>,
+    pub language: ChatLanguage,
 }
 
 impl Default for State {
@@ -26,6 +33,7 @@ impl Default for State {
             prefix: "!".to_string(),
             commands_permissions: HashMap::new(),
             commands_aliases: HashMap::new(),
+            language: ChatLanguage::En,
         }
     }
 }
