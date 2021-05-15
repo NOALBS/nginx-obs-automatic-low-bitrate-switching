@@ -102,14 +102,21 @@ impl SwitchLogic for SrtLiveServer {
 
 #[async_trait]
 impl StreamServersCommands for SrtLiveServer {
-    async fn bitrate(&self) -> String {
+    async fn bitrate(&self) -> super::Bitrate {
         let stats = if let Some(stats) = self.get_stats().await {
             stats
         } else {
-            return "Offline".to_string();
+            return super::Bitrate {
+                name: &self.name,
+                message: None,
+            };
         };
 
-        format!("{} Kbps RTT {} ms", stats.bitrate, stats.rtt.round())
+        let message = format!("{}, {} ms", stats.bitrate, stats.rtt.round());
+        super::Bitrate {
+            name: &self.name,
+            message: Some(message),
+        }
     }
 
     async fn source_info(&self) -> String {

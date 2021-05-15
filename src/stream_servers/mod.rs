@@ -5,7 +5,7 @@ pub mod nginx;
 pub mod nimble;
 pub mod sls;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum SwitchType {
     Normal,
     Low,
@@ -22,11 +22,17 @@ pub trait SwitchLogic {
 /// Chat commands
 #[async_trait]
 pub trait StreamServersCommands {
-    async fn bitrate(&self) -> String;
+    async fn bitrate(&self) -> Bitrate;
     async fn source_info(&self) -> String;
 }
 
 pub trait Bsl: SwitchLogic + StreamServersCommands + Send + Sync {}
+
+#[derive(Debug)]
+pub struct Bitrate<'a> {
+    pub name: &'a str,
+    pub message: Option<String>,
+}
 
 pub enum TriggerType {
     Low,

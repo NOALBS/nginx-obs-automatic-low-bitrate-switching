@@ -94,14 +94,21 @@ impl SwitchLogic for Belabox {
 
 #[async_trait]
 impl StreamServersCommands for Belabox {
-    async fn bitrate(&self) -> String {
+    async fn bitrate(&self) -> super::Bitrate {
         let stats = if let Some(stats) = self.get_stats().await {
             stats
         } else {
-            return "Offline".to_string();
+            return super::Bitrate {
+                name: &self.name,
+                message: None,
+            };
         };
 
-        format!("bitrate {} Kbps, RTT {} ms", stats.bitrate, stats.rtt)
+        let message = format!("{}, RTT {} ms", stats.bitrate, stats.rtt.round());
+        super::Bitrate {
+            name: &self.name,
+            message: Some(message),
+        }
     }
 
     async fn source_info(&self) -> String {

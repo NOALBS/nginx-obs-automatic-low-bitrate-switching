@@ -28,14 +28,14 @@ impl Nimble {
 
 #[async_trait]
 impl SwitchLogic for Nimble {
-    async fn switch(&self, triggers: &Triggers) -> super::SwitchType {
+    async fn switch(&self, _triggers: &Triggers) -> super::SwitchType {
         todo!()
     }
 }
 
 #[async_trait]
 impl StreamServersCommands for Nimble {
-    async fn bitrate(&self) -> String {
+    async fn bitrate(&self) -> super::Bitrate {
         todo!()
     }
 

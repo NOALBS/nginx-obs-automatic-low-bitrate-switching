@@ -275,30 +275,25 @@ impl ChatHandler {
         }
     }
 
-    pub async fn bitrate(data: &Noalbs) -> String {
-        let mut reply = "Current bitrate".to_string();
+    pub async fn bitrate(user: &Noalbs) -> String {
+        let mut msg = String::new();
 
-        let stats = {
-            let mut msg = String::new();
+        let servers = &user.switcher_state.lock().await.stream_servers;
 
-            let servers = &data.switcher_state.lock().await.stream_servers;
+        for (i, s) in servers.iter().enumerate() {
+            let t = s.bitrate().await;
+            let sep = if i == 0 || msg.is_empty() { "" } else { " - " };
 
-            if servers.len() > 1 {
-                reply += "s: ";
-            } else {
-                reply += ": ";
-            };
-
-            for (i, s) in servers.iter().enumerate() {
-                let t = s.bitrate().await;
-                let sep = if i == servers.len() - 1 { "" } else { " & " };
-                msg += &format!("{}{}", &t, sep);
+            if let Some(bitrate_message) = t.message {
+                msg += &format!("{}{}: {}", sep, t.name, bitrate_message);
             }
+        }
 
-            msg
-        };
+        if msg.is_empty() {
+            return "No connection :(".to_string();
+        }
 
-        reply + &stats
+        msg
     }
 
     // TODO: Make switch smarter

@@ -154,16 +154,21 @@ impl SwitchLogic for Nginx {
 
 #[async_trait]
 impl StreamServersCommands for Nginx {
-    async fn bitrate(&self) -> String {
+    async fn bitrate(&self) -> super::Bitrate {
         let stats = if let Some(stats) = self.get_stats().await {
             stats
         } else {
-            return format!("{}: offline", self.name);
+            return super::Bitrate {
+                name: &self.name,
+                message: None,
+            };
         };
 
         let bitrate = stats.bw_video / 1024;
-
-        format!("{}: {} Kbps", self.name, bitrate)
+        super::Bitrate {
+            name: &self.name,
+            message: Some(format!("{}", bitrate)),
+        }
     }
 
     async fn source_info(&self) -> String {
