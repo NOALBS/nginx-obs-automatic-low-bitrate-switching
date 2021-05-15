@@ -51,7 +51,7 @@ impl std::str::FromStr for Command {
             "noalbs" => Ok(Command::Noalbs),
             "trigger" => Ok(Command::Trigger),
             "otrigger" => Ok(Command::Otrigger),
-            "rtrigger" => Ok(Command::Obsinfo),
+            "rtrigger" => Ok(Command::Rtrigger),
             "obsinfo" => Ok(Command::Obsinfo),
             "refresh" => Ok(Command::Refresh),
             "sourceinfo" => Ok(Command::Sourceinfo),
@@ -111,20 +111,20 @@ pub struct ChatHandlerMessage {
 }
 
 pub struct ChatHandler {
-    pub db: Arc<RwLock<HashMap<i64, Noalbs>>>,
+    pub all_clients: Arc<RwLock<HashMap<i64, Noalbs>>>,
     default_permissions: HashMap<Command, Permission>,
 }
 
 impl ChatHandler {
-    pub fn new(db: Arc<RwLock<HashMap<i64, Noalbs>>>) -> Self {
+    pub fn new(all_clients: Arc<RwLock<HashMap<i64, Noalbs>>>) -> Self {
         Self {
-            db,
+            all_clients,
             default_permissions: Permission::default_permissions(),
         }
     }
 
     pub async fn username_to_db_user_number(&self, platform: &Platform, channel: &str) -> i64 {
-        let dbr = self.db.read().await;
+        let dbr = self.all_clients.read().await;
         // Unwrap should be fine since there should be no users that are
         // connected to chat without being in the db
         dbr.iter()
@@ -146,7 +146,7 @@ impl ChatHandler {
         dbg!(&msg);
 
         // Get the current channel settings from the database
-        let dbr = self.db.read().await;
+        let dbr = self.all_clients.read().await;
         let user_data = dbr
             .get(
                 &self
@@ -255,8 +255,14 @@ impl ChatHandler {
         false
     }
 
-    pub async fn start(data: &Noalbs) -> String {
-        match data.broadcasting_software.start_streaming().await {
+    pub async fn start(user: &Noalbs) -> String {
+        match user
+            .broadcasting_software
+            .read()
+            .await
+            .start_streaming()
+            .await
+        {
             Ok(_) => "Successfully started the stream".to_string(),
             Err(error) => {
                 error!("Error: {}", error);
@@ -265,8 +271,14 @@ impl ChatHandler {
         }
     }
 
-    pub async fn stop(data: &Noalbs) -> String {
-        match data.broadcasting_software.stop_streaming().await {
+    pub async fn stop(user: &Noalbs) -> String {
+        match user
+            .broadcasting_software
+            .read()
+            .await
+            .stop_streaming()
+            .await
+        {
             Ok(_) => "Successfully stopped the stream".to_string(),
             Err(error) => {
                 error!("Error: {}", error);
@@ -297,53 +309,30 @@ impl ChatHandler {
     }
 
     // TODO: Make switch smarter
-    pub async fn switch(data: &Noalbs, name: Option<&str>) -> String {
+    pub async fn switch(user: &Noalbs, name: Option<&str>) -> String {
         let name = match name {
             Some(name) => name,
             None => return "No scene specified".to_string(),
         };
 
-        match data.broadcasting_software.switch_scene(name).await {
+        match user
+            .broadcasting_software
+            .read()
+            .await
+            .switch_scene(name)
+            .await
+        {
             Ok(_) => {
                 format!("Scene successfully switched to \"{}\"", name)
             }
-            Err(_) => {
-                format!("Can't switch to scene \"{}\"", name)
+            Err(e) => {
+                format!("Error can't switch to scene \"{}\", {}", name, e)
             }
         }
     }
 
-    async fn get_trigger(data: &Noalbs, kind: stream_servers::TriggerType) -> Option<u32> {
-        let triggers = &data.switcher_state.lock().await.triggers;
-        dbg!(&triggers);
-
-        match kind {
-            TriggerType::Low => triggers.low,
-            TriggerType::Rtt => triggers.rtt,
-            TriggerType::Offline => triggers.offline,
-        }
-    }
-
-    async fn update_trigger(
-        data: &Noalbs,
-        kind: stream_servers::TriggerType,
-        value: u32,
-    ) -> String {
-        let mut state = data.switcher_state.lock().await;
-        let real_value = if value == 0 { None } else { Some(value) };
-
-        match kind {
-            TriggerType::Low => state.triggers.low = real_value,
-            TriggerType::Rtt => state.triggers.rtt = real_value,
-            TriggerType::Offline => state.triggers.offline = real_value,
-        }
-
-        format!("Trigger successfully set to {:?} Kbps", real_value)
-    }
-
-    // TODO: Save to file or handle that somewhere else
     pub async fn trigger(
-        data: &Noalbs,
+        user: &Noalbs,
         kind: stream_servers::TriggerType,
         value_string: Option<&str>,
     ) -> String {
@@ -352,7 +341,7 @@ impl ChatHandler {
             None => {
                 return format!(
                     "Current trigger set at {:?} Kbps",
-                    Self::get_trigger(data, kind).await
+                    user.get_trigger_by_type(kind).await
                 );
             }
         };
@@ -362,10 +351,14 @@ impl ChatHandler {
             Err(_) => return format!("Error editing trigger {} is not a valid value", value),
         };
 
-        Self::update_trigger(data, kind, value).await
+        if let Some(value) = user.update_trigger(kind, value).await {
+            format!("Trigger successfully set to {:?} Kbps", value)
+        } else {
+            "Trigger successfully disabled".to_string()
+        }
     }
 
-    pub async fn noalbs<'a, I>(data: &Noalbs, command: Option<&str>, args: I) -> Option<String>
+    pub async fn noalbs<'a, I>(user: &Noalbs, command: Option<&str>, args: I) -> Option<String>
     where
         I: IntoIterator<Item = &'a str>,
     {
@@ -380,18 +373,18 @@ impl ChatHandler {
             "version" => Some(Self::version()),
             "prefix" => {
                 if let Some(prefix) = args.next() {
-                    Self::set_prefix(data, prefix.to_owned()).await;
+                    user.set_prefix(prefix.to_owned()).await;
                     Some(format!("NOALBS prefix updated to {}", prefix))
                 } else {
                     None
                 }
             }
             "start" => {
-                Self::set_bitrate_switcher_state(data, true).await;
+                user.set_bitrate_switcher_state(true).await;
                 Some("Successfully enabled the switcher".to_string())
             }
             "stop" => {
-                Self::set_bitrate_switcher_state(data, false).await;
+                user.set_bitrate_switcher_state(false).await;
                 Some("Successfully disabled the switcher".to_string())
             }
             _ => None,
@@ -402,58 +395,39 @@ impl ChatHandler {
         format!("Running NOALBS v{}", crate::VERSION)
     }
 
-    pub async fn set_bitrate_switcher_state(data: &Noalbs, enabled: bool) {
-        let mut lock = data.switcher_state.lock().await;
-        lock.set_bitrate_switcher_enabled(enabled);
-    }
-
-    pub async fn set_prefix(data: &Noalbs, prefix: String) {
-        let mut lock = data.chat_state.lock().await;
-        lock.prefix = prefix;
-    }
-
-    pub async fn notify(data: &Noalbs, enabled: Option<&str>) -> String {
-        let mut lock = data.switcher_state.lock().await;
-        Self::handle_enable(
-            &mut lock.auto_switch_notification,
-            enabled,
-            "Auto switch notification",
-        )
-        .await
-    }
-
-    pub async fn autostop(data: &Noalbs, enabled: Option<&str>) -> String {
-        let mut lock = data.chat_state.lock().await;
-
-        Self::handle_enable(
-            &mut lock.enable_auto_stop_stream,
-            enabled,
-            "Auto stop stream",
-        )
-        .await
-    }
-
-    async fn handle_enable(edit: &mut bool, enabled: Option<&str>, res: &str) -> String {
+    pub async fn notify(user: &Noalbs, enabled: Option<&str>) -> String {
         if let Some(enabled) = enabled {
             if let Ok(b) = enabled_to_bool(enabled) {
-                *edit = b;
-
-                return if b {
-                    format!("{} enabled", res)
-                } else {
-                    format!("{} disabled", res)
-                };
+                user.set_notify(b).await;
             }
         }
 
-        format!("{} is {}", res, if *edit { "enabled" } else { "disabled" })
+        Self::generate_enable_string("Auto switch notification", user.get_notify().await)
     }
 
-    pub async fn obs_info(_data: &Noalbs) -> String {
+    pub async fn autostop(user: &Noalbs, enabled: Option<&str>) -> String {
+        if let Some(enabled) = enabled {
+            if let Ok(b) = enabled_to_bool(enabled) {
+                user.set_autostop(b).await;
+            }
+        }
+
+        Self::generate_enable_string("Auto stop stream", user.get_autostop().await)
+    }
+
+    fn generate_enable_string(res: &str, condition: bool) -> String {
+        format!(
+            "{} is {}",
+            res,
+            if condition { "enabled" } else { "disabled" }
+        )
+    }
+
+    pub async fn obs_info(_user: &Noalbs) -> String {
         "Does anyone use this command?".to_string()
     }
 
-    pub async fn alias<'a, I>(data: &Noalbs, args: I) -> String
+    pub async fn alias<'a, I>(user: &Noalbs, args: I) -> String
     where
         I: IntoIterator<Item = &'a str>,
     {
@@ -468,20 +442,18 @@ impl ChatHandler {
         let a1 = a1.unwrap();
         let a2 = a2.unwrap();
 
-        let mut lock = data.chat_state.lock().await;
-
         // remove alias
-        if dbg!(a1) == "rem" {
-            if !lock.commands_aliases.contains_key(a2) {
+        if a1 == "rem" {
+            if !user.contains_alias(a2).await {
                 return format!("Alias {} doesn't exist", a2);
             }
 
-            lock.commands_aliases.remove(a2);
+            user.remove_alias(a2).await;
             return format!("Alias {} removed", a2);
         }
 
         // add alias
-        if lock.commands_aliases.contains_key(a1) {
+        if user.contains_alias(a1).await {
             return format!("{} already used as alias", a1);
         }
 
@@ -490,14 +462,15 @@ impl ChatHandler {
             Err(_) => return format!("Command {} doesn't exist", a2),
         };
 
-        lock.commands_aliases.insert(a1.to_string(), command);
+        user.add_alias(a1.to_string(), command).await;
         format!("Added alias {} -> {}", a1, a2)
     }
 
     // Record is a toggle
-    async fn record(data: &Noalbs) -> String {
-        let status = data.broadcasting_software.recording_status().await;
-        data.broadcasting_software.toggle_recording().await;
+    async fn record(user: &Noalbs) -> String {
+        let bs = user.broadcasting_software.read().await;
+        let status = bs.recording_status().await;
+        let _ = bs.toggle_recording().await;
 
         match status {
             Ok(rs) => {
