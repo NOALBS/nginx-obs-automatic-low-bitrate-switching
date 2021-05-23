@@ -112,10 +112,13 @@ impl Noalbs {
     }
 
     pub async fn set_bitrate_switcher_state(&self, enabled: bool) {
-        // TODO: save to db
-
         let mut lock = self.switcher_state.lock().await;
         lock.set_bitrate_switcher_enabled(enabled);
+
+        let _ = self
+            .storage
+            .update_switcher_state(self.user_id, &lock)
+            .await;
     }
 
     pub async fn get_notify(&self) -> bool {
@@ -124,17 +127,20 @@ impl Noalbs {
     }
 
     pub async fn set_notify(&self, enabled: bool) {
-        // TODO: save to db
-
         let mut lock = self.switcher_state.lock().await;
         lock.auto_switch_notification = enabled;
+
+        let _ = self
+            .storage
+            .update_switcher_state(self.user_id, &lock)
+            .await;
     }
 
     pub async fn set_prefix(&self, prefix: String) {
-        // TODO: save to db
-
         let mut lock = self.chat_state.lock().await;
         lock.prefix = prefix;
+
+        let _ = self.storage.update_chat_settings(self.user_id, &lock).await;
     }
 
     pub async fn get_autostop(&self) -> bool {
@@ -143,10 +149,10 @@ impl Noalbs {
     }
 
     pub async fn set_autostop(&self, enabled: bool) {
-        // TODO: save to db
-
         let mut lock = self.chat_state.lock().await;
         lock.enable_auto_stop_stream = enabled;
+
+        let _ = self.storage.update_chat_settings(self.user_id, &lock).await;
     }
 
     pub async fn contains_alias(&self, alias: &str) -> bool {
@@ -155,16 +161,25 @@ impl Noalbs {
     }
 
     pub async fn add_alias(&self, alias: String, command: chat_handler::Command) {
-        // TODO: save to db
+        let _ = self
+            .storage
+            .add_alias(
+                self.user_id,
+                db::CommandAlias {
+                    command,
+                    alias: alias.to_owned(),
+                },
+            )
+            .await;
 
         let mut lock = self.chat_state.lock().await;
         lock.commands_aliases.insert(alias, command);
     }
 
     pub async fn remove_alias(&self, alias: &str) {
-        // TODO: save to db
-
         let mut lock = self.chat_state.lock().await;
         lock.commands_aliases.remove(alias);
+
+        let _ = self.storage.remove_alias(self.user_id, alias).await;
     }
 }

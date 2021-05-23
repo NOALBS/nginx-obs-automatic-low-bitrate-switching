@@ -39,10 +39,10 @@ impl Db {
             .await?)
     }
 
-    pub async fn get_connections(&self, id: i64) -> Result<Vec<Connection>, error::Error> {
+    pub async fn get_connections(&self, user_id: i64) -> Result<Vec<Connection>, error::Error> {
         Ok(
             sqlx::query_as::<_, Connection>("SELECT * FROM connection WHERE user_id = ?")
-                .bind(id)
+                .bind(user_id)
                 .fetch_all(&self.pool)
                 .await?,
         )
@@ -50,58 +50,67 @@ impl Db {
 
     pub async fn get_broadcasting_software_details(
         &self,
-        id: i64,
+        user_id: i64,
     ) -> Result<obs::Config, error::Error> {
         Ok(sqlx::query_as::<_, obs::Config>(
             "SELECT * FROM broadcasting_software WHERE user_id = ?",
         )
-        .bind(id)
+        .bind(user_id)
         .fetch_one(&self.pool)
         .await?)
     }
 
-    pub async fn get_switching_scenes(&self, id: i64) -> Result<SwitchingScenes, error::Error> {
+    pub async fn get_switching_scenes(
+        &self,
+        user_id: i64,
+    ) -> Result<SwitchingScenes, error::Error> {
         Ok(
             sqlx::query_as::<_, SwitchingScenes>(
                 "SELECT * FROM switching_scenes WHERE user_id = ?",
             )
-            .bind(id)
+            .bind(user_id)
             .fetch_one(&self.pool)
             .await?,
         )
     }
 
-    pub async fn get_switcher_state(&self, id: i64) -> Result<SwitcherState, error::Error> {
+    pub async fn get_switcher_state(&self, user_id: i64) -> Result<SwitcherState, error::Error> {
         Ok(
             sqlx::query_as::<_, SwitcherState>("SELECT * FROM switcher_state WHERE user_id = ?")
-                .bind(id)
+                .bind(user_id)
                 .fetch_one(&self.pool)
                 .await?,
         )
     }
 
-    pub async fn get_triggers(&self, id: i64) -> Result<stream_servers::Triggers, error::Error> {
+    pub async fn get_triggers(
+        &self,
+        user_id: i64,
+    ) -> Result<stream_servers::Triggers, error::Error> {
         Ok(sqlx::query_as::<_, stream_servers::Triggers>(
             "SELECT * FROM triggers WHERE user_id = ?",
         )
-        .bind(id)
+        .bind(user_id)
         .fetch_one(&self.pool)
         .await?)
     }
 
-    pub async fn get_stream_servers(&self, id: i64) -> Result<Vec<StreamServer>, error::Error> {
+    pub async fn get_stream_servers(
+        &self,
+        user_id: i64,
+    ) -> Result<Vec<StreamServer>, error::Error> {
         Ok(
             sqlx::query_as::<_, StreamServer>("SELECT * FROM stream_server WHERE user_id = ?")
-                .bind(id)
+                .bind(user_id)
                 .fetch_all(&self.pool)
                 .await?,
         )
     }
 
-    pub async fn get_chat_settings(&self, id: i64) -> Result<ChatSettings, error::Error> {
+    pub async fn get_chat_settings(&self, user_id: i64) -> Result<ChatSettings, error::Error> {
         Ok(
             sqlx::query_as::<_, ChatSettings>("SELECT * FROM chat_settings WHERE user_id = ?")
-                .bind(id)
+                .bind(user_id)
                 .fetch_one(&self.pool)
                 .await?,
         )
@@ -109,14 +118,14 @@ impl Db {
 
     pub async fn get_command_permissions(
         &self,
-        id: i64,
+        user_id: i64,
     ) -> Result<HashMap<Command, Permission>, error::Error> {
         let mut permissions = HashMap::new();
 
         let command_permissions: Vec<CommandPermission> = sqlx::query_as::<_, CommandPermission>(
             "SELECT * FROM command_permission WHERE user_id = ?",
         )
-        .bind(id)
+        .bind(user_id)
         .fetch_all(&self.pool)
         .await?;
 
@@ -129,13 +138,13 @@ impl Db {
 
     pub async fn get_command_aliases(
         &self,
-        id: i64,
+        user_id: i64,
     ) -> Result<HashMap<String, Command>, error::Error> {
         let mut aliases = HashMap::new();
 
         let command_aliases: Vec<CommandAlias> =
             sqlx::query_as::<_, CommandAlias>("SELECT * FROM command_alias WHERE user_id = ?")
-                .bind(id)
+                .bind(user_id)
                 .fetch_all(&self.pool)
                 .await?;
 
@@ -214,9 +223,9 @@ impl Db {
         Ok(user_id)
     }
 
-    pub async fn add_default_aliases(&self, id: i64) -> Result<(), error::Error> {
+    pub async fn add_default_aliases(&self, user_id: i64) -> Result<(), error::Error> {
         self.add_alias(
-            id,
+            user_id,
             CommandAlias {
                 command: Command::Refresh,
                 alias: "r".to_string(),
@@ -225,7 +234,7 @@ impl Db {
         .await?;
 
         self.add_alias(
-            id,
+            user_id,
             CommandAlias {
                 command: Command::Fix,
                 alias: "f".to_string(),
@@ -234,7 +243,7 @@ impl Db {
         .await?;
 
         self.add_alias(
-            id,
+            user_id,
             CommandAlias {
                 command: Command::Bitrate,
                 alias: "b".to_string(),
@@ -243,7 +252,7 @@ impl Db {
         .await?;
 
         self.add_alias(
-            id,
+            user_id,
             CommandAlias {
                 command: Command::Refresh,
                 alias: "r".to_string(),
@@ -252,7 +261,7 @@ impl Db {
         .await?;
 
         self.add_alias(
-            id,
+            user_id,
             CommandAlias {
                 command: Command::Switch,
                 alias: "ss".to_string(),
@@ -266,14 +275,14 @@ impl Db {
     // TODO: Check if alias already exists?
     pub async fn add_alias(
         &self,
-        id: i64,
+        user_id: i64,
         command_alias: CommandAlias,
     ) -> Result<(), error::Error> {
         sqlx::query!(
             r#"
             INSERT INTO command_alias (user_id, command, alias)
             VALUES(?,?,?);"#,
-            id,
+            user_id,
             command_alias.command,
             command_alias.alias,
         )
@@ -285,14 +294,14 @@ impl Db {
 
     pub async fn add_connection(
         &self,
-        id: i64,
+        user_id: i64,
         connection: Connection,
     ) -> Result<(), error::Error> {
         sqlx::query!(
             r#"
             INSERT INTO connection (user_id, channel, platform)
             VALUES(?,?,?);"#,
-            id,
+            user_id,
             connection.channel,
             connection.platform
         )
@@ -312,7 +321,7 @@ impl Db {
 
     pub async fn update_switcher_state(
         &self,
-        id: i64,
+        user_id: i64,
         switcher_state: &switcher::SwitcherState,
     ) -> Result<(), error::Error> {
         let req_int = switcher_state.request_interval.as_secs() as u32;
@@ -321,12 +330,12 @@ impl Db {
             UPDATE switcher_state
             SET request_interval=?, bitrate_switcher_enabled=?,
             only_switch_when_streaming=?, auto_switch_notification=?
-            WHERE id=?"#,
+            WHERE user_id=?"#,
             req_int,
             switcher_state.bitrate_switcher_enabled,
             switcher_state.only_switch_when_streaming,
             switcher_state.auto_switch_notification,
-            id,
+            user_id,
         )
         .execute(&self.pool)
         .await?;
@@ -336,18 +345,55 @@ impl Db {
 
     pub async fn update_triggers(
         &self,
-        id: i64,
+        user_id: i64,
         triggers: &stream_servers::Triggers,
     ) -> Result<(), error::Error> {
         sqlx::query!(
             r#"
             UPDATE triggers
             SET low=?, rtt=?, offline=?
-            WHERE id=?"#,
+            WHERE user_id=?"#,
             triggers.low,
             triggers.rtt,
             triggers.offline,
-            id,
+            user_id,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn update_chat_settings(
+        &self,
+        user_id: i64,
+        chat_state: &chat::State,
+    ) -> Result<(), error::Error> {
+        sqlx::query!(
+            r#"
+            UPDATE chat_settings
+            SET enable_public_commands=?, enable_mod_commands=?,
+            enable_auto_stop_stream=?, prefix=?, language=?
+            WHERE user_id=?
+            "#,
+            chat_state.enable_public_commands,
+            chat_state.enable_mod_commands,
+            chat_state.enable_auto_stop_stream,
+            chat_state.prefix,
+            chat_state.language,
+            user_id,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn remove_alias(&self, user_id: i64, alias: &str) -> Result<(), error::Error> {
+        sqlx::query!(
+            "DELETE FROM command_alias WHERE user_id=? AND alias=?",
+            user_id,
+            alias,
         )
         .execute(&self.pool)
         .await?;
@@ -478,6 +524,6 @@ pub struct CommandPermission {
 
 #[derive(Debug, sqlx::FromRow)]
 pub struct CommandAlias {
-    command: Command,
-    alias: String,
+    pub command: Command,
+    pub alias: String,
 }
