@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use crate::{
-    broadcasting_software::obs::Obs,
+    broadcasting_software::BroadcastingSoftwareLogic,
     db, error,
     stream_servers::{Bsl, SwitchType, Triggers},
 };
@@ -87,7 +87,7 @@ impl From<db::SwitcherState> for SwitcherState {
 
 pub struct Switcher {
     // Obs etc..
-    broadcasting_software: Arc<RwLock<Obs>>,
+    broadcasting_software: Arc<RwLock<dyn BroadcastingSoftwareLogic>>,
 
     // TODO: Maybe replace chat with just a Tx so it will send msg's to anyone who's receiving
     // probably also make use of a mpms channel
@@ -102,7 +102,7 @@ pub struct Switcher {
 impl Switcher {
     pub fn new(
         for_channel: i64,
-        broadcasting_software: Arc<RwLock<Obs>>,
+        broadcasting_software: Arc<RwLock<dyn BroadcastingSoftwareLogic>>,
         state: Arc<Mutex<SwitcherState>>,
         notification: broadcast::Sender<AutomaticSwitchMessage>,
     ) -> Self {
@@ -127,7 +127,7 @@ impl Switcher {
                 continue;
             }
 
-            let bs = &self.broadcasting_software.read().await;
+            let bs = self.broadcasting_software.read().await;
             let current_scene = bs.get_current_scene().await;
             let can_switch = bs.can_switch(&current_scene).await;
             drop(bs);

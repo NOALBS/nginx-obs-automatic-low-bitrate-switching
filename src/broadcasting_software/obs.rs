@@ -3,34 +3,14 @@ use crate::{
     stream_servers::{self, SwitchType},
     Error,
 };
+use async_trait::async_trait;
 use futures::{Stream, StreamExt};
 use log::{info, warn};
 use obws::{events::EventType, Client};
 use std::{sync::Arc, time::Duration};
 use tokio::sync::{mpsc, Mutex, Notify};
 
-pub struct State {
-    prev_scene: String,
-    curent_scene: String,
-    status: ClientStatus,
-    is_streaming: bool,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum ClientStatus {
-    Connected,
-    Disconnected,
-}
-
-#[derive(Clone, Debug, sqlx::FromRow)]
-pub struct Config {
-    /// The hostname
-    pub host: String,
-    /// The password
-    pub password: String,
-    /// Port to connect to
-    pub port: u16,
-}
+use super::{ClientStatus, Config, State};
 
 // TODO: Maybe remove the client Arc<Mutex<Client>>
 pub struct WrappedClient {
@@ -213,73 +193,27 @@ impl Obs {
         //     this.obs.on("StreamStatus", this.setStreamStatus.bind(this));
         //     this.obs.on("ScenesChanged", this.scenesChanged.bind(this));
     }
+}
 
-    pub fn connected_notifier(&self) -> Arc<Notify> {
+#[async_trait]
+impl super::BroadcastingSoftwareLogic for Obs {
+    fn connected_notifier(&self) -> Arc<Notify> {
         self.wrapped_client.connected_notify.clone()
     }
 
-    pub async fn wait_to_connect(&self) {
-        self.connected_notifier().notified().await;
-    }
-
-    pub fn start_streaming_notifier(&self) -> Arc<Notify> {
+    fn start_streaming_notifier(&self) -> Arc<Notify> {
         self.start_streaming_notify.clone()
     }
 
-    /// Waits until OBS starts streaming.
-    pub async fn wait_till_streaming(&self) {
-        self.start_streaming_notifier().notified().await;
+    fn switching_scenes(&self) -> Arc<Mutex<SwitchingScenes>> {
+        self.switching.clone()
     }
 
-    pub async fn can_switch(&self, scene: &str) -> bool {
-        let switching = self.switching.lock().await;
-
-        scene == switching.normal || scene == switching.low || scene == switching.offline
+    fn state(&self) -> Arc<Mutex<State>> {
+        self.obs_state.clone()
     }
 
-    pub async fn is_connected(&self) -> bool {
-        self.get_connection_status().await == ClientStatus::Connected
-    }
-
-    pub async fn is_streaming(&self) -> bool {
-        self.obs_state.lock().await.is_streaming
-    }
-
-    pub async fn get_connection_status(&self) -> ClientStatus {
-        self.obs_state.lock().await.status.to_owned()
-    }
-
-    pub async fn get_current_scene(&self) -> String {
-        self.obs_state.lock().await.curent_scene.to_string()
-    }
-
-    pub async fn set_prev_scene(&self, scene: String) {
-        let mut prev = self.obs_state.lock().await;
-        prev.prev_scene = scene;
-    }
-
-    pub async fn prev_scene(&self) -> String {
-        self.obs_state.lock().await.prev_scene.to_owned()
-    }
-
-    // TODO: Do i really need this?
-    pub fn get_inner_client_clone(&self) -> Arc<Mutex<Option<Client>>> {
-        self.wrapped_client.client.clone()
-    }
-
-    pub async fn type_to_scene(&self, s_type: &stream_servers::SwitchType) -> String {
-        let switching = self.switching.lock().await;
-
-        match s_type {
-            // Safety: Should be safe to unwrap since we are handling the previous.
-            SwitchType::Normal | SwitchType::Low | SwitchType::Offline => {
-                switching.type_to_scene(s_type).unwrap()
-            }
-            SwitchType::Previous => self.prev_scene().await,
-        }
-    }
-
-    pub async fn switch_scene(&self, scene: &str) -> Result<(), Error> {
+    async fn switch_scene(&self, scene: &str) -> Result<(), Error> {
         if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
             Ok(c.scenes().set_current_scene(scene).await?)
         } else {
@@ -287,15 +221,23 @@ impl Obs {
         }
     }
 
-    pub async fn get_scene_list(&self) -> Result<obws::responses::SceneList, Error> {
-        if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
-            Ok(c.scenes().get_scene_list().await?)
-        } else {
-            Err(Error::UnableInitialConnection)
-        }
+    // TODO
+    async fn get_scene_list(&self) -> Result<super::SceneList, Error> {
+        // if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
+        //     let res = c.scenes().get_scene_list().await?;
+        //     let scene_list = super::SceneList {
+        //         current_scene: res.current_scene,
+        //         scenes: res.scenes,
+        //     };
+
+        //     Ok(scene_list)
+        // } else {
+        //     Err(Error::UnableInitialConnection)
+        // }
+        todo!()
     }
 
-    pub async fn start_streaming(&self) -> Result<(), Error> {
+    async fn start_streaming(&self) -> Result<(), Error> {
         if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
             Ok(c.streaming().start_streaming(None).await?)
         } else {
@@ -303,7 +245,7 @@ impl Obs {
         }
     }
 
-    pub async fn stop_streaming(&self) -> Result<(), Error> {
+    async fn stop_streaming(&self) -> Result<(), Error> {
         if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
             Ok(c.streaming().stop_streaming().await?)
         } else {
@@ -311,15 +253,22 @@ impl Obs {
         }
     }
 
-    pub async fn stream_status(&self) -> Result<obws::responses::StreamingStatus, Error> {
+    async fn stream_status(&self) -> Result<super::StreamingStatus, Error> {
         if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
-            Ok(c.streaming().get_streaming_status().await?)
+            let res = c.streaming().get_streaming_status().await?;
+            let status = super::StreamingStatus {
+                streaming: res.streaming,
+                recording: res.recording,
+                recording_paused: res.recording_paused,
+            };
+
+            Ok(status)
         } else {
             Err(Error::UnableInitialConnection)
         }
     }
 
-    pub async fn toggle_recording(&self) -> Result<(), Error> {
+    async fn toggle_recording(&self) -> Result<(), Error> {
         if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
             Ok(c.recording().start_stop_recording().await?)
         } else {
@@ -327,9 +276,15 @@ impl Obs {
         }
     }
 
-    pub async fn recording_status(&self) -> Result<obws::responses::RecordingStatus, Error> {
+    async fn recording_status(&self) -> Result<super::RecordingStatus, Error> {
         if let Some(c) = self.wrapped_client.client.lock().await.as_ref() {
-            Ok(c.recording().get_recording_status().await?)
+            let res = c.recording().get_recording_status().await?;
+            let status = super::RecordingStatus {
+                is_recording: res.is_recording,
+                is_recording_paused: res.is_recording_paused,
+            };
+
+            Ok(status)
         } else {
             Err(Error::UnableInitialConnection)
         }

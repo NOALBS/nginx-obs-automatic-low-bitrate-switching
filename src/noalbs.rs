@@ -1,10 +1,10 @@
-use chat::chat_handler;
 use std::sync::Arc;
 use tokio::sync::{broadcast::Sender, Mutex, RwLock};
 
 use crate::{
-    broadcasting_software::obs::Obs,
-    chat, db,
+    broadcasting_software::BroadcastingSoftwareLogic,
+    chat::{self, chat_handler},
+    db,
     stream_servers::{self, Bsl, TriggerType},
     switcher::{self, AutomaticSwitchMessage},
     Error, Switcher,
@@ -12,7 +12,7 @@ use crate::{
 
 pub struct Noalbs {
     user_id: i64,
-    pub broadcasting_software: Arc<RwLock<Obs>>,
+    pub broadcasting_software: Arc<RwLock<dyn BroadcastingSoftwareLogic>>,
     pub switcher_state: Arc<Mutex<switcher::SwitcherState>>,
     pub chat_state: Arc<Mutex<chat::State>>,
     pub broadcast_sender: Sender<AutomaticSwitchMessage>,
@@ -23,15 +23,18 @@ pub struct Noalbs {
 }
 
 impl Noalbs {
-    pub fn new(
+    pub fn new<B>(
         username: i64,
-        broadcasting_software: Obs,
+        broadcasting_software: B,
         switcher_state: switcher::SwitcherState,
         chat_state: chat::State,
         broadcast_sender: Sender<AutomaticSwitchMessage>,
         connections: Vec<db::Connection>,
         db_con: db::Db,
-    ) -> Noalbs {
+    ) -> Noalbs
+    where
+        B: BroadcastingSoftwareLogic + 'static,
+    {
         let broadcasting_software = Arc::new(RwLock::new(broadcasting_software));
         let switcher_state = Arc::new(Mutex::new(switcher_state));
         let chat_state = Arc::new(Mutex::new(chat_state));

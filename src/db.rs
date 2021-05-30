@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    broadcasting_software::{obs, SwitchingScenes},
+    broadcasting_software::{self, obs, SwitchingScenes},
     chat::{
         self,
         chat_handler::{Command, Permission},
@@ -51,8 +51,8 @@ impl Db {
     pub async fn get_broadcasting_software_details(
         &self,
         user_id: i64,
-    ) -> Result<obs::Config, error::Error> {
-        Ok(sqlx::query_as::<_, obs::Config>(
+    ) -> Result<broadcasting_software::Config, error::Error> {
+        Ok(sqlx::query_as::<_, broadcasting_software::Config>(
             "SELECT * FROM broadcasting_software WHERE user_id = ?",
         )
         .bind(user_id)
