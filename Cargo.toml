@@ -23,3 +23,5 @@ pretty_env_logger = "0.4"
 alto_logger = "0.3"
 twitch-irc = "2.2"
 sqlx = { version = "0.5", features = ["runtime-tokio-rustls", "sqlite", "migrate", "macros"] }
+actix-web = "4.0.0-beta.6"
+typetag = "0.1"
