@@ -96,12 +96,12 @@ pub struct Switcher {
 
     notification: broadcast::Sender<AutomaticSwitchMessage>,
 
-    for_channel: i64,
+    for_channel: db::User,
 }
 
 impl Switcher {
     pub fn new(
-        for_channel: i64,
+        for_channel: db::User,
         broadcasting_software: Arc<RwLock<dyn BroadcastingSoftwareLogic>>,
         state: Arc<Mutex<SwitcherState>>,
         notification: broadcast::Sender<AutomaticSwitchMessage>,
@@ -116,7 +116,7 @@ impl Switcher {
 
     pub async fn run(self) -> Result<(), error::Error> {
         loop {
-            debug!("Running switcher for {}", self.for_channel);
+            debug!("Running switcher for {}", self.for_channel.username);
 
             let sleep = { self.state.lock().await.request_interval };
             tokio::time::sleep(sleep).await;
@@ -223,7 +223,7 @@ impl Switcher {
         let state = &self.state.lock().await;
         if bs.is_streaming().await && state.auto_switch_notification {
             let _ = self.notification.send(AutomaticSwitchMessage {
-                channel: self.for_channel,
+                channel: self.for_channel.id,
                 scene: switch_scene.to_string(),
                 switch_type,
             });

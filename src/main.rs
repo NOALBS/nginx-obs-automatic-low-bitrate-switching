@@ -77,7 +77,7 @@ fn load_users(
         let db_con = db_con.clone();
         let twitch_client = twitch_client.clone();
         tokio::spawn(async move {
-            match db_con.load_user(user.id, tx).await {
+            match db_con.load_user(&user, tx).await {
                 Ok(mut noalbs_user) => {
                     for connection in noalbs_user.connections.iter() {
                         match connection.platform {

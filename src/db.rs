@@ -403,25 +403,25 @@ impl Db {
 
     pub async fn load_user(
         &self,
-        user_id: i64,
+        user: &User,
         tx: Sender<AutomaticSwitchMessage>,
     ) -> Result<Noalbs, error::Error> {
-        let obs_config = self.get_broadcasting_software_details(user_id).await?;
-        let switching_scenes = self.get_switching_scenes(user_id).await?;
+        let obs_config = self.get_broadcasting_software_details(user.id).await?;
+        let switching_scenes = self.get_switching_scenes(user.id).await?;
         let broadcasting_software = obs::Obs::connect(obs_config, switching_scenes).await;
 
         let mut switcher_state =
-            switcher::SwitcherState::from(self.get_switcher_state(user_id).await?);
-        switcher_state.triggers = self.get_triggers(user_id).await?;
+            switcher::SwitcherState::from(self.get_switcher_state(user.id).await?);
+        switcher_state.triggers = self.get_triggers(user.id).await?;
 
         // TODO: what do i want to do with channel_admin
-        let connections = self.get_connections(user_id).await?;
-        let mut chat_state = chat::State::from(self.get_chat_settings(user_id).await?);
-        chat_state.commands_permissions = self.get_command_permissions(user_id).await?;
-        chat_state.commands_aliases = self.get_command_aliases(user_id).await?;
+        let connections = self.get_connections(user.id).await?;
+        let mut chat_state = chat::State::from(self.get_chat_settings(user.id).await?);
+        chat_state.commands_permissions = self.get_command_permissions(user.id).await?;
+        chat_state.commands_aliases = self.get_command_aliases(user.id).await?;
 
         let noalbs_user = Noalbs::new(
-            user_id,
+            user.to_owned(),
             broadcasting_software,
             switcher_state,
             chat_state,
@@ -432,7 +432,7 @@ impl Db {
 
         // TODO: Please refactor this
         use StreamServerKind::*;
-        for stream_servers in self.get_stream_servers(user_id).await? {
+        for stream_servers in self.get_stream_servers(user.id).await? {
             match stream_servers.server {
                 Belabox => {
                     noalbs_user

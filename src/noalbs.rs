@@ -11,7 +11,7 @@ use crate::{
 };
 
 pub struct Noalbs {
-    user_id: i64,
+    pub user: db::User,
     pub broadcasting_software: Arc<RwLock<dyn BroadcastingSoftwareLogic>>,
     pub switcher_state: Arc<Mutex<switcher::SwitcherState>>,
     pub chat_state: Arc<Mutex<chat::State>>,
@@ -24,7 +24,7 @@ pub struct Noalbs {
 
 impl Noalbs {
     pub fn new<B>(
-        username: i64,
+        user: db::User,
         broadcasting_software: B,
         switcher_state: switcher::SwitcherState,
         chat_state: chat::State,
@@ -40,7 +40,7 @@ impl Noalbs {
         let chat_state = Arc::new(Mutex::new(chat_state));
 
         Self {
-            user_id: username,
+            user,
             broadcasting_software,
             switcher_state,
             chat_state,
@@ -61,7 +61,7 @@ impl Noalbs {
 
     pub fn create_switcher(&mut self) {
         let switcher = Switcher::new(
-            self.user_id.to_owned(),
+            self.user.to_owned(),
             self.broadcasting_software.clone(),
             self.switcher_state.clone(),
             self.broadcast_sender.clone(),
@@ -108,7 +108,7 @@ impl Noalbs {
 
         let _ = self
             .storage
-            .update_triggers(self.user_id, &state.triggers)
+            .update_triggers(self.user.id, &state.triggers)
             .await;
 
         real_value
@@ -120,7 +120,7 @@ impl Noalbs {
 
         let _ = self
             .storage
-            .update_switcher_state(self.user_id, &lock)
+            .update_switcher_state(self.user.id, &lock)
             .await;
     }
 
@@ -135,7 +135,7 @@ impl Noalbs {
 
         let _ = self
             .storage
-            .update_switcher_state(self.user_id, &lock)
+            .update_switcher_state(self.user.id, &lock)
             .await;
     }
 
@@ -143,7 +143,7 @@ impl Noalbs {
         let mut lock = self.chat_state.lock().await;
         lock.prefix = prefix;
 
-        let _ = self.storage.update_chat_settings(self.user_id, &lock).await;
+        let _ = self.storage.update_chat_settings(self.user.id, &lock).await;
     }
 
     pub async fn get_autostop(&self) -> bool {
@@ -155,7 +155,7 @@ impl Noalbs {
         let mut lock = self.chat_state.lock().await;
         lock.enable_auto_stop_stream = enabled;
 
-        let _ = self.storage.update_chat_settings(self.user_id, &lock).await;
+        let _ = self.storage.update_chat_settings(self.user.id, &lock).await;
     }
 
     pub async fn contains_alias(&self, alias: &str) -> bool {
@@ -167,7 +167,7 @@ impl Noalbs {
         let _ = self
             .storage
             .add_alias(
-                self.user_id,
+                self.user.id,
                 db::CommandAlias {
                     command,
                     alias: alias.to_owned(),
@@ -183,6 +183,6 @@ impl Noalbs {
         let mut lock = self.chat_state.lock().await;
         lock.commands_aliases.remove(alias);
 
-        let _ = self.storage.remove_alias(self.user_id, alias).await;
+        let _ = self.storage.remove_alias(self.user.id, alias).await;
     }
 }
