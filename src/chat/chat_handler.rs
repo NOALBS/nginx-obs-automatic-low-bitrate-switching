@@ -1,6 +1,7 @@
 use crate::{db, error::Error, noalbs::Noalbs, stream_servers, switcher};
 use db::Platform;
 use log::error;
+use serde::Serialize;
 use std::{collections::HashMap, sync::Arc};
 use stream_servers::TriggerType;
 use tokio::sync::RwLock;
@@ -10,7 +11,7 @@ pub enum SupportedChat {
     Twitch,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, sqlx::Type, Clone, Copy)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash, sqlx::Type, Clone, Copy)]
 #[sqlx(rename_all = "lowercase")]
 pub enum Command {
     Bitrate,
@@ -72,7 +73,7 @@ impl std::str::FromStr for Command {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, sqlx::Type)]
+#[derive(Debug, Serialize, PartialEq, Eq, sqlx::Type)]
 #[sqlx(rename_all = "lowercase")]
 pub enum Permission {
     Moderator,

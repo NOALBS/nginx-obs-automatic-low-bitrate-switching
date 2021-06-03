@@ -3,7 +3,7 @@ use crate::db;
 use super::{Bsl, StreamServersCommands, SwitchLogic, SwitchType, Triggers};
 use async_trait::async_trait;
 use log::{error, trace};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 struct NginxRtmpStats {
@@ -58,6 +58,7 @@ pub struct Audio {
     sample_rate: Option<u32>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Nginx {
     /// Url to the NGINX stats page
     pub stats_url: String,
@@ -122,6 +123,7 @@ impl Nginx {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl SwitchLogic for Nginx {
     /// Which scene to switch to
     async fn switch(&self, triggers: &Triggers) -> SwitchType {
@@ -153,6 +155,7 @@ impl SwitchLogic for Nginx {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl StreamServersCommands for Nginx {
     async fn bitrate(&self) -> super::Bitrate {
         let stats = if let Some(stats) = self.get_stats().await {
@@ -176,6 +179,7 @@ impl StreamServersCommands for Nginx {
     }
 }
 
+#[typetag::serde]
 impl Bsl for Nginx {}
 
 impl From<db::StreamServer> for Nginx {

@@ -6,9 +6,11 @@ use crate::{
     stream_servers::{Bsl, SwitchType, Triggers},
 };
 use log::{debug, error, info};
+use serde::Serialize;
 use tokio::sync::{broadcast, Mutex, Notify, RwLock};
 
 /// All the data that can be changed outside of the switcher
+#[derive(Serialize)]
 pub struct SwitcherState {
     /// The interval that the switcher will sleep for before checking the stats again
     pub request_interval: std::time::Duration,
@@ -28,6 +30,7 @@ pub struct SwitcherState {
     /// Add multiple stream servers to watch before switching to low or offline
     pub stream_servers: Vec<Box<dyn Bsl>>,
 
+    #[serde(skip_serializing)]
     switcher_enabled_notifier: Arc<Notify>,
 }
 

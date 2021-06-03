@@ -3,7 +3,7 @@ use crate::db;
 use super::{Bsl, StreamServersCommands, SwitchLogic, SwitchType, Triggers};
 use async_trait::async_trait;
 use log::{error, trace};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
@@ -14,6 +14,7 @@ pub struct Stat {
     pub dropped_pkts: i32,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Belabox {
     /// URL to the BELABOX stats page (ex; http://127.0.0.1:8181/stats )
     pub stats_url: String,
@@ -58,6 +59,7 @@ impl Belabox {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl SwitchLogic for Belabox {
     /// Which scene to switch to
     async fn switch(&self, triggers: &Triggers) -> SwitchType {
@@ -93,6 +95,7 @@ impl SwitchLogic for Belabox {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl StreamServersCommands for Belabox {
     async fn bitrate(&self) -> super::Bitrate {
         let stats = if let Some(stats) = self.get_stats().await {
@@ -116,6 +119,7 @@ impl StreamServersCommands for Belabox {
     }
 }
 
+#[typetag::serde]
 impl Bsl for Belabox {}
 
 impl From<db::StreamServer> for Belabox {

@@ -1,4 +1,5 @@
 use crate::db;
+use serde::Serialize;
 use std::collections::HashMap;
 
 use self::chat_handler::{Command, Permission};
@@ -6,12 +7,13 @@ use self::chat_handler::{Command, Permission};
 pub mod chat_handler;
 pub mod twitch;
 
-#[derive(Debug, sqlx::Type)]
+#[derive(Debug, sqlx::Type, Serialize)]
 #[sqlx(rename_all = "lowercase")]
 pub enum ChatLanguage {
     En,
 }
 
+#[derive(Debug, Serialize)]
 pub struct State {
     pub enable_public_commands: bool,
     pub enable_mod_commands: bool,

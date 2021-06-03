@@ -1,8 +1,10 @@
 use crate::{db, stream_servers::SwitchLogic};
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 
 use super::{Bsl, StreamServersCommands, Triggers};
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Nimble {
     /// UDP listener ID (Usually IP:Port)
     pub id: String,
@@ -27,6 +29,7 @@ impl Nimble {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl SwitchLogic for Nimble {
     async fn switch(&self, _triggers: &Triggers) -> super::SwitchType {
         todo!()
@@ -34,6 +37,7 @@ impl SwitchLogic for Nimble {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl StreamServersCommands for Nimble {
     async fn bitrate(&self) -> super::Bitrate {
         todo!()
@@ -44,6 +48,7 @@ impl StreamServersCommands for Nimble {
     }
 }
 
+#[typetag::serde]
 impl Bsl for Nimble {}
 
 impl From<db::StreamServer> for Nimble {

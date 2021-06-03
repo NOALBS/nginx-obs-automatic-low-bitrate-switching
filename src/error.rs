@@ -26,4 +26,7 @@ pub enum Error {
 
     #[error("Unable to convert enabled to bool")]
     EnabledToBoolConversionError,
+
+    #[error("IO Error")]
+    IoError(#[from] std::io::Error),
 }

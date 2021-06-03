@@ -3,7 +3,7 @@ use crate::db;
 use super::{Bsl, StreamServersCommands, SwitchLogic, SwitchType, Triggers};
 use async_trait::async_trait;
 use log::{error, trace};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::*;
 
 #[derive(Deserialize, Debug)]
@@ -21,6 +21,7 @@ pub struct Stat {
     pub uptime: i64,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SrtLiveServer {
     /// URL to SLS stats page (ex; http://127.0.0.1:8181/stats )
     pub stats_url: String,
@@ -67,6 +68,7 @@ impl SrtLiveServer {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl SwitchLogic for SrtLiveServer {
     async fn switch(&self, triggers: &Triggers) -> SwitchType {
         let stats = match self.get_stats().await {
@@ -101,6 +103,7 @@ impl SwitchLogic for SrtLiveServer {
 }
 
 #[async_trait]
+#[typetag::serde]
 impl StreamServersCommands for SrtLiveServer {
     async fn bitrate(&self) -> super::Bitrate {
         let stats = if let Some(stats) = self.get_stats().await {
@@ -124,6 +127,7 @@ impl StreamServersCommands for SrtLiveServer {
     }
 }
 
+#[typetag::serde]
 impl Bsl for SrtLiveServer {}
 
 impl From<db::StreamServer> for SrtLiveServer {

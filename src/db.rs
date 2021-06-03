@@ -12,6 +12,7 @@ use crate::{
     stream_servers,
     switcher::{self, AutomaticSwitchMessage},
 };
+use serde::Serialize;
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 use tokio::sync::broadcast::Sender;
 
@@ -461,19 +462,19 @@ impl Db {
     }
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, sqlx::FromRow, Clone)]
 pub struct User {
     pub id: i64,
     pub username: String,
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, Serialize, sqlx::FromRow)]
 pub struct Connection {
     pub channel: String,
     pub platform: Platform,
 }
 
-#[derive(Debug, sqlx::Type, PartialEq)]
+#[derive(Debug, Serialize, sqlx::Type, PartialEq)]
 #[sqlx(rename_all = "lowercase")]
 pub enum Platform {
     Twitch,

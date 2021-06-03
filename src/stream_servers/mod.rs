@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use serde::Serialize;
 
 pub mod belabox;
 pub mod nginx;
@@ -14,6 +15,7 @@ pub enum SwitchType {
 }
 
 #[async_trait]
+#[typetag::serde(tag = "type")]
 pub trait SwitchLogic {
     /// Which scene to switch to
     async fn switch(&self, triggers: &Triggers) -> SwitchType;
@@ -21,11 +23,13 @@ pub trait SwitchLogic {
 
 /// Chat commands
 #[async_trait]
+#[typetag::serde(tag = "type")]
 pub trait StreamServersCommands {
     async fn bitrate(&self) -> Bitrate;
     async fn source_info(&self) -> String;
 }
 
+#[typetag::serde(tag = "type")]
 pub trait Bsl: SwitchLogic + StreamServersCommands + Send + Sync {}
 
 #[derive(Debug)]
@@ -34,13 +38,14 @@ pub struct Bitrate<'a> {
     pub message: Option<String>,
 }
 
+#[derive(Debug)]
 pub enum TriggerType {
     Low,
     Rtt,
     Offline,
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, Serialize, sqlx::FromRow)]
 pub struct Triggers {
     /// Trigger to switch to the low scene
     pub low: Option<u32>,

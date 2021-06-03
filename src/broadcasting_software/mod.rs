@@ -6,6 +6,7 @@ use crate::{
     Error,
 };
 use async_trait::async_trait;
+use serde::Serialize;
 use tokio::sync::{Mutex, Notify};
 
 pub mod obs;
@@ -53,7 +54,7 @@ pub struct Config {
     pub port: u16,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct State {
     prev_scene: String,
     curent_scene: String,
@@ -61,7 +62,7 @@ pub struct State {
     is_streaming: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Serialize, Clone, Copy, PartialEq)]
 pub enum ClientStatus {
     Connected,
     Disconnected,

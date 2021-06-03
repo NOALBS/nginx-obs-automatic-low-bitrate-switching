@@ -12,13 +12,29 @@ use noalbs::{
 };
 use tokio::sync::{broadcast::Sender, RwLock};
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
+    std::env::set_var("RUST_LOG", "noalbs=debug,actix_web=debug");
+    std::env::set_var("DATABASE_URL", "sqlite:database.db");
     noalbs::print_logo();
     alto_logger::init_alt_term_logger()?;
 
-    let db_con = noalbs::db::Db::connect().await?;
     let all_clients = Arc::new(RwLock::new(HashMap::new()));
+
+    let actix_rt = actix_web::rt::System::new();
+    let api = actix_rt.block_on(async { noalbs::api::Api::run(all_clients.clone()).await })?;
+
+    async_main(all_clients, api)?;
+
+    actix_web::rt::System::current().stop();
+    Ok(())
+}
+
+#[tokio::main]
+async fn async_main(
+    all_clients: Arc<RwLock<HashMap<i64, noalbs::Noalbs>>>,
+    _api: noalbs::api::Api,
+) -> Result<()> {
+    let db_con = noalbs::db::Db::connect().await?;
     let (tx, _) = tokio::sync::broadcast::channel(69);
 
     let chat_handler = Arc::new(ChatHandler::new(all_clients.clone()));
@@ -57,11 +73,12 @@ async fn main() -> Result<()> {
         twitch_client.clone(),
     );
 
-    // db_con.delete_user(1).await?;
+    async_ctrlc::CtrlC::new()
+        .expect("cannot create Ctrl+C handler")
+        .await;
+    println!("\nStopping NOALBS");
 
-    loop {
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
+    Ok(())
 }
 
 fn load_users(
