@@ -34,6 +34,7 @@ pub struct SwitcherState {
     switcher_enabled_notifier: Arc<Notify>,
 }
 
+// TODO: Sort stream_servers with priority
 impl SwitcherState {
     pub fn add_stream_server(&mut self, stream_server: Box<dyn Bsl>) {
         self.stream_servers.push(stream_server);

@@ -103,6 +103,10 @@ impl SwitchLogic for SrtLiveServer {
 
         return SwitchType::Normal;
     }
+
+    fn priority(&self) -> i32 {
+        self.priority
+    }
 }
 
 #[async_trait]
@@ -115,6 +119,7 @@ impl StreamServersCommands for SrtLiveServer {
             return super::Bitrate {
                 name: &self.name,
                 message: None,
+                priority: self.priority,
             };
         };
 
@@ -122,6 +127,7 @@ impl StreamServersCommands for SrtLiveServer {
         super::Bitrate {
             name: &self.name,
             message: Some(message),
+            priority: self.priority,
         }
     }
 

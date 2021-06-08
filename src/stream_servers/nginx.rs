@@ -155,6 +155,10 @@ impl SwitchLogic for Nginx {
 
         return SwitchType::Normal;
     }
+
+    fn priority(&self) -> i32 {
+        self.priority
+    }
 }
 
 #[async_trait]
@@ -167,6 +171,7 @@ impl StreamServersCommands for Nginx {
             return super::Bitrate {
                 name: &self.name,
                 message: None,
+                priority: self.priority,
             };
         };
 
@@ -174,6 +179,7 @@ impl StreamServersCommands for Nginx {
         super::Bitrate {
             name: &self.name,
             message: Some(format!("{}", bitrate)),
+            priority: self.priority,
         }
     }
 

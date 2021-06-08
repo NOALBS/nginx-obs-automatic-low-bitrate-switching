@@ -95,6 +95,10 @@ impl SwitchLogic for Belabox {
 
         return SwitchType::Normal;
     }
+
+    fn priority(&self) -> i32 {
+        self.priority
+    }
 }
 
 #[async_trait]
@@ -107,6 +111,7 @@ impl StreamServersCommands for Belabox {
             return super::Bitrate {
                 name: &self.name,
                 message: None,
+                priority: self.priority,
             };
         };
 
@@ -114,6 +119,7 @@ impl StreamServersCommands for Belabox {
         super::Bitrate {
             name: &self.name,
             message: Some(message),
+            priority: self.priority,
         }
     }
 

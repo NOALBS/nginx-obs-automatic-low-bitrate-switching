@@ -19,6 +19,7 @@ pub enum SwitchType {
 pub trait SwitchLogic {
     /// Which scene to switch to
     async fn switch(&self, triggers: &Triggers) -> SwitchType;
+    fn priority(&self) -> i32;
 }
 
 /// Chat commands
@@ -36,6 +37,7 @@ pub trait Bsl: SwitchLogic + StreamServersCommands + Send + Sync {}
 pub struct Bitrate<'a> {
     pub name: &'a str,
     pub message: Option<String>,
+    pub priority: i32,
 }
 
 #[derive(Debug)]

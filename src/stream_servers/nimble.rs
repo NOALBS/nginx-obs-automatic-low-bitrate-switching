@@ -37,6 +37,10 @@ impl SwitchLogic for Nimble {
     async fn switch(&self, _triggers: &Triggers) -> super::SwitchType {
         todo!()
     }
+
+    fn priority(&self) -> i32 {
+        self.priority
+    }
 }
 
 #[async_trait]
