@@ -44,6 +44,7 @@ impl WrappedClient {
             info!("Connecting");
             if let Ok(client) = Client::connect(&config.host, config.port).await {
                 info!("Connected");
+                client.login(Some(&config.password)).await.unwrap();
                 break client;
             };
 
