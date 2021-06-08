@@ -71,6 +71,9 @@ pub struct Nginx {
 
     /// A name to differentiate in case of multiple stream servers
     pub name: String,
+
+    /// Priority
+    pub priority: i32,
 }
 
 impl Nginx {
@@ -189,6 +192,7 @@ impl From<db::StreamServer> for Nginx {
             application: item.application,
             key: item.key,
             name: item.name,
+            priority: item.priority,
         }
     }
 }

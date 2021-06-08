@@ -31,6 +31,9 @@ pub struct SrtLiveServer {
 
     /// A name to differentiate in case of multiple stream servers
     pub name: String,
+
+    /// Priority
+    pub priority: i32,
 }
 
 impl SrtLiveServer {
@@ -136,6 +139,7 @@ impl From<db::StreamServer> for SrtLiveServer {
             stats_url: item.stats_url,
             publisher: item.application,
             name: item.name,
+            priority: item.priority,
         }
     }
 }

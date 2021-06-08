@@ -24,6 +24,9 @@ pub struct Belabox {
 
     /// A name to differentiate in case of multiple stream servers
     pub name: String,
+
+    /// Priority
+    pub priority: i32,
 }
 
 impl Belabox {
@@ -128,6 +131,7 @@ impl From<db::StreamServer> for Belabox {
             stats_url: item.stats_url,
             publisher: item.application,
             name: item.name,
+            priority: item.priority,
         }
     }
 }

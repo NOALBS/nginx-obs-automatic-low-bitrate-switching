@@ -20,6 +20,9 @@ pub struct Nimble {
 
     /// A name to differentiate in case of multiple stream servers
     pub name: String,
+
+    /// Priority
+    pub priority: i32,
 }
 
 impl Nimble {
@@ -59,6 +62,7 @@ impl From<db::StreamServer> for Nimble {
             application: item.application,
             key: item.key,
             name: item.name,
+            priority: item.priority,
         }
     }
 }

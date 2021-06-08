@@ -492,6 +492,7 @@ pub struct SwitcherState {
 #[derive(Debug, sqlx::FromRow)]
 pub struct StreamServer {
     pub server: StreamServerKind,
+    pub priority: i32,
     pub name: String,
     pub stats_url: String,
     pub application: String,
