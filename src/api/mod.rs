@@ -34,12 +34,20 @@ impl Api {
 
 #[derive(Serialize)]
 struct NoalbsInfo<'a> {
-    pub id: &'a i64,
-    pub username: &'a String,
-    pub broadcasting_software_state: &'a broadcasting_software::State,
-    pub switcher_state: &'a switcher::SwitcherState,
-    pub chat_state: &'a chat::State,
-    pub connections: &'a Vec<db::Connection>,
+    id: &'a i64,
+    username: &'a String,
+    broadcasting_software: BroadcastingSoftwareInfo<'a>,
+    switcher_state: &'a switcher::SwitcherState,
+    chat_state: &'a chat::State,
+    connections: &'a Vec<db::Connection>,
+}
+
+#[derive(Serialize)]
+struct BroadcastingSoftwareInfo<'a> {
+    #[serde(flatten)]
+    test: &'a dyn broadcasting_software::BroadcastingSoftwareLogic,
+    state: &'a broadcasting_software::State,
+    switching_scenes: &'a broadcasting_software::SwitchingScenes,
 }
 
 #[derive(Serialize)]
@@ -76,15 +84,23 @@ async fn user(
     // TODO: Change unwrap into error
     let user = data.get(&path).unwrap();
 
-    let bs_state = user.broadcasting_software.read().await.state();
+    let bs = user.broadcasting_software.read().await;
+    let bs_state = bs.state();
+    let bs_scene = bs.switching_scenes();
+
+    let broadcasting_software = BroadcastingSoftwareInfo {
+        test: &*bs,
+        state: &*bs_state.lock().await,
+        switching_scenes: &*bs_scene.lock().await,
+    };
 
     let info = NoalbsInfo {
         id: &user.user.id,
         username: &user.user.username,
-        broadcasting_software_state: &*bs_state.lock().await,
         switcher_state: &*user.switcher_state.lock().await,
         chat_state: &*user.chat_state.lock().await,
         connections: &user.connections,
+        broadcasting_software,
     };
 
     HttpResponse::Ok().json(info)

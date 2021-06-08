@@ -11,7 +11,7 @@ use tokio::sync::{Mutex, Notify};
 
 pub mod obs;
 
-#[derive(Debug, sqlx::FromRow, Clone)]
+#[derive(Debug, sqlx::FromRow, Clone, Serialize)]
 pub struct SwitchingScenes {
     pub normal: String,
     pub low: String,
@@ -69,6 +69,7 @@ pub enum ClientStatus {
 }
 
 #[async_trait]
+#[typetag::serialize(tag = "type")]
 pub trait BroadcastingSoftwareLogic: Send + Sync {
     fn connected_notifier(&self) -> Arc<Notify>;
 

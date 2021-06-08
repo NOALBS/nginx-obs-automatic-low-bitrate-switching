@@ -1,12 +1,9 @@
-use crate::{
-    broadcasting_software::SwitchingScenes,
-    stream_servers::{self, SwitchType},
-    Error,
-};
+use crate::{broadcasting_software::SwitchingScenes, Error};
 use async_trait::async_trait;
 use futures::{Stream, StreamExt};
 use log::{info, warn};
 use obws::{events::EventType, Client};
+use serde::Serialize;
 use std::{sync::Arc, time::Duration};
 use tokio::sync::{mpsc, Mutex, Notify};
 
@@ -123,11 +120,18 @@ impl WrappedClient {
     }
 }
 
+// TODO: Uh I just want the type from typetag
+#[derive(Serialize)]
 pub struct Obs {
+    #[serde(skip_serializing)]
     wrapped_client: WrappedClient,
+    #[serde(skip_serializing)]
     pub event_handler: tokio::task::JoinHandle<()>,
+    #[serde(skip_serializing)]
     pub switching: Arc<Mutex<SwitchingScenes>>,
+    #[serde(skip_serializing)]
     pub obs_state: Arc<Mutex<State>>,
+    #[serde(skip_serializing)]
     start_streaming_notify: Arc<Notify>,
 }
 
@@ -196,6 +200,7 @@ impl Obs {
 }
 
 #[async_trait]
+#[typetag::serialize]
 impl super::BroadcastingSoftwareLogic for Obs {
     fn connected_notifier(&self) -> Arc<Notify> {
         self.wrapped_client.connected_notify.clone()
