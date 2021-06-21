@@ -264,7 +264,8 @@ You can change the high RTT trigger value inside config.json:
 ### Using SLS (SRT-LIVE-SERVER)
 > Big Thanks to [oozebrood](https://www.twitch.tv/oozebrood), [matthewwb2](https://www.twitch.tv/matthewwb2), and [kyle___d](https://www.twitch.tv/kyle___d) for all of the hard work they've put into getting SRT to the masses!
 
-If you're using [Matt's modified version](https://gitlab.com/mattwb65/srt-live-server) of SLS then follow this section;
+If you're using either [Matt's modified version](https://gitlab.com/mattwb65/srt-live-server) or
+[my edit of Matt's version](https://hub.docker.com/r/b3ckontwitch/sls-b3ck-edit) of SLS then follow this section;
 
 You MUST Modify the ENTIRE RTMP section in NOALBS `config.json` file to match this:
 
