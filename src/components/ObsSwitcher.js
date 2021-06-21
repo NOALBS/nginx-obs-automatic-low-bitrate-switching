@@ -252,7 +252,7 @@ class ObsSwitcher extends EventEmitter {
                     );
                     const srtdata = await srtresponse.json();
                     const srtreceiver = srtdata.SrtReceivers.filter(
-                        (receiver) => receiver.id == id
+                        (receiver) => receiver.id.includes(id)
                     );
                     const publish = srtreceiver[0].state;
 
