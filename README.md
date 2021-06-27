@@ -48,6 +48,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 - [Configuring the CONFIG and Setting up Roles](#configuring-the-config-and-setting-up-roles)
 - [How to run from source](#how-to-run-from-source)
 - [Chat Commands](#chat-commands)
+- [How to publish to your NGINX RTMP Server](#how-to-publish-to-your-nginx-rtmp-server)
 - [How to pull RTMP stream into OBS](#how-to-pull-rtmp-stream-into-obs)
 - [Running with other servers (not NGINX)](#running-with-other-servers-not-nginx)
   - [Using the built-in Node-Media-Server](#using-the-built-in-node-media-server)
@@ -155,6 +156,40 @@ You can also enable/disable certain features from chat, see below:
 > |    Admins    | !mod (on/off)      | enables/disables the use of MOD commands.                  | !mod on      |
 > |    Admins    | !notify (on/off)   | enables/disables the notifications in chat.                | !notify off  |
 > |    Admins    | !autostop (on/off) | enables/disables the auto stop feature when you host/raid. | !autostop on |
+
+<sub>_[(table of contents)](#table-of-contents)_</sub>
+
+---
+## How to publish to your NGINX RTMP Server:
+
+Using the default config where the server is listening on port `1935` and the name of the application in NGINX is `publish`;
+
+<sub>_(example config, do not copy)_</sub>
+```NGINX
+rtmp {
+
+    server {
+        listen 1935;
+        (...)
+        
+        # Stream to "rtmp://IPHERE/publish/live".
+        application publish {
+            live on;
+            (...)
+        }
+    }
+}
+```
+
+- If the app or device requires the key separately put `rtmp://(SERVER-IP):1935/publish` in the RTMP URL and `live` in the key.
+- Otherwise if the app or device doesn't require the key separately put `rtmp://(SERVER-IP):1935/publish/live` in the RTMP URL.
+
+Most of these rules apply to the rest of the other types of servers;
+- RTMP will usually have an `application` and a `key`.
+- SRT will use a `publisher` ID or `streamid`, some applications or devices will only require your server IP and PORT;
+    - Example; `srt://(SERVER-IP):30000` but if it the app or device supports `streamid` it will always be separate.
+
+Either way, pay close attention to your app or device requirements, as you will need to setup accordingly to them and your configuration on the server.
 
 <sub>_[(table of contents)](#table-of-contents)_</sub>
 
