@@ -13,6 +13,7 @@ pub struct Config {
     pub software: SoftwareConnection,
     pub chat: Option<Chat>,
     pub optional_scenes: OptionalScenes,
+    pub optional_options: OptionalOptions,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
@@ -164,4 +165,12 @@ pub struct OptionalScenes {
     pub starting: Option<String>,
     pub ending: Option<String>,
     pub privacy: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OptionalOptions {
+    pub twitch_transcoding_check: bool,
+    pub twitch_transcoding_retries: u64,
+    pub twitch_transcoding_delay_seconds: u64,
 }

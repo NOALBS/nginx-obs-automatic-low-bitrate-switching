@@ -9,17 +9,18 @@ edition = "2018"
 [dependencies]
 async-trait = "0.1"
 dotenv = "0.15"
+fuse-rust = "0.2"
 futures-util = "0.3"
 obws = { version = "0.8", features = ["events"] }
 quick-xml = { version = "0.21", features = ["serialize"] }
-reqwest = "0.11.0"
+rand = "0.8"
+reqwest = { version = "0.11", features = ["json"] }
 serde = "1.0"
 serde_json = "1.0"
 thiserror = "1.0"
 tokio = { version = "1.10", features = ["rt", "rt-multi-thread", "macros", "signal", "time", "sync"] }
 twitch-irc = "3.0"
 typetag = "0.1"
-fuse-rust = "0.2"
 
 # sqlx = { version = "0.5", features = ["runtime-tokio-rustls", "sqlite", "migrate", "macros"] }
 

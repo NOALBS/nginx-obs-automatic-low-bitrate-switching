@@ -129,5 +129,10 @@
     "starting": null,
     "ending": null,
     "privacy": "privacy"
+  },
+  "optionalOptions": {
+    "twitchTranscodingCheck": false,
+    "twitchTranscodingRetries": 5,
+    "twitchTranscodingDelaySeconds": 15
   }
 }

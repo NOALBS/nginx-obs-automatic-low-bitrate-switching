@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
+use tokio::time;
 use tracing::{debug, info};
 
 use crate::chat::{self, HandleMessage};
@@ -530,6 +532,54 @@ impl DispatchCommand {
             None => return,
         };
 
+        let options = &state.config.optional_options;
+
+        if self.chat_message.platform == chat::ChatPlatform::Twitch
+            && options.twitch_transcoding_check
+        {
+            self.send("Trying to start the stream with transcoding".to_string())
+                .await;
+
+            let retry = &options.twitch_transcoding_retries;
+            let delay = &options.twitch_transcoding_delay_seconds;
+
+            for i in 0..*retry {
+                debug!("[{}] Starting stream", i);
+                if let Err(e) = bsc.start_streaming().await {
+                    self.send(format!("Error can't start the stream, {}", e))
+                        .await;
+                    return;
+                };
+
+                time::sleep(time::Duration::from_secs(*delay)).await;
+
+                if let Ok(true) = check_if_transcoding(&self.chat_message.channel).await {
+                    break;
+                }
+
+                if i == retry - 1 {
+                    debug!("[{}] Can't get transcoding", i);
+                    self.send("Successfully started the stream without transcoding".to_string())
+                        .await;
+                    return;
+                }
+
+                debug!("[{}] Stopping stream", i);
+                if let Err(e) = bsc.stop_streaming().await {
+                    self.send(format!("Error can't start the stream, {}", e))
+                        .await;
+                    return;
+                };
+
+                time::sleep(time::Duration::from_secs(5)).await;
+            }
+
+            self.send("Started stream with transcoding".to_string())
+                .await;
+
+            return;
+        }
+
         let msg = match bsc.start_streaming().await {
             Ok(_) => "Successfully started the stream".to_string(),
             Err(e) => format!("Error can't start the stream, {}", e),
@@ -789,4 +839,78 @@ async fn bitrate_msg(user: &Noalbs) -> String {
 pub struct Timeout {
     pub channel: String,
     pub time: std::time::Instant,
+}
+
+const CLIENT_ID: &str = "kimne78kx3ncx6brgo4mv6wki5h1ko";
+const USHER_BASE: &str = "https://usher.ttvnw.net";
+const GQL_BASE: &str = "https://gql.twitch.tv/gql";
+
+// TODO: Check if not an ad?
+async fn check_if_transcoding(channel: &str) -> Result<bool, error::Error> {
+    let req_string = r#"{"query": "{streamPlaybackAccessToken(channelName: \"%USER%\",params: {platform: \"web\",playerBackend: \"mediaplayer\",playerType: \"site\"}){value signature}}"}"#;
+    let req_string = req_string.replace("%USER%", channel);
+
+    let client = reqwest::Client::new();
+    let res = client
+        .post(GQL_BASE)
+        .header("Client-ID", CLIENT_ID)
+        .body(req_string)
+        .send()
+        .await?;
+
+    let json = res.json::<serde_json::Value>().await?;
+    let json = json["data"]["streamPlaybackAccessToken"].to_owned();
+    let json: StreamPlaybackAccessToken = serde_json::from_value(json)?;
+
+    use rand::Rng;
+    let rng = rand::thread_rng().gen_range(1000000..10000000);
+    let query = M3u8Query {
+        allow_source: String::from("true"),
+        allow_audio_only: String::from("true"),
+        allow_spectre: String::from("true"),
+        p: rng,
+        player: String::from("twitchweb"),
+        playlist_include_framerate: String::from("true"),
+        segment_preference: String::from("4"),
+        sig: json.signature,
+        token: json.value,
+    };
+
+    let res = client
+        .get(format!("{}/api/channel/hls/{}.m3u8", USHER_BASE, channel))
+        .header("Client-ID", CLIENT_ID)
+        .query(&query)
+        .send()
+        .await?;
+
+    let text = res.text().await?;
+    // println!("Response:\n{}", text);
+
+    if text.contains("TRANSCODESTACK=\"transmux\"")
+        || text.contains("Can not find channel")
+        || text.contains("transcode_does_not_exist")
+    {
+        return Ok(false);
+    }
+
+    Ok(true)
+}
+
+#[derive(Debug, Serialize)]
+struct M3u8Query {
+    allow_source: String,
+    allow_audio_only: String,
+    allow_spectre: String,
+    p: u32,
+    player: String,
+    playlist_include_framerate: String,
+    segment_preference: String,
+    sig: String,
+    token: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct StreamPlaybackAccessToken {
+    value: String,
+    signature: String,
 }
