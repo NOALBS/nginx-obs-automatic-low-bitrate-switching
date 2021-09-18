@@ -214,6 +214,14 @@ impl Switcher {
             return Ok(());
         }
 
+        if !state
+            .switcher_state
+            .switchable_scenes
+            .contains(&state.broadcasting_software.current_scene)
+        {
+            return Ok(());
+        }
+
         // TODO: maybe also check if we're still on a switchable scene before switching
         // Ignore the error.. it should work at some point
         if let Err(error) = state
