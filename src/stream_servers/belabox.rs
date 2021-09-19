@@ -10,7 +10,6 @@ use super::{Bsl, StreamServersCommands, SwitchLogic};
 use crate::switcher::{SwitchType, Triggers};
 
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
 pub struct Stat {
     pub bitrate: i64,
     pub rtt: f64,
