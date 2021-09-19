@@ -156,6 +156,10 @@ impl StreamServersCommands for Belabox {
             None => return super::Bitrate { message: None },
         };
 
+        if stats.bitrate == 0 {
+            return super::Bitrate { message: None };
+        }
+
         let message = format!("{}, {} ms", stats.bitrate, stats.rtt.round());
         super::Bitrate {
             message: Some(message),
