@@ -130,7 +130,7 @@ pub struct CommandInfo {
 }
 
 pub struct File {
-    pub name: String,
+    pub name: std::path::PathBuf,
 }
 
 impl ConfigLogic for File {
@@ -152,7 +152,7 @@ impl ConfigLogic for File {
 
     // TODO: Handle error
     fn save(&self, config: &Config) -> Result<(), error::Error> {
-        let file = std::fs::File::create("config.json")?;
+        let file = std::fs::File::create(&self.name)?;
         serde_json::to_writer_pretty(file, config).unwrap();
 
         Ok(())

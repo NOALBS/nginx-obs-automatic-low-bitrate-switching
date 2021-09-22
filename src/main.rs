@@ -1,11 +1,13 @@
+use std::path::PathBuf;
 use std::{env, sync::Arc};
 
+use anyhow::Result;
 use tokio::signal;
 
 use noalbs::{chat::ChatPlatform, config, Noalbs};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     noalbs::print_logo();
 
@@ -21,12 +23,20 @@ async fn main() {
     let (chat_tx, chat_rx) = tokio::sync::mpsc::channel(100);
     let mut chat_handler = noalbs::chat::ChatHandler::new(chat_rx, user_manager.clone());
 
-    let user = load_user_from_file("config.json".to_owned(), chat_tx.clone()).await;
-    user_manager.add(user).await;
+    if env::var("CONFIG_DIR").is_ok() {
+        let users = load_users_from_dir(env::var("CONFIG_DIR")?, chat_tx.clone()).await?;
+
+        for user in users {
+            user_manager.add(user).await;
+        }
+    } else {
+        let user = load_user_from_file("config.json".to_owned(), chat_tx.clone()).await;
+        user_manager.add(user).await;
+    }
 
     if env::var("TWITCH_BOT_USERNAME").is_ok() {
-        let bot_username = env::var("TWITCH_BOT_USERNAME").unwrap();
-        let oauth = env::var("TWITCH_BOT_OAUTH").unwrap();
+        let bot_username = env::var("TWITCH_BOT_USERNAME")?;
+        let oauth = env::var("TWITCH_BOT_OAUTH")?;
 
         let twitch = noalbs::chat::Twitch::new(bot_username, oauth, chat_tx.clone());
 
@@ -47,7 +57,8 @@ async fn main() {
     });
 
     if env::var("API_PORT").is_ok() {
-        noalbs::api::run(user_manager.clone()).await;
+        let port: u16 = env::var("API_PORT")?.parse()?;
+        noalbs::api::run(user_manager.clone(), port).await;
     }
 
     match signal::ctrl_c().await {
@@ -56,10 +67,34 @@ async fn main() {
             eprintln!("Unable to listen for shutdown signal: {}", err);
         }
     }
+
+    Ok(())
 }
 
-pub async fn load_user_from_file(name: String, broadcast_tx: noalbs::ChatSender) -> Noalbs {
-    let file = config::File { name };
+pub async fn load_user_from_file<P>(path: P, broadcast_tx: noalbs::ChatSender) -> Noalbs
+where
+    P: Into<PathBuf>,
+{
+    let path = path.into();
+    let file = config::File { name: path };
 
     Noalbs::new(Box::new(file), broadcast_tx).await
+}
+
+pub async fn load_users_from_dir<P>(dir: P, broadcast_tx: noalbs::ChatSender) -> Result<Vec<Noalbs>>
+where
+    P: Into<PathBuf>,
+{
+    let dir = dir.into();
+
+    let noalbs_users = std::fs::read_dir(dir)?
+        .filter_map(|f| f.ok())
+        .map(|f| f.path())
+        .filter(|e| e.extension().unwrap() == "json")
+        .map(|p| Noalbs::new(Box::new(config::File { name: p }), broadcast_tx.clone()))
+        .collect::<Vec<_>>();
+
+    let noalbs_users = futures_util::future::join_all(noalbs_users).await;
+
+    Ok(noalbs_users)
 }
