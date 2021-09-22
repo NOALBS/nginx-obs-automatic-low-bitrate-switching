@@ -21,6 +21,7 @@ pub struct Config {
 pub struct User {
     pub id: Option<i64>,
     pub name: String,
+    pub password_hash: Option<String>,
 }
 
 /// All the data that can be changed outside of the switcher

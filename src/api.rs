@@ -1,9 +1,12 @@
+use tracing::info;
+
 use crate::user_manager::UserManager;
 
-pub async fn run(user_manager: UserManager) {
+pub async fn run(user_manager: UserManager, port: u16) {
     let api = filters::routes(user_manager);
 
-    warp::serve(api).run(([127, 0, 0, 1], 3030)).await;
+    info!("Running API on 127.0.0.1:{}", port);
+    warp::serve(api).run(([127, 0, 0, 1], port)).await;
 }
 
 mod filters {
@@ -21,7 +24,8 @@ mod filters {
             .allow_methods(&[Method::GET]);
 
         noalbs_users(user_manager.clone())
-            .or(noalbs_user(user_manager))
+            .or(noalbs_user(user_manager.clone()))
+            .or(noalbs_ws(user_manager))
             .with(cors)
     }
 
@@ -43,6 +47,15 @@ mod filters {
             .and_then(handlers::get_user)
     }
 
+    pub fn noalbs_ws(
+        user_manager: UserManager,
+    ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+        warp::path!("ws")
+            .and(warp::ws())
+            .and(with_db(user_manager))
+            .and_then(handlers::ws_client)
+    }
+
     fn with_db(
         user_manager: UserManager,
     ) -> impl Filter<Extract = (UserManager,), Error = std::convert::Infallible> + Clone {
@@ -55,7 +68,7 @@ mod handlers {
 
     //use warp::http::StatusCode;
 
-    use crate::{config::User, user_manager::UserManager};
+    use crate::{config::User, user_manager::UserManager, ws};
 
     pub async fn get_users(user_manager: UserManager) -> Result<impl warp::Reply, Infallible> {
         let db = user_manager.get();
@@ -77,7 +90,7 @@ mod handlers {
         let db = user_manager.get();
         let users = db.read().await;
 
-        let found_user = users.get(&User { id: None, name });
+        let found_user = users.get(&name);
 
         let found_user = match found_user {
             Some(user) => user,
@@ -87,5 +100,12 @@ mod handlers {
         let state = found_user.state.read().await;
 
         Ok(warp::reply::json(&state.config))
+    }
+
+    pub async fn ws_client(
+        ws: warp::ws::Ws,
+        user_manager: UserManager,
+    ) -> Result<impl warp::Reply, Infallible> {
+        Ok(ws.on_upgrade(|websocket| ws::user_connected(websocket, user_manager)))
     }
 }

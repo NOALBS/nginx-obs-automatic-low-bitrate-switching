@@ -1,6 +1,7 @@
 use std::{collections::HashSet, sync::Arc};
 
-use tokio::sync::Notify;
+use serde::{Deserialize, Serialize};
+use tokio::sync::{mpsc, Notify};
 
 use crate::{broadcasting_software::BroadcastingSoftwareLogic, config};
 
@@ -8,6 +9,7 @@ pub struct State {
     pub config: config::Config,
     pub switcher_state: SwitcherState,
     pub broadcasting_software: BroadcastingSoftwareState,
+    pub event_senders: Vec<BroadcastClient>,
 }
 
 impl State {
@@ -127,4 +129,46 @@ impl Default for BroadcastingSoftwareState {
 pub enum ClientStatus {
     Connected,
     Disconnected,
+}
+
+#[derive(Debug)]
+pub struct BroadcastClient {
+    /// Unique token for the current client
+    pub token: String,
+
+    /// Channel used for sending to the websocket
+    pub tx_chan: mpsc::UnboundedSender<String>,
+}
+
+impl BroadcastClient {
+    pub fn send<T>(&self, message: &EventMessage<T>)
+    where
+        T: Serialize,
+    {
+        if self.tx_chan.send(message.as_json()).is_err() {
+            // Disconnected.. will be handled in reader
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Event {
+    PrefixChanged,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventMessage<T>
+where
+    T: Serialize,
+{
+    pub event: Event,
+    pub data: T,
+}
+
+impl<T: Serialize> EventMessage<T> {
+    pub fn as_json(&self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
 }

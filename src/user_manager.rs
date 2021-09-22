@@ -2,11 +2,13 @@ use std::{collections::HashMap, sync::Arc};
 
 use tokio::sync::RwLock;
 
-use crate::{chat, config, Noalbs};
+use crate::{chat, Noalbs};
+
+type User = Arc<RwLock<HashMap<String, Arc<Noalbs>>>>;
 
 #[derive(Clone)]
 pub struct UserManager {
-    users: Arc<RwLock<HashMap<config::User, Arc<Noalbs>>>>,
+    users: User,
 }
 
 impl UserManager {
@@ -16,7 +18,7 @@ impl UserManager {
         }
     }
 
-    pub fn get(&self) -> Arc<RwLock<HashMap<config::User, Arc<Noalbs>>>> {
+    pub fn get(&self) -> User {
         self.users.clone()
     }
 
@@ -24,7 +26,7 @@ impl UserManager {
         let lock = &mut self.users.write().await;
 
         let state = user.state.read().await;
-        let key = state.config.user.clone();
+        let key = state.config.user.name.clone();
         drop(state);
 
         lock.insert(key, Arc::new(user));

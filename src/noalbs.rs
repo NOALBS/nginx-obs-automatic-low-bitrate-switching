@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
-use tokio::sync::RwLock;
-use tracing::info;
+use tokio::sync::{mpsc, RwLock};
+use tracing::{debug, info};
 
 use crate::{
     broadcasting_software::obs::Obs,
@@ -15,7 +15,7 @@ use crate::{
 pub type UserState = Arc<RwLock<State>>;
 
 /// MPSC to send messages to chat
-pub type ChatSender = tokio::sync::mpsc::Sender<chat::HandleMessage>;
+pub type ChatSender = mpsc::Sender<chat::HandleMessage>;
 
 pub struct Noalbs {
     pub state: UserState,
@@ -31,12 +31,13 @@ pub struct Noalbs {
 impl Noalbs {
     pub async fn new(storage: Box<dyn config::ConfigLogic>, chat_sender: ChatSender) -> Self {
         let config = storage.load().unwrap();
-        info!("Loaded {:?}", config.user);
+        info!("Loaded user: {}", config.user.name);
 
         let mut state = State {
             config,
             switcher_state: state::SwitcherState::default(),
             broadcasting_software: state::BroadcastingSoftwareState::default(),
+            event_senders: Vec::new(),
         };
 
         state.set_all_switchable_scenes();
@@ -259,6 +260,43 @@ impl Noalbs {
                 .switcher_state
                 .switcher_enabled_notifier()
                 .notify_waiters();
+        }
+    }
+
+    pub async fn set_password(&self, password: String) {
+        let mut state = self.state.write().await;
+
+        state.config.user.password_hash = Some(password);
+    }
+
+    pub async fn add_event_sender(&self, token: String, tx_chan: mpsc::UnboundedSender<String>) {
+        let mut state = self.state.write().await;
+
+        state
+            .event_senders
+            .push(state::BroadcastClient { token, tx_chan });
+    }
+
+    pub async fn remove_event_sender(&self, token: String) {
+        let mut state = self.state.write().await;
+        let pos = state
+            .event_senders
+            .iter()
+            .position(|e| e.token == token)
+            .unwrap();
+
+        state.event_senders.swap_remove(pos);
+    }
+
+    pub async fn send_event<T>(&self, message: state::EventMessage<T>)
+    where
+        T: serde::Serialize,
+    {
+        let state = self.state.read().await;
+
+        for sender in &state.event_senders {
+            debug!("Sending event to {}", sender.token);
+            sender.send(&message);
         }
     }
 }

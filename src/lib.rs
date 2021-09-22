@@ -8,6 +8,7 @@ pub mod state;
 pub mod stream_servers;
 pub mod switcher;
 pub mod user_manager;
+pub mod ws;
 
 pub use noalbs::ChatSender;
 pub use noalbs::Noalbs;

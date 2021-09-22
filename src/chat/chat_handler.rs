@@ -7,7 +7,7 @@ use tokio::time;
 use tracing::{debug, info};
 
 use crate::chat::{self, HandleMessage};
-use crate::{config, error, switcher, user_manager, Noalbs};
+use crate::{config, error, state, switcher, user_manager, Noalbs};
 
 pub struct ChatHandler {
     chat_handler_rx: mpsc::Receiver<super::HandleMessage>,
@@ -733,6 +733,14 @@ impl DispatchCommand {
                 if let Some(prefix) = args.next() {
                     let _ = self.user.set_prefix(prefix.to_owned()).await;
                     self.user.save_config().await;
+
+                    self.user
+                        .send_event(state::EventMessage {
+                            event: state::Event::PrefixChanged,
+                            data: &prefix,
+                        })
+                        .await;
+
                     format!("NOALBS prefix updated to {}", prefix)
                 } else {
                     "Can't update NOALBS prefix".to_string()
