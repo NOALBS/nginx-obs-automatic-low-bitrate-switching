@@ -262,8 +262,8 @@ impl InnerConnection {
     ///
     /// Blocks until a successful connection has been established.
     /// An exponential backoff strategy is used to keep retrying to connect.
-    /// This will grow until the xth retry failure after which the max seconds
-    /// will be reached of 64 seconds.
+    /// This will grow until the 5th retry failure after which the max seconds
+    /// will be reached of 32 seconds.
     async fn get_client(&self) -> obws::Client {
         let mut retry_grow = 1;
 
@@ -291,7 +291,7 @@ impl InnerConnection {
             info!("trying to connect again in {} seconds", wait);
             tokio::time::sleep(Duration::from_secs(wait)).await;
 
-            if retry_grow < 2 {
+            if retry_grow < 5 {
                 retry_grow += 1;
             }
         }
