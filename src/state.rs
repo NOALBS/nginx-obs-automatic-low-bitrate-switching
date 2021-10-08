@@ -141,34 +141,14 @@ pub struct BroadcastClient {
 }
 
 impl BroadcastClient {
-    pub fn send<T>(&self, message: &EventMessage<T>)
+    pub fn send<T>(&self, message: T)
     where
         T: Serialize,
     {
-        if self.tx_chan.send(message.as_json()).is_err() {
-            // Disconnected.. will be handled in reader
+        let json = serde_json::to_string(&message).unwrap();
+
+        if self.tx_chan.send(json).is_err() {
+            // Disconnected.. should be handled in reader
         }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum Event {
-    PrefixChanged,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct EventMessage<T>
-where
-    T: Serialize,
-{
-    pub event: Event,
-    pub data: T,
-}
-
-impl<T: Serialize> EventMessage<T> {
-    pub fn as_json(&self) -> String {
-        serde_json::to_string(&self).unwrap()
     }
 }

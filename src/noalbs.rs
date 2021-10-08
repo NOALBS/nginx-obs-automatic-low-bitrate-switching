@@ -288,7 +288,7 @@ impl Noalbs {
         state.event_senders.swap_remove(pos);
     }
 
-    pub async fn send_event<T>(&self, message: state::EventMessage<T>)
+    pub async fn send_event<T>(&self, message: T)
     where
         T: serde::Serialize,
     {

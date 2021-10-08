@@ -2,6 +2,7 @@ pub mod broadcasting_software;
 pub mod chat;
 pub mod config;
 pub mod error;
+pub mod events;
 pub mod noalbs;
 pub mod state;
 pub mod stream_servers;
