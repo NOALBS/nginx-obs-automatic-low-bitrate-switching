@@ -277,7 +277,7 @@ impl Noalbs {
             .push(state::BroadcastClient { token, tx_chan });
     }
 
-    pub async fn remove_event_sender(&self, token: String) {
+    pub async fn remove_event_sender(&self, token: &str) {
         let mut state = self.state.write().await;
         let pos = state
             .event_senders

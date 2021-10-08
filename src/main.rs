@@ -58,7 +58,8 @@ async fn main() -> Result<()> {
 
     if env::var("API_PORT").is_ok() {
         let port: u16 = env::var("API_PORT")?.parse()?;
-        noalbs::api::run(user_manager.clone(), port).await;
+        let webserver = noalbs::web_server::WebServer::new(port, user_manager.clone());
+        webserver.run().await;
     }
 
     match signal::ctrl_c().await {
