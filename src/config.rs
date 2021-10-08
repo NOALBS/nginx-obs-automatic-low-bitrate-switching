@@ -21,6 +21,8 @@ pub struct Config {
 pub struct User {
     pub id: Option<i64>,
     pub name: String,
+
+    #[serde(skip_serializing)]
     pub password_hash: Option<String>,
 }
 
