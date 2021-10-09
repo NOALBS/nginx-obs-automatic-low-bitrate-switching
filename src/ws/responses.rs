@@ -43,7 +43,29 @@ pub struct SuccessfulLogin {
 
 #[derive(Serialize)]
 pub struct Me<'a> {
-    pub config: &'a config::Config,
+    pub config: Config<'a>,
+}
+
+/// Config details that will be send in the response
+#[derive(Serialize)]
+pub struct Config<'a> {
+    pub switcher: &'a config::Switcher,
+    pub software: &'a config::SoftwareConnection,
+    pub chat: &'a Option<config::Chat>,
+    pub optional_scenes: &'a config::OptionalScenes,
+    pub optional_options: &'a config::OptionalOptions,
+}
+
+impl<'a> Config<'a> {
+    pub fn from(config: &'a config::Config) -> Self {
+        Self {
+            switcher: &config.switcher,
+            software: &config.software,
+            chat: &config.chat,
+            optional_scenes: &config.optional_scenes,
+            optional_options: &config.optional_options,
+        }
+    }
 }
 
 #[cfg(test)]

@@ -217,10 +217,9 @@ impl WsHandler {
             .unwrap();
 
         let state = user.state.read().await;
+        let config = responses::Config::from(&state.config);
 
-        ws_message.reply(responses::Response::Me(responses::Me {
-            config: &state.config,
-        }));
+        ws_message.reply(responses::Response::Me(responses::Me { config }));
     }
 
     async fn logout(&self, ws_message: &WsMessage) {
