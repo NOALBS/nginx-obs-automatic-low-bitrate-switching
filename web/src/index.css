@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* text */
+    --color-text-base: #111827;
+    --color-text-muted: #4b5563;
+    --color-text-button: #ffffff;
+    --color-text-input: #000000;
+
+    /* bg */
+    --color-fill: #f3f4f6;
+    --color-button-accent: #1f2937;
+    --color-button-hover: #111827;
+    --color-card-bg: #ffffff;
+    --color-input-bg: #ffffff;
+
+    /* border */
+    --color-divider: #f3f4f6;
+    --color-input-border: #d1d5db;
+  }
+
+  .theme-dark {
+    --color-text-base: #f3f4f6;
+    --color-text-muted: #9ca3af;
+    --color-text-button: #ffffff;
+    --color-text-input: #111827;
+
+    --color-fill: #111827;
+    --color-button-accent: #1f2937;
+    --color-button-hover: #374151;
+    --color-card-bg: #1f2937;
+    --color-input-bg: #9ca3af;
+
+    --color-divider: #374151;
+    --color-input-border: #6b7280;
+  }
+}

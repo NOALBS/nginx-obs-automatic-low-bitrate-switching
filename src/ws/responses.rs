@@ -48,6 +48,7 @@ pub struct Me<'a> {
 
 /// Config details that will be send in the response
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Config<'a> {
     pub switcher: &'a config::Switcher,
     pub software: &'a config::SoftwareConnection,
