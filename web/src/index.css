@@ -38,3 +38,9 @@
     --color-input-border: #6b7280;
   }
 }
+
+@layer components {
+  .card {
+    @apply shadow sm:rounded-md p-6 bg-skin-card;
+  }
+}

@@ -28,63 +28,67 @@
     name="Switcher"
     description="Settings for that switching thing"
   >
-    <form>
-      <div class="space-y-5">
-        <div class="space-y-4">
-          <InputSwitch
-            label="Enable switcher"
-            bind:value={$user.config.switcher.bitrateSwitcherEnabled}
-          />
-          <div class="border border-b border-skin-divider" />
+    <div class="card">
+      <form>
+        <div class="space-y-5">
+          <div class="space-y-4">
+            <InputSwitch
+              label="Enable switcher"
+              bind:value={$user.config.switcher.bitrateSwitcherEnabled}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <InputSwitch
-            label="Only switch when streaming"
-            description="Will not switch when not streaming from OBS"
-            bind:value={$user.config.switcher.onlySwitchWhenStreaming}
-          />
-          <div class="border border-b border-skin-divider" />
+            <InputSwitch
+              label="Only switch when streaming"
+              description="Will not switch when not streaming from OBS"
+              bind:value={$user.config.switcher.onlySwitchWhenStreaming}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <InputSwitch
-            label="Auto switch notification"
-            bind:value={$user.config.switcher.autoSwitchNotification}
-          />
+            <InputSwitch
+              label="Auto switch notification"
+              bind:value={$user.config.switcher.autoSwitchNotification}
+            />
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </SettingsSection>
 
   <SettingsSection name="Triggers" description="At what point to switch scenes">
-    <form>
-      <div class="space-y-5">
-        <div class="space-y-4">
-          <Input
-            type="number"
-            label="Low"
-            description="When the bitrate drops below {$user.config.switcher
-              .triggers.low} Kbps"
-            bind:value={$user.config.switcher.triggers.low}
-          />
-          <div class="border border-b border-skin-divider" />
+    <div class="card">
+      <form>
+        <div class="space-y-5">
+          <div class="space-y-4">
+            <Input
+              type="number"
+              label="Low"
+              description="When the bitrate drops below {$user.config.switcher
+                .triggers.low} Kbps"
+              bind:value={$user.config.switcher.triggers.low}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="number"
-            label="RTT"
-            description="When the RTT is higher than {$user.config.switcher
-              .triggers.rtt} ms"
-            bind:value={$user.config.switcher.triggers.rtt}
-          />
-          <div class="border border-b border-skin-divider" />
+            <Input
+              type="number"
+              label="RTT"
+              description="When the RTT is higher than {$user.config.switcher
+                .triggers.rtt} ms"
+              bind:value={$user.config.switcher.triggers.rtt}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="number"
-            label="Offline"
-            description="When the bitrate drops below {$user.config.switcher
-              .triggers.offline} Kbps"
-            bind:value={$user.config.switcher.triggers.offline}
-          />
+            <Input
+              type="number"
+              label="Offline"
+              description="When the bitrate drops below {$user.config.switcher
+                .triggers.offline} Kbps"
+              bind:value={$user.config.switcher.triggers.offline}
+            />
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </SettingsSection>
 
   <SettingsSection
@@ -93,134 +97,143 @@
   />
 
   <SettingsSection name="Stream software">
-    <form>
-      <div class="space-y-5">
-        <div class="space-y-4">
-          <Input
-            type="text"
-            label="Software"
-            bind:value={$user.config.software.type}
-            readonly
-          />
+    <div class="card">
+      <form>
+        <div class="space-y-5">
+          <div class="space-y-4">
+            <Input
+              type="text"
+              label="Software"
+              bind:value={$user.config.software.type}
+              readonly
+            />
 
-          <div class="border border-b border-skin-divider" />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="text"
-            label="Host"
-            bind:value={$user.config.software.host}
-          />
-          <div class="border border-b border-skin-divider" />
+            <Input
+              type="text"
+              label="Host"
+              bind:value={$user.config.software.host}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="number"
-            label="Port"
-            bind:value={$user.config.software.port}
-          />
-          <div class="border border-b border-skin-divider" />
+            <Input
+              type="number"
+              label="Port"
+              bind:value={$user.config.software.port}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="password"
-            label="Password"
-            bind:value={$user.config.software.password}
-          />
+            <Input
+              type="password"
+              label="Password"
+              bind:value={$user.config.software.password}
+            />
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </SettingsSection>
 
   <SettingsSection name="Chat">
-    <form>
-      <div class="space-y-5">
-        <div class="space-y-4">
-          <Input
-            type="text"
-            label="Platform"
-            bind:value={$user.config.chat.platform}
-            readonly
-          />
-          <div class="border border-b border-skin-divider" />
+    <div class="card">
+      <form>
+        <div class="space-y-5">
+          <div class="space-y-4">
+            <Input
+              type="text"
+              label="Platform"
+              bind:value={$user.config.chat.platform}
+              readonly
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="text"
-            label="Username"
-            bind:value={$user.config.chat.username}
-          />
-          <div class="border border-b border-skin-divider" />
+            <Input
+              type="text"
+              label="Username"
+              bind:value={$user.config.chat.username}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="text"
-            label="prefix"
-            bind:value={$user.config.chat.prefix}
-          />
-          <div class="border border-b border-skin-divider" />
+            <Input
+              type="text"
+              label="prefix"
+              bind:value={$user.config.chat.prefix}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <InputSwitch
-            label="Enable auto stop"
-            description="Automatically stop the stream on host or raid"
-            bind:value={$user.config.chat.enableAutoStopStreamOnHostOrRaid}
-          />
+            <InputSwitch
+              label="Enable auto stop"
+              description="Automatically stop the stream on host or raid"
+              bind:value={$user.config.chat.enableAutoStopStreamOnHostOrRaid}
+            />
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </SettingsSection>
 
   <SettingsSection name="Optional scenes">
-    <form>
-      <div class="space-y-5">
-        <div class="space-y-4">
-          <Input
-            type="text"
-            label="Starting"
-            bind:value={$user.config.optionalScenes.starting}
-          />
-          <div class="border border-b border-skin-divider" />
+    <div class="card">
+      <form>
+        <div class="space-y-5">
+          <div class="space-y-4">
+            <Input
+              type="text"
+              label="Starting"
+              bind:value={$user.config.optionalScenes.starting}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="text"
-            label="Ending"
-            bind:value={$user.config.optionalScenes.ending}
-          />
-          <div class="border border-b border-skin-divider" />
+            <Input
+              type="text"
+              label="Ending"
+              bind:value={$user.config.optionalScenes.ending}
+            />
+            <div class="border border-b border-skin-divider" />
 
-          <Input
-            type="text"
-            label="Privacy"
-            bind:value={$user.config.optionalScenes.privacy}
-          />
+            <Input
+              type="text"
+              label="Privacy"
+              bind:value={$user.config.optionalScenes.privacy}
+            />
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </SettingsSection>
 
   <SettingsSection name="Extra options">
-    <form>
-      <div class="space-y-5">
-        <div class="space-y-4">
-          <InputSwitch
-            label="Twitch transcoding check"
-            bind:value={$user.config.optionalOptions.twitchTranscodingCheck}
-          />
-
-          {#if $user.config.optionalOptions.twitchTranscodingCheck}
-            <div class="border border-b border-skin-divider" />
-
-            <Input
-              type="number"
-              label="Twitch transcoding retries"
-              bind:value={$user.config.optionalOptions.twitchTranscodingRetries}
+    <div class="card">
+      <form>
+        <div class="space-y-5">
+          <div class="space-y-4">
+            <InputSwitch
+              label="Twitch transcoding check"
+              bind:value={$user.config.optionalOptions.twitchTranscodingCheck}
             />
-            <div class="border border-b border-skin-divider" />
 
-            <Input
-              type="number"
-              label="Twitch transcoding delay seconds"
-              bind:value={$user.config.optionalOptions
-                .twitchTranscodingDelaySeconds}
-            />
-          {/if}
+            {#if $user.config.optionalOptions.twitchTranscodingCheck}
+              <div class="border border-b border-skin-divider" />
+
+              <Input
+                type="number"
+                label="Twitch transcoding retries"
+                bind:value={$user.config.optionalOptions
+                  .twitchTranscodingRetries}
+              />
+              <div class="border border-b border-skin-divider" />
+
+              <Input
+                type="number"
+                label="Twitch transcoding delay seconds"
+                bind:value={$user.config.optionalOptions
+                  .twitchTranscodingDelaySeconds}
+              />
+            {/if}
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </SettingsSection>
 </div>

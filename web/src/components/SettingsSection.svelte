@@ -12,10 +12,12 @@
       {/if}
     </div>
 
-    <div class="col-span-3 shadow sm:rounded-md p-6 bg-skin-card mt-5 md:mt-0">
+    <div class="col-span-3 mt-5 md:mt-0">
       <slot>
-        <p class="text-center text-skin-base">Nothing in here :(</p>
-        <p class="text-center text-skin-base">Still working on this</p>
+        <div class="card">
+          <p class="text-center text-skin-base">Nothing in here :(</p>
+          <p class="text-center text-skin-base">Still working on this</p>
+        </div>
       </slot>
     </div>
   </div>
