@@ -55,6 +55,40 @@
     </div>
   </SettingsSection>
 
+
+  <SettingsSection name="Switching scenes" description="The important scenes">
+    <div class="card">
+      <form>
+        <div class="space-y-5">
+          <div class="space-y-4">
+            <Input
+              type="text"
+              label="Live"
+              description="Your main scene"
+              bind:value={$user.config.switcher.switchingScenes.normal}
+            />
+            <div class="border border-b border-skin-divider" />
+
+            <Input
+              type="text"
+              label="Low"
+              description="Your low bitrate scene"
+              bind:value={$user.config.switcher.switchingScenes.low}
+            />
+            <div class="border border-b border-skin-divider" />
+
+            <Input
+              type="text"
+              label="Offline"
+              description="Shown when you lost connection"
+              bind:value={$user.config.switcher.switchingScenes.offline}
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  </SettingsSection>
+
   <SettingsSection name="Triggers" description="At what point to switch scenes">
     <div class="card">
       <form>
