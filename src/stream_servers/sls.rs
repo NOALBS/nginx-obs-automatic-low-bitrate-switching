@@ -1,8 +1,7 @@
 use async_trait::async_trait;
-use log::{debug, error, trace};
+use log::{error, trace};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tokio::time::{self, Duration};
 
 use super::{Bsl, StreamServersCommands, SwitchLogic};
 use crate::switcher::{SwitchType, Triggers};
@@ -30,12 +29,6 @@ pub struct SrtLiveServer {
 
     /// StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
     pub publisher: String,
-
-    /// Max attempts to poll the bitrate every second on low bitrate.
-    /// This will be used to make sure the stream is actually in a low
-    /// bitrate state
-    #[serde(default = "super::default_max_low_retry")]
-    pub max_low_retry: u8,
 }
 
 impl SrtLiveServer {
@@ -93,59 +86,13 @@ impl SwitchLogic for SrtLiveServer {
 
         if let Some(low) = triggers.low {
             if stats.bitrate <= low.into() {
-                let mut amount_low = 0;
-
-                for i in 0..self.max_low_retry {
-                    let stats = match self.get_stats().await {
-                        Some(b) => b,
-                        None => return SwitchType::Offline,
-                    };
-
-                    if stats.bitrate <= low.into() {
-                        amount_low += 1;
-                    }
-
-                    debug!("LOW: {}/{}", amount_low, self.max_low_retry);
-
-                    if i != self.max_low_retry - 1 {
-                        time::sleep(Duration::from_secs(1)).await;
-                    }
-                }
-
-                if amount_low == self.max_low_retry {
-                    return SwitchType::Low;
-                }
-
-                return SwitchType::Normal;
+                return SwitchType::Low;
             }
         }
 
         if let Some(rtt) = triggers.rtt {
             if stats.rtt >= rtt.into() {
-                let mut amount_high = 0;
-
-                for i in 0..self.max_low_retry {
-                    let stats = match self.get_stats().await {
-                        Some(b) => b,
-                        None => return SwitchType::Offline,
-                    };
-
-                    if stats.bitrate >= rtt.into() {
-                        amount_high += 1;
-                    }
-
-                    debug!("HIGH RTT: {}/{}", amount_high, self.max_low_retry);
-
-                    if i != self.max_low_retry - 1 {
-                        time::sleep(Duration::from_secs(1)).await;
-                    }
-                }
-
-                if amount_high == self.max_low_retry {
-                    return SwitchType::Low;
-                }
-
-                return SwitchType::Normal;
+                return SwitchType::Low;
             }
         }
 

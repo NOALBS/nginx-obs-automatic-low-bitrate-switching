@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{chat, error, stream_servers, switcher};
 
+const MAX_LOW_RETRY: u8 = 5;
+
 /// The config of NOALBS
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -31,14 +33,17 @@ pub struct Switcher {
     /// Disable the switcher
     pub bitrate_switcher_enabled: bool,
 
-    /// The interval that the switcher will sleep for before checking the stats again
-    pub request_interval: std::time::Duration,
-
     /// Only enable the switcher when actually streaming from OBS
     pub only_switch_when_streaming: bool,
 
     /// Enable auto switch chat notification
     pub auto_switch_notification: bool,
+
+    /// Max attempts to poll the bitrate every second on low bitrate / offline.
+    /// This will be used to make sure the stream is actually in a low / offline
+    /// bitrate state
+    #[serde(default = "default_max_low_retry")]
+    pub retry_attempts: u8,
 
     /// Triggers to switch to the low or offline scenes
     pub triggers: switcher::Triggers,
@@ -75,7 +80,6 @@ impl Switcher {
 impl Default for Switcher {
     fn default() -> Self {
         Self {
-            request_interval: std::time::Duration::from_secs(2),
             bitrate_switcher_enabled: true,
             only_switch_when_streaming: true,
             auto_switch_notification: true,
@@ -86,8 +90,13 @@ impl Default for Switcher {
                 low: "low".to_string(),
                 offline: "offline".to_string(),
             },
+            retry_attempts: default_max_low_retry(),
         }
     }
+}
+
+fn default_max_low_retry() -> u8 {
+    MAX_LOW_RETRY
 }
 
 // TODO: Is it possible to do this another way?

@@ -21,13 +21,11 @@ impl Switcher {
         tracing::info!("Running switcher");
 
         let f = async move {
-            loop {
-                tokio::time::sleep({
-                    let state = switcher.state.read().await;
-                    state.config.switcher.request_interval
-                })
-                .await;
+            let mut prev_switch_type: SwitchType = SwitchType::Offline;
+            let mut same_type: u8 = 0;
 
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 tracing::debug!("Switcher loop");
 
                 if let Some(notifier) = switcher.get_sleep_notifier_if_necessary().await {
@@ -35,7 +33,7 @@ impl Switcher {
                     continue;
                 }
 
-                if let Err(e) = switcher.switch().await {
+                if let Err(e) = switcher.switch(&mut prev_switch_type, &mut same_type).await {
                     error!("Error when trying to switch: {}", e);
                 }
             }
@@ -79,125 +77,148 @@ impl Switcher {
         None
     }
 
-    pub async fn switch(&self) -> Result<(), error::Error> {
-        let (switch_type, scene) = self.next_switching_scene().await;
-        debug!("Next switch type: {:?}", switch_type);
+    async fn switch(
+        &self,
+        prev_switch_type: &mut SwitchType,
+        same_type: &mut u8,
+    ) -> Result<(), error::Error> {
+        let state = self.state.read().await;
 
-        // Set the previous scene when switch_type is normal or low
-        if let SwitchType::Normal | SwitchType::Low = switch_type {
-            let mut state = self.state.write().await;
-            state.broadcasting_software.prev_scene = scene.to_owned();
+        let switcher_config = &state.config.switcher;
+        let triggers = &switcher_config.triggers;
+        let stream_servers = &switcher_config.stream_servers;
+        let retry_attempts = &switcher_config.retry_attempts;
+
+        let (mut server, mut current_switch_type) =
+            Self::get_online_stream_server(&stream_servers, &triggers).await;
+
+        // When stream comes back from offline, instantly switch.
+        let mut force_switch =
+            *prev_switch_type == SwitchType::Offline && current_switch_type != SwitchType::Offline;
+
+        if prev_switch_type == &current_switch_type {
+            *same_type += 1;
+        } else {
+            debug!("Got different type, switching to that");
+
+            *prev_switch_type = current_switch_type.to_owned();
+            *same_type = 0;
+        }
+
+        debug!("type: {:?}, same: {:?}", current_switch_type, same_type);
+
+        if let SwitchType::Previous = &current_switch_type {
+            if let Some(s) = server {
+                if let Some(last) = &state.switcher_state.last_used_server {
+                    if last != &s.name {
+                        current_switch_type = SwitchType::Normal;
+                        force_switch = true;
+                    }
+                }
+            }
+        }
+
+        if !(same_type == retry_attempts || force_switch) {
+            return Ok(());
+        }
+
+        *same_type = 0;
+
+        if current_switch_type == SwitchType::Offline {
+            if let Some(name) = &state.switcher_state.last_used_server {
+                server = stream_servers.iter().find(|s| &s.name == name);
+            }
+        }
+
+        let scenes = if let Some(scenes) = self.get_optional_scenes(server).await {
+            scenes
+        } else {
+            &switcher_config.switching_scenes
         };
 
-        self.switch_if_necessary(&scene, switch_type).await?;
+        let scene = if let SwitchType::Previous = &current_switch_type {
+            &state.broadcasting_software.prev_scene
+        } else {
+            // Should be safe since previous is handled
+            scenes.type_to_scene(&current_switch_type).unwrap()
+        }
+        .to_owned();
+
+        let server_name = match server {
+            Some(s) => Some(s.name.to_owned()),
+            None => None,
+        };
+
+        drop(state);
+
+        {
+            let mut state = self.state.write().await;
+
+            // Set the previous scene when switch_type is normal or low
+            if let SwitchType::Normal | SwitchType::Low = current_switch_type {
+                state.broadcasting_software.prev_scene = scene.to_owned();
+            };
+
+            if current_switch_type != SwitchType::Offline {
+                debug!("Last used server set to {:?}", server_name);
+                state.switcher_state.last_used_server = server_name;
+            }
+        }
+
+        self.switch_if_necessary(&scene, current_switch_type)
+            .await?;
 
         Ok(())
     }
 
-    pub async fn next_switching_scene(&self) -> (SwitchType, String) {
-        let (switch_type, scenes) = self.next_switch().await;
+    /// Gets the first online stream server with current status
+    async fn get_online_stream_server<'a>(
+        stream_servers: &'a [stream_servers::StreamServer],
+        triggers: &'a Triggers,
+    ) -> (Option<&'a stream_servers::StreamServer>, SwitchType) {
+        for server in stream_servers {
+            let switch_type = server.stream_server.switch(&triggers).await;
 
-        let scene = if let SwitchType::Previous = switch_type {
-            let state = self.state.read().await;
-            state.broadcasting_software.prev_scene.to_owned()
-        } else {
-            // Should be safe since previous is handled
-            scenes.type_to_scene(&switch_type).unwrap()
-        };
-
-        return (switch_type, scene);
-    }
-
-    /// Returns the type and scenes of the first stream server that is not offline
-    pub async fn next_switch(&self) -> (SwitchType, SwitchingScenes) {
-        let state = self.state.read().await;
-        let mut server = state.switcher_state.last_used_server.to_owned();
-
-        // Get the next type and scenes
-        let (mut switch_type, mut switching_scenes) = (SwitchType::Offline, None);
-
-        let ss = &state.config.switcher;
-        let triggers = &ss.triggers;
-
-        for s in &ss.stream_servers {
-            let t = s.stream_server.switch(&triggers).await;
-
-            if t == SwitchType::Offline {
-                if let Some(lus) = &state.switcher_state.last_used_server {
-                    if &s.name == lus {
-                        switch_type = t;
-
-                        if let Some(d) = &s.depends_on {
-                            switching_scenes = Some(d.backup_scenes.to_owned());
-                        } else {
-                            switching_scenes = s.override_scenes.to_owned();
-                        }
-                    }
-                }
-
+            if switch_type == SwitchType::Offline {
                 continue;
             }
 
-            server = Some(s.name.to_owned());
-
-            if let Some(depends_on) = &s.depends_on {
-                if let Some(dep) = Self::depends_on(t, &depends_on, &ss.stream_servers).await {
-                    switch_type = dep.0;
-                    switching_scenes = dep.1;
-
-                    break;
-                }
-            }
-
-            switch_type = t;
-            switching_scenes = s.override_scenes.to_owned();
-            break;
+            return (Some(server), switch_type);
         }
 
-        drop(state);
-        let mut state = self.state.write().await;
-
-        let switching_scenes = match switching_scenes {
-            Some(scenes) => scenes,
-            None => {
-                // Get default scenes
-                server = None;
-                state.config.switcher.switching_scenes.to_owned()
-            }
-        };
-
-        debug!("Last used server set to {:?}", server);
-        state.switcher_state.last_used_server = server;
-        (switch_type, switching_scenes)
+        (None, SwitchType::Offline)
     }
 
-    /// Returns the backup scenes when the depended on stream is offline
-    async fn depends_on(
-        switch_type: SwitchType,
-        depends_on: &stream_servers::DependsOn,
-        stream_servers: &[stream_servers::StreamServer],
-    ) -> Option<(SwitchType, Option<SwitchingScenes>)> {
-        debug!("This stream server depends on: {}", depends_on.name);
-
-        let server = match stream_servers.iter().find(|&x| x.name == depends_on.name) {
-            Some(server) => server,
-            None => return None,
-        };
-
-        // got the server is it online?
-        if server.stream_server.bitrate().await.message.is_some() {
-            debug!("The depended stream server is online");
-            return None;
+    async fn get_optional_scenes<'a>(
+        &'a self,
+        server: Option<&'a stream_servers::StreamServer>,
+    ) -> Option<&'a SwitchingScenes> {
+        if let Some(depends) = &server?.depends_on {
+            if !self.is_stream_server_online(&depends.name).await {
+                debug!("The depended stream server is offline. Going to use the backup scenes.");
+                return Some(&depends.backup_scenes);
+            }
         }
 
-        // it's offline
-
-        debug!("The depended stream server is offline. Going to use the backup scenes.");
-
-        Some((switch_type, Some(depends_on.backup_scenes.to_owned())))
+        return server?.override_scenes.as_ref();
     }
 
-    // TODO
+    async fn is_stream_server_online(&self, server_name: &str) -> bool {
+        match self
+            .state
+            .read()
+            .await
+            .config
+            .switcher
+            .stream_servers
+            .iter()
+            .find(|&x| x.name == server_name)
+        {
+            Some(server) => server.stream_server.bitrate().await.message.is_some(),
+            None => false,
+        }
+    }
+
     pub async fn switch_if_necessary(
         &self,
         switch_scene: &str,
@@ -222,7 +243,6 @@ impl Switcher {
             return Ok(());
         }
 
-        // TODO: maybe also check if we're still on a switchable scene before switching
         // Ignore the error.. it should work at some point
         if let Err(error) = state
             .broadcasting_software
@@ -280,15 +300,13 @@ impl SwitchingScenes {
         }
     }
 
-    pub fn type_to_scene(&self, s_type: &SwitchType) -> Result<String, error::Error> {
-        let str = match s_type {
+    pub fn type_to_scene(&self, s_type: &SwitchType) -> Result<&str, error::Error> {
+        Ok(match s_type {
             SwitchType::Normal => &self.normal,
             SwitchType::Low => &self.low,
             SwitchType::Offline => &self.offline,
             _ => return Err(error::Error::SwitchTypeNotSupported),
-        };
-
-        Ok(str.to_string())
+        })
     }
 }
 

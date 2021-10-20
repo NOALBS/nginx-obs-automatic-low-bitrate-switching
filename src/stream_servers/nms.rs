@@ -1,8 +1,6 @@
 use async_trait::async_trait;
 use log::{error, trace};
 use serde::{Deserialize, Serialize};
-use tokio::time::{self, Duration};
-use tracing::debug;
 
 use super::{Bsl, StreamServersCommands, SwitchLogic};
 use crate::switcher::{SwitchType, Triggers};
@@ -33,12 +31,6 @@ pub struct NodeMediaServer {
 
     /// Stream key
     pub key: String,
-
-    /// Max attempts to poll the bitrate every second on low bitrate.
-    /// This will be used to make sure the stream is actually in a low
-    /// bitrate state
-    #[serde(default = "super::default_max_low_retry")]
-    pub max_low_retry: u8,
 
     pub auth: Option<Auth>,
 }
@@ -101,30 +93,7 @@ impl SwitchLogic for NodeMediaServer {
 
         if let Some(low) = triggers.low {
             if stats.bitrate <= low.into() {
-                let mut amount_low = 0;
-
-                for i in 0..self.max_low_retry {
-                    let stats = match self.get_stats().await {
-                        Some(b) => b,
-                        None => return SwitchType::Offline,
-                    };
-
-                    if stats.bitrate <= low.into() {
-                        amount_low += 1;
-                    }
-
-                    debug!("LOW: {}/{}", amount_low, self.max_low_retry);
-
-                    if i != self.max_low_retry - 1 {
-                        time::sleep(Duration::from_secs(1)).await;
-                    }
-                }
-
-                if amount_low == self.max_low_retry {
-                    return SwitchType::Low;
-                }
-
-                return SwitchType::Normal;
+                return SwitchType::Low;
             }
         }
 

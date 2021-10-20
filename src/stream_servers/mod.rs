@@ -9,8 +9,6 @@ pub mod nimble;
 pub mod nms;
 pub mod sls;
 
-const MAX_LOW_RETRY: u8 = 3;
-
 #[async_trait]
 #[typetag::serde(tag = "type")]
 pub trait SwitchLogic {
@@ -60,8 +58,4 @@ pub struct StreamServer {
 pub struct DependsOn {
     pub name: String,
     pub backup_scenes: switcher::SwitchingScenes,
-}
-
-fn default_max_low_retry() -> u8 {
-    MAX_LOW_RETRY
 }
