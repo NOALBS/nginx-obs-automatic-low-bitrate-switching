@@ -1,16 +1,14 @@
 {
   "user": {
     "id": null,
-    "name": "715209"
+    "name": "715209",
+    "passwordHash": null
   },
   "switcher": {
     "bitrateSwitcherEnabled": true,
-    "requestInterval": {
-      "secs": 2,
-      "nanos": 0
-    },
     "onlySwitchWhenStreaming": true,
     "autoSwitchNotification": true,
+    "retryAttempts": 5,
     "triggers": {
       "low": 800,
       "rtt": 2500,
@@ -28,7 +26,6 @@
           "statsUrl": "http://localhost:8000/api/streams",
           "application": "publish",
           "key": "live",
-          "maxLowRetry": 3,
           "auth": {
             "username": "admin",
             "password": "admin"
@@ -43,8 +40,7 @@
         "streamServer": {
           "type": "SrtLiveServer",
           "statsUrl": "http://127.0.0.1:8181/stats",
-          "publisher": "publish/live/feed1",
-          "maxLowRetry": 3
+          "publisher": "publish/live/feed1"
         },
         "name": "SLS",
         "priority": 0,
@@ -62,8 +58,7 @@
         "streamServer": {
           "type": "SrtLiveServer",
           "statsUrl": "http://127.0.0.1:8181/stats",
-          "publisher": "publish/live/feed2",
-          "maxLowRetry": 3
+          "publisher": "publish/live/feed2"
         },
         "name": "SLS2",
         "priority": 0,
@@ -100,7 +95,7 @@
     "admins": [
       "b3ck"
     ],
-    "prefix": "#",
+    "prefix": "!",
     "enablePublicCommands": false,
     "enableModCommands": true,
     "enableAutoStopStreamOnHostOrRaid": true,
