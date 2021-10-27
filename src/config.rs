@@ -28,7 +28,7 @@ pub struct User {
 
 /// All the data that can be changed outside of the switcher
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct Switcher {
     /// Disable the switcher
     pub bitrate_switcher_enabled: bool,
@@ -36,13 +36,15 @@ pub struct Switcher {
     /// Only enable the switcher when actually streaming from OBS
     pub only_switch_when_streaming: bool,
 
+    /// When stream comes back from offline, instantly switch to low / live
+    pub instantly_switch_on_recover: bool,
+
     /// Enable auto switch chat notification
     pub auto_switch_notification: bool,
 
     /// Max attempts to poll the bitrate every second on low bitrate / offline.
     /// This will be used to make sure the stream is actually in a low / offline
     /// bitrate state
-    #[serde(default = "default_max_low_retry")]
     pub retry_attempts: u8,
 
     /// Triggers to switch to the low or offline scenes
@@ -82,6 +84,7 @@ impl Default for Switcher {
         Self {
             bitrate_switcher_enabled: true,
             only_switch_when_streaming: true,
+            instantly_switch_on_recover: true,
             auto_switch_notification: true,
             triggers: switcher::Triggers::default(),
             stream_servers: Vec::new(),
@@ -90,13 +93,9 @@ impl Default for Switcher {
                 low: "low".to_string(),
                 offline: "offline".to_string(),
             },
-            retry_attempts: default_max_low_retry(),
+            retry_attempts: MAX_LOW_RETRY,
         }
     }
-}
-
-fn default_max_low_retry() -> u8 {
-    MAX_LOW_RETRY
 }
 
 // TODO: Is it possible to do this another way?

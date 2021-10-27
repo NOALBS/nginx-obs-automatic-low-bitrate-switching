@@ -7,6 +7,7 @@
   "switcher": {
     "bitrateSwitcherEnabled": true,
     "onlySwitchWhenStreaming": true,
+    "instantlySwitchOnRecover": true,
     "autoSwitchNotification": true,
     "retryAttempts": 5,
     "triggers": {

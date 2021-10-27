@@ -88,13 +88,15 @@ impl Switcher {
         let triggers = &switcher_config.triggers;
         let stream_servers = &switcher_config.stream_servers;
         let retry_attempts = &switcher_config.retry_attempts;
+        let instant_recover = &switcher_config.instantly_switch_on_recover;
 
         let (mut server, mut current_switch_type) =
             Self::get_online_stream_server(&stream_servers, &triggers).await;
 
         // When stream comes back from offline, instantly switch.
-        let mut force_switch =
-            *prev_switch_type == SwitchType::Offline && current_switch_type != SwitchType::Offline;
+        let mut force_switch = *instant_recover
+            && *prev_switch_type == SwitchType::Offline
+            && current_switch_type != SwitchType::Offline;
 
         if prev_switch_type == &current_switch_type {
             *same_type += 1;
