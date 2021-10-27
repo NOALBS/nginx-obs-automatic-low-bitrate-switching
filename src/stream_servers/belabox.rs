@@ -76,6 +76,10 @@ impl SwitchLogic for Belabox {
             return SwitchType::Offline;
         }
 
+        if stats.bitrate == 1 {
+            return SwitchType::Previous;
+        }
+
         if let Some(low) = triggers.low {
             if stats.bitrate <= low.into() {
                 return SwitchType::Low;
