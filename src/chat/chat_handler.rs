@@ -197,7 +197,15 @@ impl ChatHandler {
             return None;
         }
 
-        debug!("Executing command: {:?}", command);
+        match command {
+            chat::Command::Unknown(_) => {}
+            _ => {
+                info!(
+                    "[{}] {} executed command: {:?}",
+                    msg.channel, msg.sender, command
+                );
+            }
+        }
 
         let dc = DispatchCommand {
             user: user.clone(),
