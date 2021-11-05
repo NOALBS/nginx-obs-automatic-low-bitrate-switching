@@ -753,12 +753,44 @@ impl DispatchCommand {
                 self.user.save_config().await;
                 "Successfully disabled the switcher".to_string()
             }
+            "instant" => {
+                let toggle = self.user.set_instantly_switch_on_recover().await;
+                self.user.save_config().await;
+                generate_enable_string("Instant switch on recover", toggle)
+            }
+            "retry" => self.set_retry_attempts(args.next()).await,
             _ => String::new(),
         };
 
         if !msg.is_empty() {
             self.send(msg).await;
         }
+    }
+
+    async fn set_retry_attempts(&self, value_string: Option<&str>) -> String {
+        let value = match value_string {
+            Some(name) => name,
+            None => {
+                let current_attempts = &self.user.get_retry_attempts().await;
+
+                return format!("Current retry set at {}", current_attempts);
+            }
+        };
+
+        let value = match value.parse::<u8>() {
+            Ok(v) => v,
+            Err(_) => {
+                return format!(
+                    "Error editing retry attempts {} is not a valid value",
+                    value
+                );
+            }
+        };
+
+        self.user.set_retry_attempts(value).await;
+        self.user.save_config().await;
+
+        format!("Retry attempts set to {}", value)
     }
 
     async fn privacy_scene(&self) {

@@ -229,6 +229,16 @@ impl Noalbs {
         Ok(())
     }
 
+    pub async fn set_instantly_switch_on_recover(&self) -> bool {
+        let mut state = self.state.write().await;
+        let switcher = &mut state.config.switcher;
+        let toggle = !switcher.instantly_switch_on_recover;
+
+        switcher.instantly_switch_on_recover = toggle;
+
+        toggle
+    }
+
     pub async fn get_notify(&self) -> bool {
         let state = self.state.read().await;
 
@@ -239,6 +249,18 @@ impl Noalbs {
         let mut state = self.state.write().await;
 
         state.config.switcher.auto_switch_notification = enabled;
+    }
+
+    pub async fn get_retry_attempts(&self) -> u8 {
+        let state = self.state.read().await;
+
+        state.config.switcher.retry_attempts
+    }
+
+    pub async fn set_retry_attempts(&self, value: u8) {
+        let mut state = self.state.write().await;
+
+        state.config.switcher.retry_attempts = value;
     }
 
     pub async fn set_prefix(&self, prefix: String) -> Result<(), error::Error> {
