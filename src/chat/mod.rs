@@ -36,6 +36,7 @@ pub enum Command {
     Switch,
     Trigger,
     Version,
+    LiveScene,
     StartingScene,
     EndingScene,
     PrivacyScene,
@@ -68,6 +69,7 @@ impl From<&str> for Command {
 
             "noalbsversion" => Command::Version,
 
+            "live" => Command::LiveScene,
             "privacy" => Command::PrivacyScene,
             "starting" => Command::StartingScene,
             "ending" => Command::EndingScene,

@@ -440,6 +440,7 @@ impl DispatchCommand {
             chat::Command::PrivacyScene => self.privacy_scene().await,
             chat::Command::StartingScene => self.starting_scene().await,
             chat::Command::EndingScene => self.ending_scene().await,
+            chat::Command::LiveScene => self.live_scene().await,
             chat::Command::Obsinfo => {}
             chat::Command::Mod => {}
             chat::Command::Public => {}
@@ -829,6 +830,15 @@ impl DispatchCommand {
         } else {
             self.send("No ending scene set".to_string()).await;
         }
+    }
+
+    // TODO: Actually switch to the right scene
+    async fn live_scene(&self) {
+        let state = self.user.state.read().await;
+        let scene = &state.config.switcher.switching_scenes.normal;
+
+        self.send("Switching to live scene".to_string()).await;
+        self.switch(Some(&scene)).await;
     }
 
     async fn send(&self, message: String) {
