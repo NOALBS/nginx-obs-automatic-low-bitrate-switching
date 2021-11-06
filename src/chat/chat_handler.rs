@@ -444,7 +444,7 @@ impl DispatchCommand {
             chat::Command::Obsinfo => {}
             chat::Command::Mod => {}
             chat::Command::Public => {}
-            chat::Command::Sourceinfo => {}
+            chat::Command::Sourceinfo => self.source_info(params.next()).await,
             chat::Command::Unknown(_) => {}
         };
     }
@@ -839,6 +839,43 @@ impl DispatchCommand {
 
         self.send("Switching to live scene".to_string()).await;
         self.switch(Some(&scene)).await;
+    }
+
+    async fn source_info(&self, server_name: Option<&str>) {
+        let state = &self.user.state.read().await;
+        let stream_servers = &state.config.switcher.stream_servers;
+
+        if let Some(name) = server_name {
+            let server = match stream_servers.iter().find(|s| s.name == name) {
+                Some(s) => s,
+                None => {
+                    let msg = format!("Error no server found with the name: {}", name);
+                    self.send(msg).await;
+
+                    return;
+                }
+            };
+
+            let info = match server.stream_server.source_info().await {
+                Some(i) => i,
+                None => "no information".to_string(),
+            };
+            self.send(format!("{}: {}", name, info)).await;
+
+            return;
+        }
+
+        let mut msg = Vec::new();
+
+        for s in stream_servers {
+            let info = s.stream_server.source_info().await;
+
+            if let Some(info) = info {
+                msg.push(format!("{}: {}", s.name, info));
+            }
+        }
+
+        self.send(msg.join(" - ")).await;
     }
 
     async fn send(&self, message: String) {

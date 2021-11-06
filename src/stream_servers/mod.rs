@@ -21,7 +21,7 @@ pub trait SwitchLogic {
 #[typetag::serde(tag = "type")]
 pub trait StreamServersCommands {
     async fn bitrate(&self) -> Bitrate;
-    async fn source_info(&self) -> String;
+    async fn source_info(&self) -> Option<String>;
 }
 
 #[typetag::serde(tag = "type")]

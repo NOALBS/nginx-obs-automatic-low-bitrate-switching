@@ -167,8 +167,32 @@ impl StreamServersCommands for Nginx {
         }
     }
 
-    async fn source_info(&self) -> String {
-        todo!()
+    async fn source_info(&self) -> Option<String> {
+        let stats = self.get_stats().await?;
+        let meta = stats.meta?;
+        let video = meta.video;
+        let audio = meta.audio;
+
+        let bitrate = format!("{} Kbps", stats.bw_video / 1024);
+
+        let v_info = format!(
+            "{}p{} | {} {} {}",
+            video.height,
+            video.frame_rate,
+            video.codec,
+            video.profile.unwrap_or_default(),
+            video.level.unwrap_or_default()
+        );
+
+        let a_info = format!(
+            "{} {} {}Hz, {} channels",
+            audio.codec,
+            audio.profile.unwrap_or_default(),
+            audio.sample_rate.unwrap_or_default(),
+            audio.channels.unwrap_or_default(),
+        );
+
+        Some(format!("{} | {} | {}", bitrate, v_info, a_info))
     }
 }
 

@@ -214,8 +214,8 @@ impl StreamServersCommands for Nimble {
         }
     }
 
-    async fn source_info(&self) -> String {
-        todo!()
+    async fn source_info(&self) -> Option<String> {
+        self.bitrate().await.message
     }
 }
 

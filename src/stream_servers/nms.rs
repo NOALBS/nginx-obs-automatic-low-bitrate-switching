@@ -119,8 +119,10 @@ impl StreamServersCommands for NodeMediaServer {
         }
     }
 
-    async fn source_info(&self) -> String {
-        todo!()
+    async fn source_info(&self) -> Option<String> {
+        let stats = self.get_stats().await?;
+
+        Some(format!("{} Kbps", stats.bitrate))
     }
 }
 

@@ -115,8 +115,13 @@ impl StreamServersCommands for Belabox {
         }
     }
 
-    async fn source_info(&self) -> String {
-        todo!()
+    async fn source_info(&self) -> Option<String> {
+        let stats = self.get_stats().await?;
+
+        let bitrate = format!("{} Kbps, {} ms", stats.bitrate, stats.rtt.round(),);
+        let dropped = format!("dropped {} packets", stats.dropped_pkts);
+
+        Some(format!("{} | {}", bitrate, dropped))
     }
 }
 

@@ -115,8 +115,26 @@ impl StreamServersCommands for SrtLiveServer {
         }
     }
 
-    async fn source_info(&self) -> String {
-        todo!()
+    async fn source_info(&self) -> Option<String> {
+        let stats = self.get_stats().await?;
+
+        let bitrate = format!("{} Kbps, {} ms", stats.bitrate, stats.rtt.round());
+
+        let mbps = format!(
+            "Estimated bandwidth {} Mbps, Receiving rate {:.2} Mbps",
+            stats.mbps_bandwidth.round(),
+            stats.mbps_recv_rate
+        );
+
+        let pkt = format!(
+            "{} dropped, {} loss",
+            stats.pkt_rcv_drop, stats.pkt_rcv_loss
+        );
+
+        // The ms of acknowledged packets in the receiver's buffer
+        let ms_buf = format!("{} ms buffer", stats.ms_rcv_buf);
+
+        Some(format!("{} | {} | {} |  {}", bitrate, mbps, pkt, ms_buf))
     }
 }
 
