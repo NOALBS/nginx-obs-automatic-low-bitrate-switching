@@ -845,6 +845,8 @@ impl DispatchCommand {
         let state = &self.user.state.read().await;
         let stream_servers = &state.config.switcher.stream_servers;
 
+        let no_info = "No information".to_string();
+
         if let Some(name) = server_name {
             let server = match stream_servers.iter().find(|s| s.name == name) {
                 Some(s) => s,
@@ -858,7 +860,7 @@ impl DispatchCommand {
 
             let info = match server.stream_server.source_info().await {
                 Some(i) => i,
-                None => "no information".to_string(),
+                None => no_info,
             };
             self.send(format!("{}: {}", name, info)).await;
 
@@ -873,6 +875,12 @@ impl DispatchCommand {
             if let Some(info) = info {
                 msg.push(format!("{}: {}", s.name, info));
             }
+        }
+
+        if msg.is_empty() {
+            self.send(no_info).await;
+
+            return;
         }
 
         self.send(msg.join(" - ")).await;
