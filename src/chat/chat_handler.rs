@@ -552,6 +552,8 @@ impl DispatchCommand {
             let retry = &options.twitch_transcoding_retries;
             let delay = &options.twitch_transcoding_delay_seconds;
 
+            let mut attempts = 0;
+
             for i in 0..*retry {
                 debug!("[{}] Starting stream", i);
                 if let Err(e) = bsc.start_streaming().await {
@@ -563,6 +565,7 @@ impl DispatchCommand {
                 time::sleep(time::Duration::from_secs(*delay)).await;
 
                 if let Ok(true) = check_if_transcoding(&self.chat_message.channel).await {
+                    attempts = i + 1;
                     break;
                 }
 
@@ -583,8 +586,13 @@ impl DispatchCommand {
                 time::sleep(time::Duration::from_secs(5)).await;
             }
 
-            self.send("Started stream with transcoding".to_string())
-                .await;
+            let mut msg = "Started stream with transcoding".to_string();
+
+            if attempts > 1 {
+                msg += &format!(", took {} attempts", attempts,);
+            }
+
+            self.send(msg).await;
 
             return;
         }
