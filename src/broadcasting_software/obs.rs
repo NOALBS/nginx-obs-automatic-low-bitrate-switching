@@ -233,7 +233,20 @@ impl InnerConnection {
                 bs.is_streaming = streaming_status.streaming;
                 bs.status = ClientStatus::Connected;
 
+                let bs = &state.broadcasting_software;
                 bs.connected_notifier().notify_waiters();
+
+                if bs.is_streaming {
+                    bs.start_streaming_notifier().notify_waiters();
+                }
+
+                if state
+                    .switcher_state
+                    .switchable_scenes
+                    .contains(&bs.current_scene)
+                {
+                    bs.switch_scene_notifier().notify_waiters();
+                }
             }
 
             if let Err(e) = &event_stream {
