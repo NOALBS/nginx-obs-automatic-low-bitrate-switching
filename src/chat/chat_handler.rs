@@ -534,70 +534,50 @@ impl DispatchCommand {
     }
 
     async fn start(&self) {
-        let state = self.user.state.read().await;
-
-        let bsc = match &state.broadcasting_software.connection {
-            Some(b) => b,
-            None => return,
+        let twitch_transcoding = {
+            self.user
+                .state
+                .read()
+                .await
+                .config
+                .optional_options
+                .twitch_transcoding_check
         };
 
-        let options = &state.config.optional_options;
-
-        if self.chat_message.platform == chat::ChatPlatform::Twitch
-            && options.twitch_transcoding_check
-        {
-            self.send("Trying to start the stream with transcoding".to_string())
-                .await;
-
-            let retry = &options.twitch_transcoding_retries;
-            let delay = &options.twitch_transcoding_delay_seconds;
-
-            let mut attempts = 0;
-
-            for i in 0..*retry {
-                debug!("[{}] Starting stream", i);
-                if let Err(e) = bsc.start_streaming().await {
-                    self.send(format!("Error can't start the stream, {}", e))
-                        .await;
-                    return;
-                };
-
-                time::sleep(time::Duration::from_secs(*delay)).await;
-
-                if let Ok(true) = check_if_transcoding(&self.chat_message.channel).await {
-                    attempts = i + 1;
-                    break;
-                }
-
-                if i == retry - 1 {
-                    debug!("[{}] Can't get transcoding", i);
-                    self.send("Successfully started the stream without transcoding".to_string())
-                        .await;
-                    return;
-                }
-
-                debug!("[{}] Stopping stream", i);
-                if let Err(e) = bsc.stop_streaming().await {
-                    self.send(format!("Error can't start the stream, {}", e))
-                        .await;
-                    return;
-                };
-
-                time::sleep(time::Duration::from_secs(5)).await;
-            }
-
-            let mut msg = "Started stream with transcoding".to_string();
-
-            if attempts > 1 {
-                msg += &format!(", took {} attempts", attempts,);
-            }
-
-            self.send(msg).await;
-
+        if self.chat_message.platform == chat::ChatPlatform::Twitch && twitch_transcoding {
+            self.start_twitch_transcoding().await;
             return;
         }
 
-        let msg = match bsc.start_streaming().await {
+        self.start_normal().await;
+    }
+
+    async fn start_bsc(&self) -> Result<(), error::Error> {
+        let state = self.user.state.read().await;
+
+        let bsc = state
+            .broadcasting_software
+            .connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        bsc.start_streaming().await
+    }
+
+    async fn stop_bsc(&self) -> Result<(), error::Error> {
+        let state = self.user.state.read().await;
+
+        let bsc = state
+            .broadcasting_software
+            .connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        bsc.stop_streaming().await
+    }
+
+    async fn start_normal(&self) {
+        let msg = match self.start_bsc().await {
             Ok(_) => "Successfully started the stream".to_string(),
             Err(e) => format!("Error can't start the stream, {}", e),
         };
@@ -605,15 +585,65 @@ impl DispatchCommand {
         self.send(msg).await;
     }
 
-    async fn stop(&self) {
-        let state = self.user.state.read().await;
+    async fn start_twitch_transcoding(&self) {
+        let (retry, delay) = {
+            let options = &self.user.state.read().await.config.optional_options;
+            let retry = options.twitch_transcoding_retries;
+            let delay = options.twitch_transcoding_delay_seconds;
 
-        let bsc = match &state.broadcasting_software.connection {
-            Some(b) => b,
-            None => return,
+            (retry, delay)
         };
 
-        let msg = match bsc.stop_streaming().await {
+        self.send("Trying to start the stream with transcoding".to_string())
+            .await;
+
+        let mut attempts = 0;
+
+        for i in 0..retry {
+            debug!("[{}] Starting stream", i);
+            if let Err(e) = self.start_bsc().await {
+                self.send(format!("Error can't start the stream, {}", e))
+                    .await;
+                return;
+            };
+
+            time::sleep(time::Duration::from_secs(delay)).await;
+
+            if let Ok(true) = check_if_transcoding(&self.chat_message.channel).await {
+                attempts = i + 1;
+                break;
+            }
+
+            if i == retry - 1 {
+                debug!("[{}] Can't get transcoding", i);
+                self.send("Successfully started the stream without transcoding".to_string())
+                    .await;
+                return;
+            }
+
+            debug!("[{}] Stopping stream", i);
+            if let Err(e) = self.stop_bsc().await {
+                self.send(format!("Error can't start the stream, {}", e))
+                    .await;
+                return;
+            };
+
+            time::sleep(time::Duration::from_secs(5)).await;
+        }
+
+        let mut msg = "Started stream with transcoding".to_string();
+
+        if attempts > 1 {
+            msg += &format!(", took {} attempts", attempts,);
+        }
+
+        self.send(msg).await;
+
+        return;
+    }
+
+    async fn stop(&self) {
+        let msg = match self.stop_bsc().await {
             Ok(_) => "Successfully stopped the stream".to_string(),
             Err(e) => format!("Error can't stop the stream, {}", e),
         };
