@@ -50,6 +50,10 @@ jobs:
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
 
+      - name: Strip linux and mac binary
+        if: matrix.build == 'linux' || matrix.build == 'mac'
+        run: strip "target/${{ matrix.target }}/release/noalbs"
+
       - name: Archive
         shell: bash
         run: |
