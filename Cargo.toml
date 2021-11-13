@@ -36,3 +36,5 @@ tracing-futures = "0.2"
 tracing-subscriber = "0.2"
 
 warp = "0.3"
+
+openssl = { version = "=0.10.38", features = ["vendored"] }

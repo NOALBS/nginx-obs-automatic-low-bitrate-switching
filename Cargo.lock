@@ -850,6 +850,7 @@ dependencies = [
  "futures-util",
  "log",
  "obws",
+ "openssl",
  "pretty_env_logger",
  "quick-xml",
  "rand 0.8.4",
@@ -963,6 +964,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28988d872ab76095a6e6ac88d99b54fd267702734fd7ffe610ca27f533ddb95a"
 
 [[package]]
+name = "openssl-src"
+version = "300.0.2+3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "14a760a11390b1a5daf72074d4f6ff1a6e772534ae191f999f57e9ee8146d1fb"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "openssl-sys"
 version = "0.9.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -971,6 +981,7 @@ dependencies = [
  "autocfg",
  "cc",
  "libc",
+ "openssl-src",
  "pkg-config",
  "vcpkg",
 ]
