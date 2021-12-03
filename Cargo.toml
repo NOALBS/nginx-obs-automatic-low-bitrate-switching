@@ -1,8 +1,8 @@
 [package]
 name = "noalbs"
 version = "2.2.1"
-authors = ["Brian Spit <brian@mythenatic.com>"]
-edition = "2018"
+authors = ["Brian Spit <brian@715209.net>"]
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
