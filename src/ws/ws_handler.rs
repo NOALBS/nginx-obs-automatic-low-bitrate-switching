@@ -53,7 +53,7 @@ impl WsHandler {
         debug!("Client disconnected [{}]", token);
 
         if let Some(user) = &self.clients.read().await.get(token).unwrap().user {
-            user.remove_event_sender(&token).await;
+            user.remove_event_sender(token).await;
         }
 
         let mut clients = self.clients.write().await;
@@ -96,7 +96,7 @@ impl WsHandler {
         use crate::ws::requests::Request;
 
         if let Request::Auth(auth) = &ws_message.message.request {
-            self.handle_auth(&auth, &ws_message).await;
+            self.handle_auth(auth, &ws_message).await;
             return;
         }
 
@@ -110,7 +110,7 @@ impl WsHandler {
         }
 
         match &ws_message.message.request {
-            Request::SetPassword(s) => self.set_password(&s, &ws_message).await,
+            Request::SetPassword(s) => self.set_password(s, &ws_message).await,
             Request::Me => self.me(&ws_message).await,
             Request::Logout => self.logout(&ws_message).await,
             Request::Auth(_) => unreachable!(),
@@ -170,7 +170,7 @@ impl WsHandler {
             }
         };
 
-        if !super::verify(&config_hash, auth.password.as_bytes()) {
+        if !super::verify(config_hash, auth.password.as_bytes()) {
             ws_message.reply(error_response);
             return;
         }

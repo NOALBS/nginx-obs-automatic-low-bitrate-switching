@@ -88,6 +88,6 @@ pub fn hash(password: &[u8]) -> String {
 
 pub fn verify(password_hash: &str, password: &[u8]) -> bool {
     let argon2 = Argon2::default();
-    let parsed_hash = PasswordHash::new(&password_hash).unwrap();
+    let parsed_hash = PasswordHash::new(password_hash).unwrap();
     argon2.verify_password(password, &parsed_hash).is_ok()
 }

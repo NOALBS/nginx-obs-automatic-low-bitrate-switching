@@ -1,6 +1,6 @@
 use std::{collections::HashSet, sync::Arc};
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tokio::sync::{mpsc, Notify};
 
 use crate::{broadcasting_software::BroadcastingSoftwareLogic, config};

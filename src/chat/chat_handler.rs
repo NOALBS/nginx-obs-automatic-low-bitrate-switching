@@ -7,7 +7,7 @@ use tokio::time;
 use tracing::{debug, info};
 
 use crate::chat::{self, HandleMessage};
-use crate::{config, error, events, state, switcher, user_manager, Noalbs};
+use crate::{config, error, events, switcher, user_manager, Noalbs};
 
 pub struct ChatHandler {
     chat_handler_rx: mpsc::Receiver<super::HandleMessage>,
@@ -232,7 +232,7 @@ impl ChatHandler {
 
         if let super::Command::Unknown(ref cmd) = command {
             if let Some(cmd_from_alias) =
-                try_get_command_from_alias(&chat.commands, &self.default_commands, &cmd)
+                try_get_command_from_alias(&chat.commands, &self.default_commands, cmd)
             {
                 command = cmd_from_alias;
             }
@@ -305,7 +305,7 @@ impl ChatHandler {
 
     // TODO: Maybe remove when timeout passed
     pub async fn handle_timeout(&mut self, platform: &chat::ChatPlatform, channel: &str) -> bool {
-        let platform_timeouts = self.timeouts.get_mut(&platform).unwrap();
+        let platform_timeouts = self.timeouts.get_mut(platform).unwrap();
         let channel_timeout = platform_timeouts.iter_mut().find(|x| x.channel == channel);
 
         if let Some(timeout) = channel_timeout {
@@ -334,19 +334,19 @@ fn is_allowed_to_run_command(
     user_permission: &chat::Permission,
 ) -> bool {
     if let Some(command) = match user_commands {
-        Some(user_commands) => user_commands.get(&command),
+        Some(user_commands) => user_commands.get(command),
         None => None,
     } {
         if let Some(permission) = &command.permission {
-            if permission_is_allowed(&permission, &user_permission) {
+            if permission_is_allowed(permission, user_permission) {
                 return true;
             }
         }
     }
 
-    if let Some(command) = default_commands.get(&command) {
+    if let Some(command) = default_commands.get(command) {
         if let Some(permission) = &command.permission {
-            if permission_is_allowed(&permission, &user_permission) {
+            if permission_is_allowed(permission, user_permission) {
                 return true;
             }
         }
@@ -370,12 +370,12 @@ fn try_get_command_from_alias(
 ) -> Option<chat::Command> {
     // check if user defined alias
     if let Some(user_cmd) = user_commands {
-        if let Some(cmd) = get_command_from_alias_string(user_cmd, &potential_command) {
+        if let Some(cmd) = get_command_from_alias_string(user_cmd, potential_command) {
             return Some(cmd);
         }
     }
 
-    if let Some(cmd) = get_command_from_alias_string(&default_commands, &potential_command) {
+    if let Some(cmd) = get_command_from_alias_string(default_commands, potential_command) {
         return Some(cmd);
     }
 
@@ -638,8 +638,6 @@ impl DispatchCommand {
         }
 
         self.send(msg).await;
-
-        return;
     }
 
     async fn stop(&self) {
@@ -844,7 +842,7 @@ impl DispatchCommand {
         let state = self.user.state.read().await;
         if let Some(scene) = &state.config.optional_scenes.privacy {
             self.send("Switching to privacy scene".to_string()).await;
-            self.switch(Some(&scene)).await;
+            self.switch(Some(scene)).await;
         } else {
             self.send("No privacy scene set".to_string()).await;
         }
@@ -854,7 +852,7 @@ impl DispatchCommand {
         let state = self.user.state.read().await;
         if let Some(scene) = &state.config.optional_scenes.starting {
             self.send("Switching to starting scene".to_string()).await;
-            self.switch(Some(&scene)).await;
+            self.switch(Some(scene)).await;
         } else {
             self.send("No starting scene set".to_string()).await;
         }
@@ -864,7 +862,7 @@ impl DispatchCommand {
         let state = self.user.state.read().await;
         if let Some(scene) = &state.config.optional_scenes.ending {
             self.send("Switching to ending scene".to_string()).await;
-            self.switch(Some(&scene)).await;
+            self.switch(Some(scene)).await;
         } else {
             self.send("No ending scene set".to_string()).await;
         }
@@ -876,7 +874,7 @@ impl DispatchCommand {
         let scene = &state.config.switcher.switching_scenes.normal;
 
         self.send("Switching to live scene".to_string()).await;
-        self.switch(Some(&scene)).await;
+        self.switch(Some(scene)).await;
     }
 
     async fn source_info(&self, server_name: Option<&str>) {

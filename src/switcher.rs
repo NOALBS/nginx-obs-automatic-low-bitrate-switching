@@ -91,7 +91,7 @@ impl Switcher {
         let instant_recover = &switcher_config.instantly_switch_on_recover;
 
         let (mut server, mut current_switch_type) =
-            Self::get_online_stream_server(&stream_servers, &triggers).await;
+            Self::get_online_stream_server(stream_servers, triggers).await;
 
         // When stream comes back from offline, instantly switch.
         let mut force_switch = *instant_recover
@@ -146,10 +146,7 @@ impl Switcher {
         }
         .to_owned();
 
-        let server_name = match server {
-            Some(s) => Some(s.name.to_owned()),
-            None => None,
-        };
+        let server_name = server.map(|s| s.name.to_owned());
 
         drop(state);
 
@@ -179,7 +176,7 @@ impl Switcher {
         triggers: &'a Triggers,
     ) -> (Option<&'a stream_servers::StreamServer>, SwitchType) {
         for server in stream_servers {
-            let switch_type = server.stream_server.switch(&triggers).await;
+            let switch_type = server.stream_server.switch(triggers).await;
 
             if switch_type == SwitchType::Offline {
                 continue;
@@ -202,7 +199,7 @@ impl Switcher {
             }
         }
 
-        return server?.override_scenes.as_ref();
+        server?.override_scenes.as_ref()
     }
 
     async fn is_stream_server_online(&self, server_name: &str) -> bool {
