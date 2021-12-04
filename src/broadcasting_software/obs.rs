@@ -3,6 +3,7 @@ use std::{sync::Arc, time::Duration};
 use async_trait::async_trait;
 use futures_util::StreamExt;
 use obws::events::EventType;
+use serde::Deserialize;
 use tokio::sync::{mpsc, Mutex};
 use tracing::{error, info, warn};
 
@@ -153,8 +154,6 @@ impl BroadcastingSoftwareLogic for Obs {
         Ok(client.streaming().stop_streaming().await?)
     }
 
-    // TODO: Actually only use on streaming protocols
-    // TODO: This will be used on literally all media sources playing
     async fn fix(&self) -> Result<(), error::Error> {
         let connection = self.connection.lock().await;
 
@@ -170,6 +169,41 @@ impl BroadcastingSoftwareLogic for Obs {
             .filter(|m| matches!(m.media_state, MediaState::Playing));
 
         for media in media_playing {
+            let media_inputs = match media.source_kind.as_ref() {
+                "ffmpeg_source" => {
+                    let source = client
+                        .sources()
+                        .get_source_settings::<FfmpegSource>(
+                            &media.source_name,
+                            Some(&media.source_kind),
+                        )
+                        .await?;
+
+                    if let Some(input) = source.source_settings.input {
+                        Vec::from([input.to_lowercase()])
+                    } else {
+                        continue;
+                    }
+                }
+                "vlc_source" => client
+                    .sources()
+                    .get_source_settings::<VlcSource>(&media.source_name, Some(&media.source_kind))
+                    .await?
+                    .source_settings
+                    .playlist
+                    .iter()
+                    .map(|s| s.value.to_lowercase())
+                    .collect::<Vec<String>>(),
+                s => unimplemented!("Fix not implemented for {}", s),
+            };
+
+            if !media_inputs
+                .iter()
+                .any(|m| m.starts_with("rtmp") || m.starts_with("srt"))
+            {
+                continue;
+            }
+
             client
                 .media_control()
                 .stop_media(&media.source_name)
@@ -332,4 +366,26 @@ impl Drop for Obs {
         self.connection_join.abort();
         self.event_join.abort();
     }
+}
+
+// From obws
+/// Settings specific to a **FFmpeg** video source.
+#[derive(Deserialize)]
+struct FfmpegSource {
+    /// URL of the remote media file. Only used if [`Self::is_local_file`] is set to `false`.
+    pub input: Option<String>,
+}
+
+/// Settings specific to a **VLC** video source.
+#[derive(Deserialize)]
+struct VlcSource {
+    /// List of files to play.
+    pub playlist: Vec<SlideshowFile>,
+}
+
+/// Single file as part of a [`Slideshow`].
+#[derive(Deserialize)]
+struct SlideshowFile {
+    /// Location of the file to display.
+    pub value: String,
 }
