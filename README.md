@@ -17,7 +17,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 
 ## Quick Start
 
-- Download the latest binary from [releases](https://github.com/715209/liveu_stats_bot/releases)
+- Download the latest binary from [releases](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
 - Have [OBS-Studio](https://github.com/obsproject/obs-studio/) and [OBS-WebSocket](https://github.com/obsproject/obs-websocket/releases/latest) installed
 - [Configure NOALBS](#configure-noalbs)
 - Run the executable
