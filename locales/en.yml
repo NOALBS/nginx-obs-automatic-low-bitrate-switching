@@ -37,8 +37,8 @@ en:
     alias:
         success: Added alias %{alias} -> %{command}
         removed: Alias %{alias} removed
-        errorCommand: Command %{command} does't exist
-        errorAlias: Alias %{alias} does't exist
+        errorCommand: Command %{command} doesn't exist
+        errorAlias: Alias %{alias} doesn't exist
         errorAlreadyUsed: "%{alias} already used as alias"
         errorIncorrectArguments: Error incorrect arguments given
     sceneSwitch:
