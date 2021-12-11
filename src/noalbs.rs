@@ -299,6 +299,25 @@ impl Noalbs {
             .push(state::BroadcastClient { token, tx_chan });
     }
 
+    pub async fn chat_language(&self) -> Result<chat::ChatLanguage, error::Error> {
+        let state = self.state.read().await;
+        let chat = &state.config.chat.as_ref().ok_or(error::Error::NoChat)?;
+
+        Ok(chat.language.clone())
+    }
+
+    pub async fn set_chat_language(
+        &self,
+        language: chat::ChatLanguage,
+    ) -> Result<(), error::Error> {
+        let mut state = self.state.write().await;
+        let chat = state.config.chat.as_mut().ok_or(error::Error::NoChat)?;
+
+        chat.language = language;
+
+        Ok(())
+    }
+
     pub async fn remove_event_sender(&self, token: &str) {
         let mut state = self.state.write().await;
         let pos = state

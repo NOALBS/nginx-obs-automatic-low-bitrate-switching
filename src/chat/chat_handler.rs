@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use rust_i18n::t;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 use tokio::time;
@@ -161,17 +162,17 @@ impl ChatHandler {
     ) -> Option<()> {
         let sender = self.chat_senders.get(&ss.platform)?;
 
-        let mut msg = format!(r#"Scene switched to "{}""#, ss.scene);
+        let user = self
+            .user_manager
+            .get_user_by_chat_platform(&ss.channel, &ss.platform)
+            .await?;
+        let lang = &user.chat_language().await.unwrap().to_string();
+        let mut msg = t!("sceneSwitch.switch", locale = lang, scene = &ss.scene);
 
         use switcher::SwitchType::*;
         match ss.switch_type {
             Normal | Low => {
-                let user = self
-                    .user_manager
-                    .get_user_by_chat_platform(&ss.channel, &ss.platform)
-                    .await?;
-
-                let bitrate = bitrate_msg(&user).await;
+                let bitrate = bitrate_msg(&user, lang).await;
                 msg += &format!(" | {}", bitrate);
             }
             Previous | Offline => {}
@@ -209,6 +210,7 @@ impl ChatHandler {
 
         let dc = DispatchCommand {
             user: user.clone(),
+            lang: user.chat_language().await.unwrap().to_string(),
             chat_sender: self.chat_senders.get(&msg.platform)?.clone(),
             command,
             chat_message: msg,
@@ -286,6 +288,7 @@ impl ChatHandler {
 
         let dc = DispatchCommand {
             user: user.clone(),
+            lang: user.chat_language().await.unwrap().to_string(),
             chat_sender: self.chat_senders.get(&host.platform)?.clone(),
             command: chat::Command::Stop,
             chat_message: chat::ChatMessage {
@@ -402,6 +405,7 @@ pub fn get_command_from_alias_string(
 
 pub struct DispatchCommand {
     user: Arc<Noalbs>,
+    lang: String,
     chat_sender: Arc<dyn chat::ChatLogic>,
     command: chat::Command,
     chat_message: chat::ChatMessage,
@@ -458,7 +462,7 @@ impl DispatchCommand {
         let a2 = args.next();
 
         if a1.is_none() || a2.is_none() {
-            self.send("Error incorrect arguments given".to_string())
+            self.send(t!("alias.errorIncorrectArguments", locale = &self.lang))
                 .await;
             return;
         }
@@ -469,14 +473,16 @@ impl DispatchCommand {
         // remove alias
         if a1 == "rem" {
             if !&self.user.contains_alias(a2).await.unwrap() {
-                self.send(format!("Alias {} doesn't exist", a2)).await;
+                self.send(t!("alias.errorAlias", locale = &self.lang, alias = a2))
+                    .await;
                 return;
             }
 
             if let Ok(success) = self.user.remove_alias(a2).await {
                 if success {
                     self.save_config().await;
-                    self.send(format!("Alias {} removed", a2)).await;
+                    self.send(t!("alias.removed", locale = &self.lang, alias = a2))
+                        .await;
                 }
             }
 
@@ -485,25 +491,37 @@ impl DispatchCommand {
 
         // add alias
         if self.user.contains_alias(a1).await.unwrap() {
-            self.send(format!("{} already used as alias", a1)).await;
+            self.send(t!(
+                "alias.errorAlreadyUsed",
+                locale = &self.lang,
+                alias = a1
+            ))
+            .await;
             return;
         }
 
         let command = super::Command::from(a2);
 
         if let chat::Command::Unknown(_) = command {
-            self.send(format!("Command {} doesn't exist", a2)).await;
+            self.send(t!("alias.errorCommand", locale = &self.lang, command = a2))
+                .await;
             return;
         }
 
         if self.user.add_alias(a1.to_string(), command).await.is_ok() {
             self.save_config().await;
-            self.send(format!("Added alias {} -> {}", a1, a2)).await;
+            self.send(t!(
+                "alias.success",
+                locale = &self.lang,
+                alias = a1,
+                command = a2
+            ))
+            .await;
         }
     }
 
     async fn bitrate(&self) {
-        let msg = bitrate_msg(&self.user).await;
+        let msg = bitrate_msg(&self.user, &self.lang).await;
 
         self.send(msg).await;
     }
@@ -513,7 +531,7 @@ impl DispatchCommand {
         let name = match name {
             Some(name) => name,
             None => {
-                self.send("No scene specified".to_string()).await;
+                self.send(t!("switch.noParams", locale = &self.lang)).await;
                 return;
             }
         };
@@ -526,8 +544,11 @@ impl DispatchCommand {
         }
 
         let msg = match bsc.as_ref().unwrap().switch_scene(name).await {
-            Ok(scene) => format!("Scene successfully switched to \"{}\"", scene),
-            Err(e) => format!("Error can't switch to scene \"{}\", {}", name, e),
+            Ok(scene) => t!("switch.success", locale = &self.lang, scene = &scene),
+            Err(e) => {
+                error!("{}", e);
+                t!("switch.error", locale = &self.lang, scene = name)
+            }
         };
 
         self.send(msg).await;
@@ -578,8 +599,8 @@ impl DispatchCommand {
 
     async fn start_normal(&self) {
         let msg = match self.start_bsc().await {
-            Ok(_) => "Successfully started the stream".to_string(),
-            Err(e) => format!("Error can't start the stream, {}", e),
+            Ok(_) => t!("start.success", locale = &self.lang),
+            Err(e) => t!("start.error", locale = &self.lang, error = &e.to_string()),
         };
 
         self.send(msg).await;
@@ -594,7 +615,7 @@ impl DispatchCommand {
             (retry, delay)
         };
 
-        self.send("Trying to start the stream with transcoding".to_string())
+        self.send(t!("startTwitchTranscoding.trying", locale = &self.lang))
             .await;
 
         let mut attempts = 0;
@@ -602,8 +623,12 @@ impl DispatchCommand {
         for i in 0..retry {
             debug!("[{}] Starting stream", i);
             if let Err(e) = self.start_bsc().await {
-                self.send(format!("Error can't start the stream, {}", e))
-                    .await;
+                self.send(t!(
+                    "start.error",
+                    locale = &self.lang,
+                    error = &e.to_string()
+                ))
+                .await;
                 return;
             };
 
@@ -616,34 +641,51 @@ impl DispatchCommand {
 
             if i == retry - 1 {
                 debug!("[{}] Can't get transcoding", i);
-                self.send("Successfully started the stream without transcoding".to_string())
-                    .await;
+                self.send(t!(
+                    "startTwitchTranscoding.successNoTranscoding",
+                    locale = &self.lang
+                ))
+                .await;
                 return;
             }
 
             debug!("[{}] Stopping stream", i);
             if let Err(e) = self.stop_bsc().await {
-                self.send(format!("Error can't start the stream, {}", e))
-                    .await;
+                self.send(t!(
+                    "stop.error",
+                    locale = &self.lang,
+                    error = &e.to_string()
+                ))
+                .await;
                 return;
             };
 
             time::sleep(time::Duration::from_secs(5)).await;
         }
 
-        let mut msg = "Started stream with transcoding".to_string();
+        let mut att_msg = String::new();
 
         if attempts > 1 {
-            msg += &format!(", took {} attempts", attempts,);
+            att_msg = t!(
+                "startTwitchTranscoding.attempts",
+                locale = &self.lang,
+                count = &attempts.to_string()
+            );
         }
+
+        let msg = t!(
+            "startTwitchTranscoding.success",
+            locale = &self.lang,
+            attemptsMessage = &att_msg
+        );
 
         self.send(msg).await;
     }
 
     async fn stop(&self) {
         let msg = match self.stop_bsc().await {
-            Ok(_) => "Successfully stopped the stream".to_string(),
-            Err(e) => format!("Error can't stop the stream, {}", e),
+            Ok(_) => t!("stop.success", locale = &self.lang),
+            Err(e) => t!("stop.error", locale = &self.lang, error = &e.to_string()),
         };
 
         self.send(msg).await;
@@ -654,8 +696,12 @@ impl DispatchCommand {
             Some(name) => name,
             None => {
                 let msg = match &self.user.get_trigger_by_type(kind).await {
-                    Some(bitrate) => format!("Current trigger set at {} Kbps", bitrate),
-                    None => "Current trigger is disabled".to_string(),
+                    Some(bitrate) => t!(
+                        "trigger.current",
+                        locale = &self.lang,
+                        number = &bitrate.to_string()
+                    ),
+                    None => t!("trigger.disabled", locale = &self.lang),
                 };
 
                 self.send(msg).await;
@@ -666,15 +712,27 @@ impl DispatchCommand {
         let value = match value.parse::<u32>() {
             Ok(v) => v,
             Err(_) => {
-                let msg = format!("Error editing trigger {} is not a valid value", value);
+                let msg = t!(
+                    "trigger.error",
+                    locale = &self.lang,
+                    number = &value.to_string()
+                );
                 self.send(msg).await;
                 return;
             }
         };
 
         let msg = match &self.user.update_trigger(kind, value).await {
-            Some(value) => format!("Trigger successfully set to {:?} Kbps", value),
-            None => "Trigger successfully disabled".to_string(),
+            Some(value) => t!(
+                "trigger.success",
+                locale = &self.lang,
+                number = &value.to_string()
+            ),
+            None => t!(
+                "trigger.successDisabled",
+                locale = &self.lang,
+                number = &value.to_string()
+            ),
         };
 
         self.save_config().await;
@@ -689,7 +747,12 @@ impl DispatchCommand {
             }
         }
 
-        let msg = generate_enable_string("Auto switch notification", self.user.get_notify().await);
+        let msg = t!(
+            "handleCommands.notify",
+            locale = &self.lang,
+            condition = &condition_to_text(self.user.get_notify().await, &self.lang)
+        );
+
         self.send(msg).await;
     }
 
@@ -701,8 +764,12 @@ impl DispatchCommand {
             }
         }
 
-        let msg =
-            generate_enable_string("Auto stop stream", self.user.get_autostop().await.unwrap());
+        let msg = t!(
+            "handleCommands.autostop",
+            locale = &self.lang,
+            condition = &condition_to_text(self.user.get_autostop().await.unwrap(), &self.lang)
+        );
+
         self.send(msg).await;
     }
 
@@ -715,8 +782,8 @@ impl DispatchCommand {
         };
 
         let msg = match bsc.fix().await {
-            Ok(_) => "Trying to fix the stream".to_string(),
-            Err(_) => "Error fixing the stream".to_string(),
+            Ok(_) => t!("fix.try", locale = &self.lang),
+            Err(_) => t!("fix.error", locale = &self.lang),
         };
 
         self.send(msg).await;
@@ -734,23 +801,22 @@ impl DispatchCommand {
         let is_recording = match bsc.is_recording().await {
             Ok(status) => status,
             Err(_) => {
-                self.send("Error getting recording status".to_string())
-                    .await;
+                self.send(t!("rec.errorStatus", locale = &self.lang)).await;
                 return;
             }
         };
 
         if bsc.toggle_recording().await.is_err() {
-            self.send("Error toggling recording".to_string()).await;
+            self.send(t!("rec.errorToggle", locale = &self.lang)).await;
             return;
         }
 
         if is_recording {
-            self.send("Recording stopped".to_string()).await;
+            self.send(t!("rec.stopped", locale = &self.lang)).await;
             return;
         }
 
-        self.send("Recording started".to_string()).await;
+        self.send(t!("rec.started", locale = &self.lang)).await;
     }
 
     pub async fn version(&self) {
@@ -791,17 +857,34 @@ impl DispatchCommand {
             "start" => {
                 self.user.set_bitrate_switcher_state(true).await;
                 self.save_config().await;
-                "Successfully enabled the switcher".to_string()
+                t!("noalbs.switcherEnabled", locale = &self.lang)
             }
             "stop" => {
                 self.user.set_bitrate_switcher_state(false).await;
                 self.save_config().await;
-                "Successfully disabled the switcher".to_string()
+                t!("noalbs.switcherDisabled", locale = &self.lang)
             }
             "instant" => {
                 let toggle = self.user.set_instantly_switch_on_recover().await;
                 self.save_config().await;
-                generate_enable_string("Instant switch on recover", toggle)
+                t!(
+                    "noalbs.instantSwitch",
+                    locale = &self.lang,
+                    condition = &condition_to_text(toggle, &self.lang)
+                )
+            }
+            "lang" => {
+                if let Some(lang) = args.next() {
+                    if let Ok(l) = lang.parse::<super::ChatLanguage>() {
+                        self.user.set_chat_language(l).await.unwrap();
+                        self.save_config().await;
+                        t!("noalbs.langSuccess", locale = lang, lang = lang)
+                    } else {
+                        t!("noalbs.langErrorInvalid", locale = &self.lang, lang = lang)
+                    }
+                } else {
+                    t!("noalbs.langError", locale = &self.lang)
+                }
             }
             "retry" => self.set_retry_attempts(args.next()).await,
             _ => String::new(),
@@ -818,53 +901,65 @@ impl DispatchCommand {
             None => {
                 let current_attempts = &self.user.get_retry_attempts().await;
 
-                return format!("Current retry set at {}", current_attempts);
+                return t!(
+                    "noalbs.retryCount",
+                    locale = &self.lang,
+                    count = &current_attempts.to_string()
+                );
             }
         };
 
         let value = match value.parse::<u8>() {
             Ok(v) => v,
             Err(_) => {
-                return format!(
-                    "Error editing retry attempts {} is not a valid value",
-                    value
-                );
+                return t!("noalbs.retryError", locale = &self.lang, count = value);
             }
         };
 
         self.user.set_retry_attempts(value).await;
         self.save_config().await;
 
-        format!("Retry attempts set to {}", value)
+        t!(
+            "noalbs.retrySuccess",
+            locale = &self.lang,
+            count = &value.to_string()
+        )
     }
 
+    // TODO: Refactor these functions
     async fn privacy_scene(&self) {
         let state = self.user.state.read().await;
         if let Some(scene) = &state.config.optional_scenes.privacy {
-            self.send("Switching to privacy scene".to_string()).await;
+            self.send(t!("scene.success", locale = &self.lang, scene = "privacy"))
+                .await;
             self.switch(Some(scene)).await;
         } else {
-            self.send("No privacy scene set".to_string()).await;
+            self.send(t!("scene.error", locale = &self.lang, scene = "privacy"))
+                .await;
         }
     }
 
     async fn starting_scene(&self) {
         let state = self.user.state.read().await;
         if let Some(scene) = &state.config.optional_scenes.starting {
-            self.send("Switching to starting scene".to_string()).await;
+            self.send(t!("scene.success", locale = &self.lang, scene = "starting"))
+                .await;
             self.switch(Some(scene)).await;
         } else {
-            self.send("No starting scene set".to_string()).await;
+            self.send(t!("scene.error", locale = &self.lang, scene = "starting"))
+                .await;
         }
     }
 
     async fn ending_scene(&self) {
         let state = self.user.state.read().await;
         if let Some(scene) = &state.config.optional_scenes.ending {
-            self.send("Switching to ending scene".to_string()).await;
+            self.send(t!("scene.success", locale = &self.lang, scene = "ending"))
+                .await;
             self.switch(Some(scene)).await;
         } else {
-            self.send("No ending scene set".to_string()).await;
+            self.send(t!("scene.error", locale = &self.lang, scene = "ending"))
+                .await;
         }
     }
 
@@ -873,7 +968,8 @@ impl DispatchCommand {
         let state = self.user.state.read().await;
         let scene = &state.config.switcher.switching_scenes.normal;
 
-        self.send("Switching to live scene".to_string()).await;
+        self.send(t!("scene.success", locale = &self.lang, scene = "live"))
+            .await;
         self.switch(Some(scene)).await;
     }
 
@@ -881,13 +977,13 @@ impl DispatchCommand {
         let state = &self.user.state.read().await;
         let stream_servers = &state.config.switcher.stream_servers;
 
-        let no_info = "No information".to_string();
+        let no_info = t!("sourceinfo.noInfo", locale = &self.lang);
 
         if let Some(name) = server_name {
             let server = match stream_servers.iter().find(|s| s.name == name) {
                 Some(s) => s,
                 None => {
-                    let msg = format!("Error no server found with the name: {}", name);
+                    let msg = t!("sourceinfo.noInfo", locale = &self.lang, name = name);
                     self.send(msg).await;
 
                     return;
@@ -935,12 +1031,12 @@ impl DispatchCommand {
     }
 }
 
-fn generate_enable_string(res: &str, condition: bool) -> String {
-    format!(
-        "{} is {}",
-        res,
-        if condition { "enabled" } else { "disabled" }
-    )
+fn condition_to_text(condition: bool, lang: &str) -> String {
+    if condition {
+        t!("handleCommands.enabled", locale = lang)
+    } else {
+        t!("handleCommands.disabled", locale = lang)
+    }
 }
 
 fn enabled_to_bool(enabled: &str) -> Result<bool, error::Error> {
@@ -955,7 +1051,7 @@ fn enabled_to_bool(enabled: &str) -> Result<bool, error::Error> {
     Err(error::Error::EnabledToBoolConversionError)
 }
 
-async fn bitrate_msg(user: &Noalbs) -> String {
+async fn bitrate_msg(user: &Noalbs, lang: &str) -> String {
     let mut msg = String::new();
 
     let state = &user.state.read().await;
@@ -966,12 +1062,17 @@ async fn bitrate_msg(user: &Noalbs) -> String {
         let sep = if i == 0 || msg.is_empty() { "" } else { " - " };
 
         if let Some(bitrate_message) = t.message {
-            msg += &format!("{}{}: {}", sep, s.name, bitrate_message);
+            let locale = t!(
+                "bitrate.success",
+                name = &s.name,
+                message = &bitrate_message
+            );
+            msg += &format!("{}{}", sep, locale);
         }
     }
 
     if msg.is_empty() {
-        return "No connection :(".to_string();
+        return t!("bitrate.error", locale = lang);
     }
 
     msg

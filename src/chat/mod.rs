@@ -1,7 +1,9 @@
+use std::fmt::Display;
+
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use crate::switcher;
+use crate::{error, switcher};
 
 pub mod chat_handler;
 pub mod twitch;
@@ -92,6 +94,35 @@ pub enum Permission {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ChatPlatform {
     Twitch,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ChatLanguage {
+    EN,
+    ZHTW,
+}
+
+impl Display for ChatLanguage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ChatLanguage::EN => write!(f, "en"),
+            ChatLanguage::ZHTW => write!(f, "zh_tw"),
+        }
+    }
+}
+
+impl std::str::FromStr for ChatLanguage {
+    type Err = error::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let language = s.to_lowercase();
+
+        match language.as_ref() {
+            "en" => Ok(ChatLanguage::EN),
+            "zh_tw" => Ok(ChatLanguage::ZHTW),
+            _ => Err(error::Error::LangNotSupported),
+        }
+    }
 }
 
 #[derive(Debug)]

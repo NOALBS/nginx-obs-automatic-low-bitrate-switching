@@ -118,11 +118,12 @@ pub trait ConfigLogic: Send + Sync {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct Chat {
     pub platform: chat::ChatPlatform,
     pub username: String,
     pub admins: Vec<String>,
+    pub language: chat::ChatLanguage,
 
     pub prefix: String,
 
@@ -130,6 +131,22 @@ pub struct Chat {
     pub enable_mod_commands: bool,
     pub enable_auto_stop_stream_on_host_or_raid: bool,
     pub commands: Option<HashMap<chat::Command, CommandInfo>>,
+}
+
+impl Default for Chat {
+    fn default() -> Self {
+        Self {
+            platform: chat::ChatPlatform::Twitch,
+            username: "715209".to_string(),
+            admins: vec![],
+            language: chat::ChatLanguage::EN,
+            prefix: "!".to_string(),
+            enable_public_commands: true,
+            enable_mod_commands: true,
+            enable_auto_stop_stream_on_host_or_raid: true,
+            commands: None,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -37,4 +37,7 @@ pub enum Error {
 
     #[error("No chat configured")]
     NoChat,
+
+    #[error("Language not supported")]
+    LangNotSupported,
 }
