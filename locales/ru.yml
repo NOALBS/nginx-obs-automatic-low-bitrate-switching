@@ -1,4 +1,4 @@
- ru:
+ru:
     start:
         success: Успешный запуск трансляции
         error: "Ошибка: %{error}"
@@ -62,4 +62,4 @@
         retrySuccess: Количество повторных попыток установлено на %{count} попыток
     scene:
         success: Переход на %{scene} сцену
-        error:  "%{scene} не установлена"
+        error: "%{scene} не установлена"
