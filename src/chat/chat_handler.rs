@@ -4,7 +4,7 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 use tokio::time;
-use tracing::{debug, info};
+use tracing::{debug, error, info};
 
 use crate::chat::{self, HandleMessage};
 use crate::{config, error, events, switcher, user_manager, Noalbs};
@@ -475,7 +475,7 @@ impl DispatchCommand {
 
             if let Ok(success) = self.user.remove_alias(a2).await {
                 if success {
-                    self.user.save_config().await;
+                    self.save_config().await;
                     self.send(format!("Alias {} removed", a2)).await;
                 }
             }
@@ -497,7 +497,7 @@ impl DispatchCommand {
         }
 
         if self.user.add_alias(a1.to_string(), command).await.is_ok() {
-            self.user.save_config().await;
+            self.save_config().await;
             self.send(format!("Added alias {} -> {}", a1, a2)).await;
         }
     }
@@ -677,7 +677,7 @@ impl DispatchCommand {
             None => "Trigger successfully disabled".to_string(),
         };
 
-        self.user.save_config().await;
+        self.save_config().await;
         self.send(msg).await;
     }
 
@@ -685,7 +685,7 @@ impl DispatchCommand {
         if let Some(enabled) = enabled {
             if let Ok(b) = enabled_to_bool(enabled) {
                 self.user.set_notify(b).await;
-                self.user.save_config().await;
+                self.save_config().await;
             }
         }
 
@@ -697,7 +697,7 @@ impl DispatchCommand {
         if let Some(enabled) = enabled {
             if let Ok(b) = enabled_to_bool(enabled) {
                 self.user.set_autostop(b).await.unwrap();
-                self.user.save_config().await;
+                self.save_config().await;
             }
         }
 
@@ -777,7 +777,7 @@ impl DispatchCommand {
             "prefix" => {
                 if let Some(prefix) = args.next() {
                     let _ = self.user.set_prefix(prefix.to_owned()).await;
-                    self.user.save_config().await;
+                    self.save_config().await;
 
                     self.user
                         .send_event(events::Event::PrefixChanged { prefix })
@@ -790,17 +790,17 @@ impl DispatchCommand {
             }
             "start" => {
                 self.user.set_bitrate_switcher_state(true).await;
-                self.user.save_config().await;
+                self.save_config().await;
                 "Successfully enabled the switcher".to_string()
             }
             "stop" => {
                 self.user.set_bitrate_switcher_state(false).await;
-                self.user.save_config().await;
+                self.save_config().await;
                 "Successfully disabled the switcher".to_string()
             }
             "instant" => {
                 let toggle = self.user.set_instantly_switch_on_recover().await;
-                self.user.save_config().await;
+                self.save_config().await;
                 generate_enable_string("Instant switch on recover", toggle)
             }
             "retry" => self.set_retry_attempts(args.next()).await,
@@ -833,7 +833,7 @@ impl DispatchCommand {
         };
 
         self.user.set_retry_attempts(value).await;
-        self.user.save_config().await;
+        self.save_config().await;
 
         format!("Retry attempts set to {}", value)
     }
@@ -926,6 +926,12 @@ impl DispatchCommand {
         self.chat_sender
             .send_message(self.chat_message.channel.to_owned(), message)
             .await;
+    }
+
+    async fn save_config(&self) {
+        if let Err(e) = self.user.save_config().await {
+            error!("Error saving config: {}", e)
+        }
     }
 }
 

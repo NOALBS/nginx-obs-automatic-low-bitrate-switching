@@ -40,6 +40,7 @@ pub struct Meta {
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 pub struct Video {
     width: u32,
     height: u32,
