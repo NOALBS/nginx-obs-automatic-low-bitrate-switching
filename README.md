@@ -28,27 +28,28 @@ This script gives you the option to enable some simple chat commands to help you
 
 > Please note: Admins are all the users in the `admins` array in `chat` config section, MODs are all of your MODs, and Public is anyone in your chat.
 
-| Default Role | Command                  | Description                                                                                             | Example          |
-| :----------: | ------------------------ | :------------------------------------------------------------------------------------------------------ | :--------------- |
-|    Admins    | !start                   | on-demand command to start streaming in OBS.                                                            | !start           |
-|    Admins    | !stop                    | on-demand command to stop streaming in OBS.                                                             | !stop            |
-|    Admins    | !record                  | on-demand command to toggle recording in OBS.                                                           | !record          |
-|    Admins    | !alias (alias) (command) | add an alias for a command.                                                                             | !alias ss switch |
-|    Admins    | !alias rem (alias)       | removes an alias for a command.                                                                         | !alias rem ss    |
-|    Admins    | !switch (scene)          | switches to the provided SCENE ([fuzzy match](https://wikipedia.org/wiki/Approximate_string_matching)). | !switch INTRO    |
-|    Admins    | !live                    | switch to the live scene.                                                                               | !live            |
-|    Admins    | !privacy                 | switch to the privacy scene.                                                                            | !privacy         |
-|    Admins    | !starting                | switch to the starting scene.                                                                           | !starting        |
-|    Admins    | !ending                  | switch to the ending scene.                                                                             | !ending          |
-|    Admins    | !noalbs prefix (prefix)  | change noalbs command prefix.                                                                           | !noalbs prefix # |
-|    Admins    | !noalbs retry (value)    | changes the retry value for the switcher.                                                               | !noalbs retry 5  |
-|     MODs     | !trigger (value)         | changes the low bitrate threshold to the defined value.                                                 | !trigger 800     |
-|     MODs     | !otrigger (value)        | changes the offline bitrate threshold to the defined value.                                             | !otrigger 200    |
-|     MODs     | !rtrigger (value)        | changes the RTT threshold to the defined value.                                                         | !rtrigger 2000   |
-|     MODs     | !sourceinfo              | gives you details about the SOURCE in chat.                                                             | !sourceinfo      |
-|     MODs     | !fix                     | tries to fix the stream.                                                                                | !fix             |
-|     MODs     | !refresh                 | tries to fix the stream.                                                                                | !refresh         |
-|    Public    | !bitrate                 | returns the current bitrate.                                                                            | !bitrate         |
+| Default Role | Command                  | Description                                                                                             | Example            |
+| :----------: | ------------------------ | :------------------------------------------------------------------------------------------------------ | :----------------- |
+|    Admins    | !start                   | on-demand command to start streaming in OBS.                                                            | !start             |
+|    Admins    | !stop                    | on-demand command to stop streaming in OBS.                                                             | !stop              |
+|    Admins    | !record                  | on-demand command to toggle recording in OBS.                                                           | !record            |
+|    Admins    | !alias (alias) (command) | add an alias for a command.                                                                             | !alias ss switch   |
+|    Admins    | !alias rem (alias)       | removes an alias for a command.                                                                         | !alias rem ss      |
+|    Admins    | !switch (scene)          | switches to the provided SCENE ([fuzzy match](https://wikipedia.org/wiki/Approximate_string_matching)). | !switch INTRO      |
+|    Admins    | !live                    | switch to the live scene.                                                                               | !live              |
+|    Admins    | !privacy                 | switch to the privacy scene.                                                                            | !privacy           |
+|    Admins    | !starting                | switch to the starting scene.                                                                           | !starting          |
+|    Admins    | !ending                  | switch to the ending scene.                                                                             | !ending            |
+|    Admins    | !noalbs prefix (prefix)  | change noalbs command prefix.                                                                           | !noalbs prefix #   |
+|    Admins    | !noalbs retry (value)    | changes the retry value for the switcher.                                                               | !noalbs retry 5    |
+|    Admins    | !noalbs lang (value)     | changes the chat response language.                                                                     | !noalbs lang zh_tw |
+|     MODs     | !trigger (value)         | changes the low bitrate threshold to the defined value.                                                 | !trigger 800       |
+|     MODs     | !otrigger (value)        | changes the offline bitrate threshold to the defined value.                                             | !otrigger 200      |
+|     MODs     | !rtrigger (value)        | changes the RTT threshold to the defined value.                                                         | !rtrigger 2000     |
+|     MODs     | !sourceinfo              | gives you details about the SOURCE in chat.                                                             | !sourceinfo        |
+|     MODs     | !fix                     | tries to fix the stream.                                                                                | !fix               |
+|     MODs     | !refresh                 | tries to fix the stream.                                                                                | !refresh           |
+|    Public    | !bitrate                 | returns the current bitrate.                                                                            | !bitrate           |
 
 You can also enable/disable certain features from chat, see below:
 
