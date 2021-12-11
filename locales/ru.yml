@@ -1,36 +1,36 @@
-ru:
+ ru:
     start:
         success: Успешный запуск трансляции
         error: "Ошибка: %{error}"
     startTwitchTranscoding:
-        trying: Trying to start the stream with transcoding
-        successNoTranscoding: Successfully started the stream without transcoding
-        success: Started stream with transcoding %{attemptsMessage}
-        attempts: ", took %{count} attempts"
+        trying: Пытаюсь запустить трансляцию с транскодом
+        successNoTranscoding: Трансляция успешно запущена без транскода
+        success: Началась трансляция с транскодированием %{attemptsMessage}
+        attempts: ", потребовалось %{count} попыток"
     stop:
         success: Успешная остановка трансляции
         error: "Ошибка: %{error}"
     switch:
         noParams: "Ошибка: сцена не указана"
         success: Успешное переключение сцены на "%{scene}"
-        error: Error can't switch to scene "%{scene}"
+        error: Ошибка не удается переключиться на другую сцену "%{scene}"
     bitrate:
         success: "%{name}: %{message}"
         error: "Текущий битрейт: Не в сети"
     trigger:
         success: Успешная установка триггера на %{number} kbps
-        successDisabled: Trigger successfully disabled
+        successDisabled: Триггер успешно отключен
         error: "Ошибка: редактирование триггера на %{number} не является допустимым значением"
         current: Текущий триггер установлен на %{number} kbps
-        disabled: Current trigger is disabled
+        disabled: Текущий триггер отключен
     sourceinfo:
-        noInfo: No information
-        notFound: "Error no server found with the name: %{name}"
+        noInfo: Нет информации
+        notFound: "Ошибка: сервер с таким именем не найден: %{name}"
     rec:
         started: Успешное начало записи
         stopped: Успешная остановка записи
-        errorStatus: Error getting recording status
-        errorToggle: Error toggling recording
+        errorStatus: Не удалось получить статус записи
+        errorToggle: Ошибка включения записи
     fix:
         try: Попытка исправить трансляцию
         error: Ошибка исправления трансляции
@@ -40,7 +40,7 @@ ru:
         errorCommand: "Ошибка: %{command} не существует"
         errorAlias: Псевдоним %{alias} не существует
         errorAlreadyUsed: "%{alias} уже используется как псевдоним"
-        errorIncorrectArguments: Error incorrect arguments given
+        errorIncorrectArguments: Ошибка неверные аргументы даны
     sceneSwitch:
         switch: Сцена переключена на "%{scene}"
     handleCommands:
@@ -49,17 +49,17 @@ ru:
         enabled: включены
         disabled: выключены
     noalbs:
-        prefix: NOALBS prefix updated to %{prefix}
-        errorPrefix: Can't update NOALBS prefix
-        switcherEnabled: Successfully enabled the switcher
-        switcherDisabled: Successfully disabled the switcher
-        instantSwitch: Instant switch on recover %{condition}
-        langError: Can't update NOALBS language
-        langErrorInvalid: Error editing language %{lang} is not a valid value
-        langSuccess: NOALBS language updated to %{lang}
-        retryCount: Current retry set at %{count}
-        retryError: Error editing retry attempts %{count} is not a valid value
-        retrySuccess: Retry attempts set to %{count}
+        prefix: Префикс NOALBS обновлен до %{prefix}
+        errorPrefix: Не удается обновить префикс NOALBS
+        switcherEnabled: Успешно включен свитчер
+        switcherDisabled: Успешно отключен свитчер
+        instantSwitch: Мгновенное включение восстановления %{condition}
+        langError: Не могу обновить язык NOALBS
+        langErrorInvalid: Ошибка при редактировании языка %{lang} не является правильним тип данны
+        langSuccess: NOALBS язык обновлен на %{lang} языка
+        retryCount: Текущая попытка установлена на %{count} попыток
+        retryError: ошибка в редактирования повторных попыток  %{count} не является правильним тип данны
+        retrySuccess: Количество повторных попыток установлено на %{count} попыток
     scene:
-        success: Switching to %{scene} scene
-        error: No %{scene} scene set
+        success: Переход на %{scene} сцену
+        error:  "%{scene} не установлена"
