@@ -98,14 +98,22 @@ pub enum ChatPlatform {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ChatLanguage {
+    DE,
+    DK,
     EN,
+    RU,
+    TR,
     ZHTW,
 }
 
 impl Display for ChatLanguage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            ChatLanguage::DE => write!(f, "de"),
+            ChatLanguage::DK => write!(f, "dk"),
             ChatLanguage::EN => write!(f, "en"),
+            ChatLanguage::RU => write!(f, "ru"),
+            ChatLanguage::TR => write!(f, "tr"),
             ChatLanguage::ZHTW => write!(f, "zh_tw"),
         }
     }
@@ -118,7 +126,11 @@ impl std::str::FromStr for ChatLanguage {
         let language = s.to_lowercase();
 
         match language.as_ref() {
+            "de" => Ok(ChatLanguage::DE),
+            "dk" => Ok(ChatLanguage::DK),
             "en" => Ok(ChatLanguage::EN),
+            "ru" => Ok(ChatLanguage::RU),
+            "tr" => Ok(ChatLanguage::TR),
             "zh_tw" => Ok(ChatLanguage::ZHTW),
             _ => Err(error::Error::LangNotSupported),
         }

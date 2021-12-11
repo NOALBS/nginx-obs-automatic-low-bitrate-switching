@@ -1,0 +1,65 @@
+tr:
+    start:
+        success: Yayın başarıyla başlatıldı
+        error: "Hata oluştu: %{error}"
+    startTwitchTranscoding:
+        trying: Trying to start the stream with transcoding
+        successNoTranscoding: Successfully started the stream without transcoding
+        success: Started stream with transcoding %{attemptsMessage}
+        attempts: ", took %{count} attempts"
+    stop:
+        success: Yayın başarıyla durduruldu
+        error: "Hata oluştu: %{error}"
+    switch:
+        noParams: Sahne belirtilmedi
+        success: Sahne başarıyla geçti "%{scene}"
+        error: Error can't switch to scene "%{scene}"
+    bitrate:
+        success: "%{name}: %{message}"
+        error: "Mevcut bit hızı: çevrimdışı"
+    trigger:
+        success: Tetik başarıyla ayarlandı %{number} Kbps
+        successDisabled: Trigger successfully disabled
+        error: Tetik düzenlenirken hata oluştu %{number} geçerli bir değer değil
+        current: Şimdiki tetik %{number} Kbps
+        disabled: Current trigger is disabled
+    sourceinfo:
+        noInfo: No information
+        notFound: "Error no server found with the name: %{name}"
+    rec:
+        started: Kayıt başladı
+        stopped: Kayıt durduruldu
+        errorStatus: Error getting recording status
+        errorToggle: Error toggling recording
+    fix:
+        try: Yayını düzeltmeye çalışıyor
+        error: Yayın düzeltilirken hata oluştu
+    alias:
+        success: Takma ad eklendi %{alias} -> %{command}
+        removed: Takma ad kaldırıldı %{alias}
+        errorCommand: "Hata oluştu: {command} bulunmuyor"
+        errorAlias: "%{alias} takma adı mevcut değil"
+        errorAlreadyUsed: "%{alias} zaten takma ad olarak kullanılıyor"
+        errorIncorrectArguments: Error incorrect arguments given
+    sceneSwitch:
+        switch: Sahne değiştirildi "%{scene}"
+    handleCommands:
+        notify: Otomatik geçiş bildirimi %{condition}
+        autostop: Yayını otomatik durdur %{condition}
+        enabled: etkin
+        disabled: engelli
+    noalbs:
+        prefix: NOALBS prefix updated to %{prefix}
+        errorPrefix: Can't update NOALBS prefix
+        switcherEnabled: Successfully enabled the switcher
+        switcherDisabled: Successfully disabled the switcher
+        instantSwitch: Instant switch on recover %{condition}
+        langError: Can't update NOALBS language
+        langErrorInvalid: Error editing language %{lang} is not a valid value
+        langSuccess: NOALBS language updated to %{lang}
+        retryCount: Current retry set at %{count}
+        retryError: Error editing retry attempts %{count} is not a valid value
+        retrySuccess: Retry attempts set to %{count}
+    scene:
+        success: Switching to %{scene} scene
+        error: No %{scene} scene set

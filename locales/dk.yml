@@ -1,0 +1,65 @@
+dk:
+    start:
+        success: Stream startet!
+        error: "Fejl: %{error}"
+    startTwitchTranscoding:
+        trying: Trying to start the stream with transcoding
+        successNoTranscoding: Successfully started the stream without transcoding
+        success: Started stream with transcoding %{attemptsMessage}
+        attempts: ", took %{count} attempts"
+    stop:
+        success: Stream afsluttet!
+        error: "Error can't stop the stream: %{error}"
+    switch:
+        noParams: Ingen scene angivet
+        success: Scene er skiftet til "%{scene}"
+        error: "Fejl: {scene}"
+    bitrate:
+        success: "%{name}: %{message}"
+        error: "Nuværende bitrate: OFFLINE"
+    trigger:
+        success: Trigger skiftet til %{number} Kbps
+        successDisabled: Trigger successfully disabled
+        error: Fejl ved ændring af trigger %{number} er ikke en tilladt værdi
+        current: Nuværende trigger er sat til %{number} Kbps
+        disabled: Current trigger is disabled
+    sourceinfo:
+        noInfo: No information
+        notFound: "Error no server found with the name: %{name}"
+    rec:
+        started: Optagelse startet!
+        stopped: Optagelse stoppet!
+        errorStatus: Error getting recording status
+        errorToggle: Error toggling recording
+    fix:
+        try: Forsøger at fixe forbindelse
+        error: Kunne ikke fixe forbindelse
+    alias:
+        success: Tilføjet alias %{alias} -> %{command}
+        removed: Alias %{alias} fjernet
+        errorCommand: Fejl %{command} eksistere ikke
+        errorAlias: Fejl alias %{alias} eksisterer ikke
+        errorAlreadyUsed: "%{alias} er allerede brugt som alias"
+        errorIncorrectArguments: Error incorrect arguments given
+    sceneSwitch:
+        switch: Scene skiftet til "%{scene}"
+    handleCommands:
+        notify: Automatiske sceneskift notifikationer %{condition}
+        autostop: Auto stop stream %{condition}
+        enabled: slået til
+        disabled: slået fra
+    noalbs:
+        prefix: NOALBS prefix updated to %{prefix}
+        errorPrefix: Can't update NOALBS prefix
+        switcherEnabled: Successfully enabled the switcher
+        switcherDisabled: Successfully disabled the switcher
+        instantSwitch: Instant switch on recover %{condition}
+        langError: Can't update NOALBS language
+        langErrorInvalid: Error editing language %{lang} is not a valid value
+        langSuccess: NOALBS language updated to %{lang}
+        retryCount: Current retry set at %{count}
+        retryError: Error editing retry attempts %{count} is not a valid value
+        retrySuccess: Retry attempts set to %{count}
+    scene:
+        success: Switching to %{scene} scene
+        error: No %{scene} scene set
