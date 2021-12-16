@@ -257,7 +257,7 @@ You can always contact us on discord @ b3ck#3517 or 715209#0600 and we'll do our
 
 ### I want to keep using the old version
 
-You can find the old NOALBS version in the master branch.
+You can find the old NOALBS version in the [master branch](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/tree/master).
 
 ### NGINX Setup
 
