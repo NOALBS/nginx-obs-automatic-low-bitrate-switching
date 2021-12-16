@@ -331,6 +331,12 @@ Update your OBS to v26+ and follow the steps below:
 
 ---
 
+### How to run with multiple users
+
+In the `.env` file add the line `CONFIG_DIR=configs` where `configs` is the folder that holds all the config files. The name of the config is ignored so you can name it anything you want.
+
+---
+
 ### Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
