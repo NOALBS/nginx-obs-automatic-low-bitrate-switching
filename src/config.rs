@@ -1,6 +1,10 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    io::{Seek, SeekFrom},
+};
 
 use serde::{Deserialize, Serialize};
+use tracing::{error, info};
 
 use crate::{chat, error, stream_servers, switcher};
 
@@ -149,7 +153,7 @@ impl Default for Chat {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct CommandInfo {
     pub permission: Option<chat::Permission>,
     pub alias: Option<Vec<String>>,
@@ -161,8 +165,23 @@ pub struct File {
 
 impl ConfigLogic for File {
     fn load(&self) -> Result<Config, error::Error> {
-        let file = std::fs::File::open(&self.name)?;
-        let mut config: Config = serde_json::from_reader(file)?;
+        let mut file = std::fs::File::open(&self.name)?;
+        let mut config: Config = match serde_json::from_reader(&file) {
+            Ok(c) => c,
+            Err(e) => {
+                // Check if config v1
+                file.seek(SeekFrom::Start(0))?;
+                let old: serde_json::Result<ConfigOld> = serde_json::from_reader(&file);
+
+                if let Ok(o) = old {
+                    info!("Converting old NOALBS config into v2");
+                    Config::from(o)
+                } else {
+                    return Err(error::Error::Json(e));
+                }
+            }
+        };
+
         config.switcher.sort_stream_servers();
 
         if let Some(chat) = &mut config.chat {
@@ -185,8 +204,8 @@ impl ConfigLogic for File {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase", default)]
 pub struct OptionalScenes {
     pub starting: Option<String>,
     pub ending: Option<String>,
@@ -194,9 +213,234 @@ pub struct OptionalScenes {
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct OptionalOptions {
     pub twitch_transcoding_check: bool,
     pub twitch_transcoding_retries: u64,
     pub twitch_transcoding_delay_seconds: u64,
+}
+
+impl Default for OptionalOptions {
+    fn default() -> Self {
+        Self {
+            twitch_transcoding_check: false,
+            twitch_transcoding_retries: 5,
+            twitch_transcoding_delay_seconds: 15,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ConfigOld {
+    obs: ObsOld,
+    rtmp: RtmpOld,
+    twitch_chat: TwitchChat,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ObsOld {
+    ip: String,
+    password: String,
+    normal_scene: String,
+    offline_scene: String,
+    low_bitrate_scene: String,
+    refresh_scene: String,
+    low_bitrate_trigger: u32,
+    high_rtt_trigger: u32,
+    refresh_scene_interval: u32,
+    only_switch_when_streaming: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct RtmpOld {
+    server: String,
+    stats: String,
+    application: Option<String>,
+    key: Option<String>,
+    id: Option<String>,
+    publisher: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct TwitchChat {
+    channel: String,
+    enable: bool,
+    prefix: String,
+    enable_public_commands: bool,
+    public_commands: Vec<String>,
+    enable_mod_commands: bool,
+    mod_commands: Vec<String>,
+    enable_auto_switch_notification: bool,
+    enable_auto_stop_stream_on_host_or_raid: bool,
+    admin_users: Vec<String>,
+    alias: Vec<Vec<String>>,
+}
+
+impl From<ConfigOld> for Config {
+    fn from(o: ConfigOld) -> Self {
+        let mut full_host = o.obs.ip.split(':');
+        let software = SoftwareConnection::Obs(ObsConfig {
+            host: full_host.next().unwrap().to_owned(),
+            password: Some(o.obs.password),
+            port: full_host.next().unwrap().parse().unwrap(),
+        });
+
+        let mut config = Config {
+            user: User {
+                id: None,
+                name: o.twitch_chat.channel.to_owned(),
+                password_hash: None,
+            },
+            switcher: Switcher {
+                only_switch_when_streaming: o.obs.only_switch_when_streaming,
+                auto_switch_notification: o.twitch_chat.enable_auto_switch_notification,
+                triggers: switcher::Triggers {
+                    low: Some(o.obs.low_bitrate_trigger),
+                    rtt: Some(o.obs.high_rtt_trigger),
+                    offline: None,
+                },
+                ..Default::default()
+            },
+            software,
+            chat: Some(Chat {
+                platform: chat::ChatPlatform::Twitch,
+                username: o.twitch_chat.channel,
+                admins: o.twitch_chat.admin_users,
+                prefix: o.twitch_chat.prefix,
+                enable_auto_stop_stream_on_host_or_raid: o
+                    .twitch_chat
+                    .enable_auto_stop_stream_on_host_or_raid,
+                commands: Some(HashMap::new()),
+                ..Default::default()
+            }),
+            optional_scenes: OptionalScenes::default(),
+            optional_options: OptionalOptions::default(),
+        };
+
+        let commands = config.chat.as_mut().unwrap().commands.as_mut().unwrap();
+
+        for c in o.twitch_chat.mod_commands.into_iter() {
+            update_command(commands, c, Some(chat::Permission::Mod), None)
+        }
+
+        for c in o.twitch_chat.public_commands.into_iter() {
+            update_command(commands, c, Some(chat::Permission::Public), None)
+        }
+
+        for c in o.twitch_chat.alias.into_iter() {
+            update_command(commands, c[1].clone(), None, Some(c[0].clone()))
+        }
+
+        if !commands.contains_key(&chat::Command::Switch) {
+            update_command(
+                commands,
+                "switch".to_string(),
+                Some(chat::Permission::Mod),
+                Some("ss".to_string()),
+            );
+        }
+
+        if !commands.contains_key(&chat::Command::Fix) {
+            update_command(
+                commands,
+                "fix".to_string(),
+                Some(chat::Permission::Mod),
+                Some("f".to_string()),
+            );
+        }
+
+        let ss = stream_servers::StreamServer::from(o.rtmp);
+        config.switcher.stream_servers.push(ss);
+
+        config
+    }
+}
+
+impl From<RtmpOld> for stream_servers::StreamServer {
+    fn from(r: RtmpOld) -> Self {
+        let mut name = if r.server == "nginx" || r.server == "node-media-server" {
+            "RTMP"
+        } else {
+            "SRT"
+        }
+        .to_string();
+
+        let stream_server: Box<dyn stream_servers::Bsl> = match r.server.as_ref() {
+            "nginx" => Box::new(stream_servers::nginx::Nginx {
+                stats_url: r.stats,
+                application: r.application.unwrap(),
+                key: r.key.unwrap(),
+            }),
+            "node-media-server" => Box::new(stream_servers::nms::NodeMediaServer {
+                stats_url: r.stats,
+                application: r.application.unwrap(),
+                key: r.key.unwrap(),
+                auth: None,
+            }),
+            "nimble" => Box::new(stream_servers::nimble::Nimble {
+                id: r.id.unwrap(),
+                stats_url: r.stats,
+                application: r.application.unwrap(),
+                key: r.key.unwrap(),
+            }),
+            "srt-live-server" => {
+                let stats_url = r.stats;
+                let publisher = r.publisher.unwrap();
+
+                if stats_url.contains("belabox.net") {
+                    name = "BELABOX".to_string();
+                    Box::new(stream_servers::belabox::Belabox {
+                        stats_url,
+                        publisher,
+                    })
+                } else {
+                    Box::new(stream_servers::sls::SrtLiveServer {
+                        stats_url,
+                        publisher,
+                    })
+                }
+            }
+            _ => panic!("No supported server found"),
+        };
+
+        Self {
+            stream_server,
+            name,
+            priority: Some(0),
+            override_scenes: None,
+            depends_on: None,
+        }
+    }
+}
+
+fn update_command(
+    config: &mut HashMap<chat::Command, CommandInfo>,
+    command: String,
+    permission: Option<chat::Permission>,
+    alias: Option<String>,
+) {
+    let command = chat::Command::from(command.as_ref());
+
+    if let chat::Command::Unknown(e) = command {
+        error!("Found unrecognized command {}", e);
+        return;
+    }
+
+    let c = config.entry(command).or_default();
+
+    if permission.is_some() {
+        c.permission = permission;
+    }
+
+    if let Some(alias) = alias {
+        if c.alias.is_none() {
+            c.alias = Some(Vec::new());
+        }
+
+        c.alias.as_mut().unwrap().push(alias);
+    }
 }
