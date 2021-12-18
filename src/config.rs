@@ -239,7 +239,7 @@ struct ConfigOld {
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 struct ObsOld {
     ip: String,
     password: String,
@@ -265,7 +265,7 @@ struct RtmpOld {
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 struct TwitchChat {
     channel: String,
     enable: bool,
@@ -415,6 +415,51 @@ impl From<RtmpOld> for stream_servers::StreamServer {
             priority: Some(0),
             override_scenes: None,
             depends_on: None,
+        }
+    }
+}
+
+impl Default for ObsOld {
+    fn default() -> Self {
+        Self {
+            ip: "localhost".to_string(),
+            password: "password".to_string(),
+            normal_scene: "live".to_string(),
+            low_bitrate_scene: "low".to_string(),
+            offline_scene: "offline".to_string(),
+            refresh_scene: "refresh".to_string(),
+            low_bitrate_trigger: 800,
+            high_rtt_trigger: Some(2500),
+            refresh_scene_interval: 10,
+            only_switch_when_streaming: true,
+        }
+    }
+}
+
+impl Default for TwitchChat {
+    fn default() -> Self {
+        Self {
+            channel: "715209".to_string(),
+            enable: true,
+            prefix: "!".to_string(),
+            enable_public_commands: true,
+            public_commands: vec!["bitrate".to_string()],
+            enable_mod_commands: true,
+            mod_commands: vec![
+                "refresh".to_string(),
+                "fix".to_string(),
+                "trigger".to_string(),
+                "sourceinfo".to_string(),
+                "obsinfo".to_string(),
+            ],
+            enable_auto_switch_notification: true,
+            enable_auto_stop_stream_on_host_or_raid: true,
+            admin_users: vec!["715209".to_string(), "b3ck".to_string()],
+            alias: Some(vec![
+                vec!["r".to_string(), "refresh".to_string()],
+                vec!["f".to_string(), "fix".to_string()],
+                vec!["b".to_string(), "bitrate".to_string()],
+            ]),
         }
     }
 }
