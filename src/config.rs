@@ -248,7 +248,7 @@ struct ObsOld {
     low_bitrate_scene: String,
     refresh_scene: String,
     low_bitrate_trigger: u32,
-    high_rtt_trigger: u32,
+    high_rtt_trigger: Option<u32>,
     refresh_scene_interval: u32,
     only_switch_when_streaming: bool,
 }
@@ -277,7 +277,7 @@ struct TwitchChat {
     enable_auto_switch_notification: bool,
     enable_auto_stop_stream_on_host_or_raid: bool,
     admin_users: Vec<String>,
-    alias: Vec<Vec<String>>,
+    alias: Option<Vec<Vec<String>>>,
 }
 
 impl From<ConfigOld> for Config {
@@ -300,7 +300,7 @@ impl From<ConfigOld> for Config {
                 auto_switch_notification: o.twitch_chat.enable_auto_switch_notification,
                 triggers: switcher::Triggers {
                     low: Some(o.obs.low_bitrate_trigger),
-                    rtt: Some(o.obs.high_rtt_trigger),
+                    rtt: o.obs.high_rtt_trigger,
                     offline: None,
                 },
                 ..Default::default()
@@ -323,16 +323,18 @@ impl From<ConfigOld> for Config {
 
         let commands = config.chat.as_mut().unwrap().commands.as_mut().unwrap();
 
-        for c in o.twitch_chat.mod_commands.into_iter() {
+        for c in o.twitch_chat.mod_commands {
             update_command(commands, c, Some(chat::Permission::Mod), None)
         }
 
-        for c in o.twitch_chat.public_commands.into_iter() {
+        for c in o.twitch_chat.public_commands {
             update_command(commands, c, Some(chat::Permission::Public), None)
         }
 
-        for c in o.twitch_chat.alias.into_iter() {
-            update_command(commands, c[1].clone(), None, Some(c[0].clone()))
+        if let Some(alias) = o.twitch_chat.alias {
+            for c in alias {
+                update_command(commands, c[1].clone(), None, Some(c[0].clone()))
+            }
         }
 
         if !commands.contains_key(&chat::Command::Switch) {
