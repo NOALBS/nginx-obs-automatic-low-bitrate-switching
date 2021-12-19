@@ -10,6 +10,7 @@ use noalbs::{chat::ChatPlatform, config, Noalbs};
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     noalbs::print_logo();
+    let _ = print_if_new_version().await;
 
     if env::var("RUST_LOG").is_err() {
         env::set_var("RUST_LOG", "noalbs=info");
@@ -98,4 +99,32 @@ where
     let noalbs_users = futures_util::future::join_all(noalbs_users).await;
 
     Ok(noalbs_users)
+}
+
+async fn print_if_new_version() -> Result<(), noalbs::error::Error> {
+    let url = "https://api.github.com/repos/715209/nginx-obs-automatic-low-bitrate-switching/releases/latest";
+    let dlu = "https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases/latest";
+    let client = reqwest::Client::new();
+    let res = client
+        .get(url)
+        .header(
+            reqwest::header::USER_AGENT,
+            "nginx-obs-automatic-low-bitrate-switching",
+        )
+        .send()
+        .await?
+        .json::<GithubApi>()
+        .await?;
+
+    if !res.tag_name.contains(noalbs::VERSION) {
+        println!("NEW VERSION {} AVAILABLE", res.tag_name);
+        println!("Download at {}\n", dlu);
+    }
+
+    Ok(())
+}
+
+#[derive(serde::Deserialize, Debug)]
+struct GithubApi {
+    tag_name: String,
 }

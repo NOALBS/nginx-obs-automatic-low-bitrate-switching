@@ -14,7 +14,7 @@ pub mod ws;
 pub use crate::noalbs::ChatSender;
 pub use crate::noalbs::Noalbs;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 rust_i18n::i18n!("locales");
 
 pub fn print_logo() {
