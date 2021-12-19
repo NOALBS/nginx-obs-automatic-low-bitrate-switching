@@ -33,7 +33,7 @@ log = "0.4"
 pretty_env_logger = "0.4"
 tracing = "0.1"
 tracing-futures = "0.2"
-tracing-subscriber = "0.3"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 warp = "0.3"
 
