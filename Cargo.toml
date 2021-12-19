@@ -12,10 +12,10 @@ argon2 = "0.3"
 async-trait = "0.1"
 base64 = "0.13"
 dotenv = "0.15"
-fuse-rust = "0.2"
+fuse-rust = "0.3"
 futures-util = "0.3"
 obws = { version = "0.8", features = ["events"] }
-quick-xml = { version = "0.21", features = ["serialize"] }
+quick-xml = { version = "0.22", features = ["serialize"] }
 rand = "0.8"
 rand_core = { version = "0.6", features = ["std"] }
 reqwest = { version = "0.11", features = ["json"] }
@@ -33,7 +33,7 @@ log = "0.4"
 pretty_env_logger = "0.4"
 tracing = "0.1"
 tracing-futures = "0.2"
-tracing-subscriber = "0.2"
+tracing-subscriber = "0.3"
 
 warp = "0.3"
 
