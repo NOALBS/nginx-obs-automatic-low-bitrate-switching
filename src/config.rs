@@ -175,7 +175,24 @@ impl ConfigLogic for File {
 
                 if let Ok(o) = old {
                     info!("Converting old NOALBS config into v2");
-                    Config::from(o)
+
+                    if std::fs::File::open(".env").is_err() {
+                        info!("Creating .env file");
+
+                        let bot = o.twitch_chat.bot_username.to_lowercase();
+                        let oauth = o.twitch_chat.oauth.to_string();
+                        let env =
+                            format!("TWITCH_BOT_USERNAME={}\nTWITCH_BOT_OAUTH={}", bot, oauth);
+                        std::fs::write(".env", env.as_bytes())?;
+
+                        std::env::set_var("TWITCH_BOT_USERNAME", bot);
+                        std::env::set_var("TWITCH_BOT_OAUTH", oauth);
+                    }
+
+                    let c = Config::from(o);
+                    self.save(&c)?;
+
+                    c
                 } else {
                     return Err(error::Error::Json(e));
                 }
@@ -268,6 +285,8 @@ struct RtmpOld {
 #[serde(rename_all = "camelCase", default)]
 struct TwitchChat {
     channel: String,
+    bot_username: String,
+    oauth: String,
     enable: bool,
     prefix: String,
     enable_public_commands: bool,
@@ -440,6 +459,8 @@ impl Default for TwitchChat {
     fn default() -> Self {
         Self {
             channel: "715209".to_string(),
+            bot_username: "715209".to_string(),
+            oauth: "oauth:YOUR_OAUTH_HERE".to_string(),
             enable: true,
             prefix: "!".to_string(),
             enable_public_commands: true,
