@@ -41,6 +41,6 @@ lazy_static = "1.4"
 rust-i18n = "0.5"
 
 openssl-src = "300.0.4+3.0.1"
+openssl-sys = "0.9.72"
 [target.x86_64-unknown-linux-musl.dependencies]
 openssl = { version = "=0.10.38", features = ["vendored"] }
-openssl-sys = { version = "=0.9.72", features = ["vendored"] }
