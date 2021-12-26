@@ -13,6 +13,8 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 - [IRLToolkit](https://irltoolkit.com/)
 - [psynapticmedia.com](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
 - [norip.io](https://www.norip.io)
+- [IRL Media Solutions](https://www.irlmediasolutions.com)
+- [U3](https://#) -Coming Soon-
 - Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
 
 ## Quick Start
@@ -198,11 +200,23 @@ see [HERE](https://gitlab.com/mattwb65/srt-live-server#1test-with-ffmpeg)
 ##### How do I pull the SRT feed into OBS?
 
 - Add Media Source
-- Uncheck Local File
+- Un-check `Local File`
+- Make sure `Restart playback when source becomes active` is checked.
+- Change Network Buffering to `1 MB`
 - In the "Input" field enter in: `srt://<SERVER-IP>:<PORT>/?streamid=<PUBLISHER>`
-  - Using the example from the above image, it would be `srt://<SERVER-IP>:<PORT>/?streamid=jojo/bob/thorton`
-- In the "Input Format" field enter in: `mpegts`
-- Check `Seekable` then click `OK`
+  - Using the example from the above image, it would be something like this if you are using SLS on the same machine: `srt://localhost:30000/?streamid=jojo/bob/thorton`
+- In the `Input Format` field enter in: `mpegts`
+- Change `Reconnect Delay` to `3S` (Three Seconds)
+- Make sure `Show nothing when playback ends` is checked.
+- Check `Close file when inactive`
+- Optional: If your streams color looks washed out change your `YUV Color Range` to `Partial`
+- Sidenote: Do not Use `Use hardware decoding when available`, `Apply alpha in linear space`, or `Seekable`, As I have only ran into issues with these options enabled.
+
+Below is an example when used with a BelaBox Reciever:
+
+![image](https://user-images.githubusercontent.com/1740542/147401054-9b99d8ea-4388-441d-a965-4e0924de30e2.png)
+
+Remember this is just an example, your ports and streamid may differ.
 
 ---
 
