@@ -57,6 +57,8 @@ You can also enable/disable certain features from chat, see below:
 
 | Default Role | Command              | Description                                                | Example         |
 | :----------: | -------------------- | :--------------------------------------------------------- | :-------------- |
+|    Admins    | !public (on/off)     | enables/disables the use of Public commands.               | !public off     |
+|    Admins    | !mod (on/off)        | enables/disables the use of MOD commands.                  | !mod on         |
 |    Admins    | !notify (on/off)     | enables/disables the notifications in chat.                | !notify off     |
 |    Admins    | !autostop (on/off)   | enables/disables the auto stop feature when you host/raid. | !autostop on    |
 |    Admins    | !noalbs (start/stop) | NOALBS start/stop switching scenes.                        | !noalbs stop    |
