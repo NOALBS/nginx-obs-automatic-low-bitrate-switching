@@ -276,6 +276,27 @@ impl ChatHandler {
             return Some(true);
         }
 
+        if *user_permission == chat::Permission::Mod
+            && !chat.enable_public_commands
+            && !chat.enable_mod_commands
+        {
+            debug!("Public and Mod commands disabled");
+            return Some(false);
+        }
+
+        if *user_permission == chat::Permission::Mod
+            && *permission == chat::Permission::Mod
+            && !chat.enable_mod_commands
+        {
+            debug!("Mod commands disabled");
+            return Some(false);
+        }
+
+        if *user_permission == chat::Permission::Public && !chat.enable_public_commands {
+            debug!("Public commands disabled");
+            return Some(false);
+        }
+
         debug!("Not an admin checking permission");
         Some(permission_is_allowed(permission, user_permission))
     }
