@@ -189,7 +189,15 @@ impl ChatHandler {
             .get_user_by_chat_platform(&msg.channel, &msg.platform)
             .await?;
 
-        let command = self.get_command(&user, &msg).await?;
+        let (command, permission) = self.get_command(&user, &msg).await?;
+
+        if !self
+            .is_allowed_to_use_command(&user, &msg, &permission)
+            .await?
+        {
+            debug!("{} not allowed to use command {:?}", msg.sender, command);
+            return None;
+        }
 
         if msg.permission == chat::Permission::Public
             && self.handle_timeout(&msg.platform, &msg.channel).await
@@ -222,8 +230,12 @@ impl ChatHandler {
     }
 
     // TODO: refactor this
-    /// Returns the command if allowed
-    async fn get_command(&self, user: &Noalbs, msg: &chat::ChatMessage) -> Option<chat::Command> {
+    /// Returns the command
+    async fn get_command(
+        &self,
+        user: &Noalbs,
+        msg: &chat::ChatMessage,
+    ) -> Option<(chat::Command, chat::Permission)> {
         let state = user.state.read().await;
         let chat = state.config.chat.as_ref()?;
         let prefix = &chat.prefix;
@@ -240,23 +252,32 @@ impl ChatHandler {
             }
         }
 
-        debug!("Found command: {:?}", command);
+        let permission = get_permission(&command, &chat.commands, &self.default_commands);
 
-        if !(msg.permission == chat::Permission::Admin || chat.admins.contains(&msg.sender)) {
-            debug!("Not an admin checking permission");
+        debug!(
+            "Found command: {:?}, with permission: {:?}",
+            command, permission
+        );
 
-            if !is_allowed_to_run_command(
-                &chat.commands,
-                &self.default_commands,
-                &command,
-                &msg.permission,
-            ) {
-                debug!("{} not allowed to use command {:?}", msg.sender, command);
-                return None;
-            }
+        Some((command, permission))
+    }
+
+    async fn is_allowed_to_use_command(
+        &self,
+        user: &Noalbs,
+        msg: &chat::ChatMessage,
+        permission: &chat::Permission,
+    ) -> Option<bool> {
+        let state = user.state.read().await;
+        let chat = state.config.chat.as_ref()?;
+        let user_permission = &msg.permission;
+
+        if *user_permission == chat::Permission::Admin || chat.admins.contains(&msg.sender) {
+            return Some(true);
         }
 
-        Some(command)
+        debug!("Not an admin checking permission");
+        Some(permission_is_allowed(permission, user_permission))
     }
 
     pub async fn handle_hosting(&self, host: chat::StartedHosting) -> Option<()> {
@@ -330,32 +351,35 @@ impl ChatHandler {
     }
 }
 
-fn is_allowed_to_run_command(
+fn get_permission(
+    command: &chat::Command,
     user_commands: &Option<HashMap<chat::Command, config::CommandInfo>>,
     default_commands: &HashMap<chat::Command, config::CommandInfo>,
+) -> chat::Permission {
+    if let Some(user_commands) = user_commands {
+        if let Some(p) = try_get_permission(command, user_commands) {
+            return p;
+        }
+    }
+
+    if let Some(p) = try_get_permission(command, default_commands) {
+        return p;
+    }
+
+    chat::Permission::Admin
+}
+
+fn try_get_permission(
     command: &chat::Command,
-    user_permission: &chat::Permission,
-) -> bool {
-    if let Some(command) = match user_commands {
-        Some(user_commands) => user_commands.get(command),
-        None => None,
-    } {
+    commands: &HashMap<chat::Command, config::CommandInfo>,
+) -> Option<chat::Permission> {
+    if let Some(command) = commands.get(command) {
         if let Some(permission) = &command.permission {
-            if permission_is_allowed(permission, user_permission) {
-                return true;
-            }
+            return Some(permission.to_owned());
         }
     }
 
-    if let Some(command) = default_commands.get(command) {
-        if let Some(permission) = &command.permission {
-            if permission_is_allowed(permission, user_permission) {
-                return true;
-            }
-        }
-    }
-
-    false
+    None
 }
 
 fn permission_is_allowed(
