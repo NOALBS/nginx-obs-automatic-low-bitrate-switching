@@ -44,6 +44,8 @@ en:
     sceneSwitch:
         switch: Scene switched to "%{scene}"
     handleCommands:
+        public: Public commands %{condition}
+        mod: Mod commands %{condition}
         notify: Auto switch notification %{condition}
         autostop: Auto stop stream %{condition}
         enabled: is enabled

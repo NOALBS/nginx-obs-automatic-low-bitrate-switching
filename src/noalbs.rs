@@ -239,6 +239,38 @@ impl Noalbs {
         toggle
     }
 
+    pub async fn get_enable_mod(&self) -> Result<bool, error::Error> {
+        let state = &self.state.read().await;
+        let chat = &state.config.chat.as_ref().ok_or(error::Error::NoChat)?;
+
+        Ok(chat.enable_mod_commands)
+    }
+
+    pub async fn set_enable_mod(&self, enabled: bool) -> Result<(), error::Error> {
+        let mut state = self.state.write().await;
+        let chat = state.config.chat.as_mut().ok_or(error::Error::NoChat)?;
+
+        chat.enable_mod_commands = enabled;
+
+        Ok(())
+    }
+
+    pub async fn get_enable_public(&self) -> Result<bool, error::Error> {
+        let state = &self.state.read().await;
+        let chat = &state.config.chat.as_ref().ok_or(error::Error::NoChat)?;
+
+        Ok(chat.enable_public_commands)
+    }
+
+    pub async fn set_enable_public(&self, enabled: bool) -> Result<(), error::Error> {
+        let mut state = self.state.write().await;
+        let chat = state.config.chat.as_mut().ok_or(error::Error::NoChat)?;
+
+        chat.enable_public_commands = enabled;
+
+        Ok(())
+    }
+
     pub async fn get_notify(&self) -> bool {
         let state = self.state.read().await;
 

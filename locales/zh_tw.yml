@@ -46,6 +46,8 @@ zh_tw:
     sceneSwitch:
         switch: 場景切換到 "%{scene}"
     handleCommands:
+        public: 公用指令 %{condition}
+        mod: Mod 指令 %{condition}
         notify: 自動切換通知 %{condition}
         autostop: 自動停止直播 %{condition}
         enabled: 開啟

@@ -44,6 +44,8 @@ dk:
     sceneSwitch:
         switch: Scene skiftet til "%{scene}"
     handleCommands:
+        public: Offentlige kommandoer %{condition}
+        mod: Mod kommandoer %{condition}
         notify: Automatiske sceneskift notifikationer %{condition}
         autostop: Auto stop stream %{condition}
         enabled: slået til

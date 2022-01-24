@@ -491,8 +491,8 @@ impl DispatchCommand {
             chat::Command::EndingScene => self.ending_scene().await,
             chat::Command::LiveScene => self.live_scene().await,
             chat::Command::Obsinfo => {}
-            chat::Command::Mod => {}
-            chat::Command::Public => {}
+            chat::Command::Mod => self.enable_mod(params.next()).await,
+            chat::Command::Public => self.enable_public(params.next()).await,
             chat::Command::Sourceinfo => self.source_info(params.next()).await,
             chat::Command::Unknown(_) => {}
         };
@@ -1061,6 +1061,41 @@ impl DispatchCommand {
         }
 
         self.send(msg.join(" - ")).await;
+    }
+
+    async fn enable_mod(&self, enabled: Option<&str>) {
+        if let Some(enabled) = enabled {
+            if let Ok(b) = enabled_to_bool(enabled) {
+                self.user.set_enable_mod(b).await.unwrap();
+                self.save_config().await;
+            }
+        }
+
+        let msg = t!(
+            "handleCommands.mod",
+            locale = &self.lang,
+            condition = &condition_to_text(self.user.get_enable_mod().await.unwrap(), &self.lang)
+        );
+
+        self.send(msg).await;
+    }
+
+    async fn enable_public(&self, enabled: Option<&str>) {
+        if let Some(enabled) = enabled {
+            if let Ok(b) = enabled_to_bool(enabled) {
+                self.user.set_enable_public(b).await.unwrap();
+                self.save_config().await;
+            }
+        }
+
+        let msg = t!(
+            "handleCommands.public",
+            locale = &self.lang,
+            condition =
+                &condition_to_text(self.user.get_enable_public().await.unwrap(), &self.lang)
+        );
+
+        self.send(msg).await;
     }
 
     async fn send(&self, message: String) {

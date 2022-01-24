@@ -44,6 +44,8 @@ tr:
     sceneSwitch:
         switch: Sahne değiştirildi "%{scene}"
     handleCommands:
+        public: Genel komutlar %{condition}
+        mod: Mod komutları %{condition}
         notify: Otomatik geçiş bildirimi %{condition}
         autostop: Yayını otomatik durdur %{condition}
         enabled: etkin

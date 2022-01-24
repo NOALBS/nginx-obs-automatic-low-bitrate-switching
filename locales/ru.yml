@@ -44,6 +44,8 @@ ru:
     sceneSwitch:
         switch: Сцена переключена на "%{scene}"
     handleCommands:
+        public: Публичные команды %{condition}
+        mod: Команды модераторов %{condition}
         notify: Автоуведомления %{condition}
         autostop: Автоостановка %{condition}
         enabled: включены

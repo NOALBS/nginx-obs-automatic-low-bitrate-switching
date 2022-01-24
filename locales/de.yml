@@ -44,6 +44,8 @@ de:
     sceneSwitch:
         switch: Szene erfolgreich auf "%{scene}" gewechselt
     handleCommands:
+        public: Öffentliche Befehle %{condition}
+        mod: Mod Befehle %{condition}
         notify: Automatische Wechsel Benachrichtigung %{condition}
         autostop: Stream automatisch gestoppt %{condition}
         enabled: ist aktiviert
