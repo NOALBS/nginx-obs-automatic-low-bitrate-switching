@@ -253,6 +253,7 @@ struct ConfigOld {
     obs: ObsOld,
     rtmp: RtmpOld,
     twitch_chat: TwitchChat,
+    language: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -322,6 +323,11 @@ impl From<ConfigOld> for Config {
                     rtt: o.obs.high_rtt_trigger,
                     offline: None,
                 },
+                switching_scenes: switcher::SwitchingScenes {
+                    normal: o.obs.normal_scene,
+                    low: o.obs.low_bitrate_scene,
+                    offline: o.obs.offline_scene,
+                },
                 ..Default::default()
             },
             software,
@@ -334,6 +340,8 @@ impl From<ConfigOld> for Config {
                     .twitch_chat
                     .enable_auto_stop_stream_on_host_or_raid,
                 commands: Some(HashMap::new()),
+                enable_public_commands: o.twitch_chat.enable_public_commands,
+                enable_mod_commands: o.twitch_chat.enable_mod_commands,
                 ..Default::default()
             }),
             optional_scenes: OptionalScenes::default(),
@@ -376,6 +384,12 @@ impl From<ConfigOld> for Config {
 
         let ss = stream_servers::StreamServer::from(o.rtmp);
         config.switcher.stream_servers.push(ss);
+
+        if let Some(lang) = o.language {
+            if let Ok(l) = lang.parse() {
+                config.chat.as_mut().unwrap().language = l;
+            }
+        }
 
         config
     }
