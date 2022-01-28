@@ -18,7 +18,7 @@ struct NginxRtmpServer {
 #[derive(Deserialize, Debug)]
 struct NginxRtmpApp {
     name: String,
-    live: NginxRtmpLive,
+    live: Option<NginxRtmpLive>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -105,8 +105,8 @@ impl Nginx {
             .application
             .into_iter()
             .filter_map(|x| {
-                if x.name == self.application {
-                    x.live.stream
+                if x.live.is_some() && x.name == self.application {
+                    x.live.unwrap().stream
                 } else {
                     None
                 }
@@ -285,7 +285,42 @@ mod tests {
             </rtmp>
         "#;
 
-        let parsed: NginxRtmpStats = quick_xml::de::from_str(&text).unwrap();
+        let parsed: NginxRtmpStats = quick_xml::de::from_str(text).unwrap();
+        println!("{:#?}", parsed);
+    }
+
+    #[test]
+    fn application_without_live() {
+        let text = r#"
+            <?xml version="1.0" encoding="utf-8" ?>
+            <?xml-stylesheet type="text/xsl" href="/stat.xsl" ?>
+            <rtmp>
+                <nginx_version>1.21.4</nginx_version>
+                <nginx_rtmp_version>1.1.4</nginx_rtmp_version>
+                <compiler>clang 13.0.0 (clang-1300.0.29.3)</compiler>
+                <built>Dec  2 2021 06:31:15</built>
+                <pid>18715</pid>
+                <uptime>130</uptime>
+                <naccepted>0</naccepted>
+                <bw_in>0</bw_in>
+                <bytes_in>0</bytes_in>
+                <bw_out>0</bw_out>
+                <bytes_out>0</bytes_out>
+                <server>
+                    <application>
+                        <name>publish</name>
+                        <live>
+                            <nclients>0</nclients>
+                        </live>
+                    </application>
+                    <application>
+                        <name>:(</name>
+                    </application>
+                </server>
+            </rtmp>
+        "#;
+
+        let parsed: NginxRtmpStats = quick_xml::de::from_str(text).unwrap();
         println!("{:#?}", parsed);
     }
 }
