@@ -1,0 +1,65 @@
+swe:
+    start:
+        success: Strömmen startades framgångsrikt
+        error: "Fel kan inte starta strömmen: %{error}"
+    startTwitchTranscoding:
+        trying: Försöker starta strömmen med omkodning
+        successNoTranscoding: Strömmen startades framgångsrikt utan omkodning
+        success: Startade ström med omkodning %{attemptsMessage}
+        attempts: ", took %{count} attempts"
+    stop:
+        success: Stoppade strömmen med framgång
+        error: "Fel kan inte stoppa strömmen: %{error}"
+    switch:
+        noParams: Ingen scen specificerad
+        success: Scenen har bytt till "%{scene}"
+        error: Fel kan inte växla till scen "%{scene}"
+    bitrate:
+        success: "%{name}: %{message}"
+        error: "Ingen anslutning :("
+    trigger:
+        success: Utlösaren har ställts in till %{number} Kbps
+        successDisabled: Utlösaren har inaktiverats framgångsrikt
+        error: Fel i redigeringen av utlösaren %{number} är inte ett giltigt värde
+        current: Den nuvarande utlösaren är inställd på %{number} Kbps
+        disabled: Den aktuella utlösaren är inaktiverad
+    sourceinfo:
+        noInfo: Ingen information
+        notFound: "Fel ingen server hittades med namnet: %{name}"
+    rec:
+        started: Inspelning påbörjad
+        stopped: Inspelningen har stoppats
+        errorStatus: Fel i att hämta inspelningsstatus
+        errorToggle: Fel vid växling av inspelning
+    fix:
+        try: Försöker fixa strömmen
+        error: Fel vid fastställande av strömmen
+    alias:
+        success: Tillägg av alias %{alias} -> %{command}
+        removed: Alias %{alias} borttaget
+        errorCommand: Command %{command} existerar inte
+        errorAlias: Alias %{alias} existerar inte
+        errorAlreadyUsed: "%{alias} används redan som alias"
+        errorIncorrectArguments: Fel felaktiga argument har angetts
+    sceneSwitch:
+        switch: Scenen byttes till "%{scene}"
+    handleCommands:
+        notify: Automatisk anmälan om växling %{condition}
+        autostop: Automatiskt stopp för strömmen %{condition}
+        enabled: är aktiverad
+        disabled: är inaktiverat
+    noalbs:
+        prefix: NOALBS prefix updated to %{prefix}
+        errorPrefix: Can't update NOALBS prefix
+        switcherEnabled: Successfully enabled the switcher
+        switcherDisabled: Successfully disabled the switcher
+        instantSwitch: Instant switch on recover %{condition}
+        langError: Can't update NOALBS language
+        langErrorInvalid: Error editing language %{lang} is not a valid value
+        langSuccess: NOALBS language updated to %{lang}
+        retryCount: Current retry set at %{count}
+        retryError: Error editing retry attempts %{count} is not a valid value
+        retrySuccess: Retry attempts set to %{count}
+    scene:
+        success: Växla till %{scene} scen
+        error: Ingen %{scene} scenuppsättning
