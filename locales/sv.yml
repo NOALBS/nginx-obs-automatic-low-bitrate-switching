@@ -1,4 +1,4 @@
-swe:
+sv:
     start:
         success: Strömmen startades framgångsrikt
         error: "Fel kan inte starta strömmen: %{error}"
@@ -16,7 +16,7 @@ swe:
         error: Fel kan inte växla till scen "%{scene}"
     bitrate:
         success: "%{name}: %{message}"
-        error: "Ingen anslutning :("
+        error: "Ingen anslutning"
     trigger:
         success: Utlösaren har ställts in till %{number} Kbps
         successDisabled: Utlösaren har inaktiverats framgångsrikt
@@ -37,29 +37,29 @@ swe:
     alias:
         success: Tillägg av alias %{alias} -> %{command}
         removed: Alias %{alias} borttaget
-        errorCommand: Command %{command} existerar inte
+        errorCommand: Kommando %{command} existerar inte
         errorAlias: Alias %{alias} existerar inte
         errorAlreadyUsed: "%{alias} används redan som alias"
-        errorIncorrectArguments: Fel felaktiga argument har angetts
+        errorIncorrectArguments: Felaktiga argument har angetts
     sceneSwitch:
         switch: Scenen byttes till "%{scene}"
     handleCommands:
         notify: Automatisk anmälan om växling %{condition}
         autostop: Automatiskt stopp för strömmen %{condition}
-        enabled: är aktiverad
-        disabled: är inaktiverat
+        enabled: Är aktiverad
+        disabled: Är inaktiverat
     noalbs:
-        prefix: NOALBS prefix updated to %{prefix}
-        errorPrefix: Can't update NOALBS prefix
-        switcherEnabled: Successfully enabled the switcher
-        switcherDisabled: Successfully disabled the switcher
-        instantSwitch: Instant switch on recover %{condition}
-        langError: Can't update NOALBS language
-        langErrorInvalid: Error editing language %{lang} is not a valid value
-        langSuccess: NOALBS language updated to %{lang}
-        retryCount: Current retry set at %{count}
-        retryError: Error editing retry attempts %{count} is not a valid value
-        retrySuccess: Retry attempts set to %{count}
+        prefix: NOALBS prefix ändrades till %{prefix}
+        errorPrefix: Kunde inte updatera NOALBS prefix
+        switcherEnabled: Växeln har aktiverats med framgång
+        switcherDisabled: Växeln har avaktiverats med framgång
+        instantSwitch: Byt växel direkt vid återhämtning %{condition}
+        langError: Kunde inte byta NOALBS språk
+        langErrorInvalid: Fel vid ändring av språk %{lang} är inte ett giltigt värde
+        langSuccess: NOALBS språk ändrat till %{lang}
+        retryCount: Nuvarande återförsök ställt till %{count}
+        retryError: Fel vid redigering av återförsök %{count} är inte ett giltigt värde
+        retrySuccess: Återförsök ställt till %{count}
     scene:
         success: Växla till %{scene} scen
         error: Ingen %{scene} scenuppsättning
