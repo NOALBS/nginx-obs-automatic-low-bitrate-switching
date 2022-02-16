@@ -31,6 +31,7 @@ pub struct NginxRtmpStream {
     pub name: String,
     pub bw_video: u32,
     pub meta: Option<Meta>,
+    pub active: Option<()>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -132,6 +133,10 @@ impl SwitchLogic for Nginx {
         };
 
         let bitrate = stats.bw_video / 1024;
+
+        if stats.active.is_none() {
+            return SwitchType::Offline;
+        }
 
         if let Some(offline) = triggers.offline {
             if bitrate > 0 && bitrate <= offline {
