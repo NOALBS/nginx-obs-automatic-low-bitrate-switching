@@ -21,7 +21,7 @@ pl:
         success: Wyzwalacz pomyślnie ustawiony na %{number} Kbps
         successDisabled: Wyzwalacz pomyślnie wyłączony
         error: Błąd edycji wyzwalacza %{number} nie jest prawidłową wartoscią
-        current:Aktualny wyzwalacz na %{number} Kbps
+        current: Aktualny wyzwalacz na %{number} Kbps
         disabled: Aktualny wyzwalacz jest wyłączony
     sourceinfo:
         noInfo: Brak informacji
