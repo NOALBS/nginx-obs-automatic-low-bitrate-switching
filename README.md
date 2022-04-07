@@ -66,7 +66,7 @@ You can also enable/disable certain features from chat, see below:
 
 ## Configure NOALBS
 
-Rename `.env.example` to `.env`. Fill in your bot username and oauth.
+Rename `.env.example` to `.env`. If you have a custom Twitch account created for a bot fill in your Twitch Account bot username and oauth.
 
 Use <https://twitchapps.com/tmi> to get your oauth from Twitch.
 
