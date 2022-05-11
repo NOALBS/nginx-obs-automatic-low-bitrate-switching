@@ -1,0 +1,67 @@
+es:
+    start:
+        success: Stream iniciado correctamente
+        error: "Error al iniciar stream: %{error}"
+    startTwitchTranscoding:
+        trying: Intentando iniciar stream con transcodificacion
+        successNoTranscoding: Stream iniciado sin transcodificacion
+        success: Stream iniciado con transcoder %{attemptsMessage}
+        attempts: ", tomo %{count} intentos"
+    stop:
+        success: Stream detenido correctamente
+        error: "Error al detener stream: %{error}"
+    switch:
+        noParams: No se especifico escena
+        success: Escena cambiada a "%{scene}"
+        error: Error no se pudo cambiar a escena "%{scene}"
+    bitrate:
+        success: "%{name}: %{message}"
+        error: "Sin conexion :("
+    trigger:
+        success: Disparador establecido a %{number} Kbps
+        successDisabled: Disparador desactivado
+        error: Error modificando disparador %{number} no es un valor valido
+        current: Disparador actual en %{number} Kbps
+        disabled: Disparador actual descativado
+    sourceinfo:
+        noInfo: Sin informacion
+        notFound: "Error. No se encontro server con el nombre: %{name}"
+    rec:
+        started: Grabacion iniciada
+        stopped: Grabacion detenida
+        errorStatus: Error obteniendo estado de grabacion
+        errorToggle: Error cambiando grabacion
+    fix:
+        try: Tratando de reparar el stream
+        error: Error reparando el stream
+    alias:
+        success: Agregado alias %{alias} -> %{command}
+        removed: Alias %{alias} eliminado
+        errorCommand: El commando %{command} no existe
+        errorAlias: Alias %{alias} no existe
+        errorAlreadyUsed: "%{alias} ya esta en uso"
+        errorIncorrectArguments: Error. Datos incorrectos
+    sceneSwitch:
+        switch: Escena cambiada a "%{scene}"
+    handleCommands:
+        public: Comandos publicos %{condition}
+        mod: Comandos de Moderador %{condition}
+        notify: Notificacion de cambio automatico %{condition}
+        autostop: Detener autopmatico %{condition}
+        enabled: esta activado
+        disabled: esta descativado
+    noalbs:
+        prefix: NOALBS actualizado a %{prefix}
+        errorPrefix: No se pudo actualizar NOALBS
+        switcherEnabled: Cambio automatico activado
+        switcherDisabled: Cambio automatico desactivado
+        instantSwitch: Instant switch on recover %{condition}
+        langError: No se pudo actualizar idioma
+        langErrorInvalid: Error cambiando idioma %{lang} no es un valor valido
+        langSuccess: NOALBS idioma actualizado a %{lang}
+        retryCount: Reintento actual establecido en %{count}
+        retryError: Error al editar reintentos %{count} no es un valor valido
+        retrySuccess: Intentos de reintento establecidos en %{count}
+    scene:
+        success: Cambiando a escena %{scene}
+        error: La escena %{scene} no existe
