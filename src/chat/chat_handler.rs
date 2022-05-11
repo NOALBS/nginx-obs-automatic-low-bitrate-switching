@@ -923,7 +923,11 @@ impl DispatchCommand {
                     if let Ok(l) = lang.parse::<super::ChatLanguage>() {
                         self.user.set_chat_language(l).await.unwrap();
                         self.save_config().await;
-                        t!("noalbs.langSuccess", locale = lang, lang = lang)
+                        t!(
+                            "noalbs.langSuccess",
+                            locale = &lang.to_lowercase(),
+                            lang = lang
+                        )
                     } else {
                         t!("noalbs.langErrorInvalid", locale = &self.lang, lang = lang)
                     }
