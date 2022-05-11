@@ -130,5 +130,6 @@
     "twitchTranscodingCheck": false,
     "twitchTranscodingRetries": 5,
     "twitchTranscodingDelaySeconds": 15
-  }
+  },
+  "language": "en"
 }
