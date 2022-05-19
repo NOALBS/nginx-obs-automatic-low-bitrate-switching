@@ -10,7 +10,7 @@ NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes
 
 Don't feel like setting this all up by yourself? Check out these links for similar solutions/paid services:
 
-- [u³](https://u3.gg) 
+- [u³](https://u3.gg)
 - [IRLToolkit](https://irltoolkit.com/)
 - [psynapticmedia.com](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
 - [norip.io](https://www.norip.io)
