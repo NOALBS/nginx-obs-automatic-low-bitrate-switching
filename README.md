@@ -17,7 +17,7 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 - [IRL Media Solutions](https://www.irlmediasolutions.com)
 
 
-- Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
+Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
 
 ## Quick Start
 
