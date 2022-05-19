@@ -389,12 +389,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fuse-rust"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d9ff709b73b2baf07e03076ffe6fb9a6e7309e67651d650e2775729a4fc0eaf"
-
-[[package]]
 name = "futures-channel"
 version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -829,7 +823,6 @@ dependencies = [
  "async-trait",
  "base64",
  "dotenv",
- "fuse-rust",
  "futures-util",
  "lazy_static",
  "log",
@@ -843,6 +836,7 @@ dependencies = [
  "rust-i18n",
  "serde",
  "serde_json",
+ "strsim 0.10.0",
  "thiserror",
  "tokio",
  "tokio-stream",

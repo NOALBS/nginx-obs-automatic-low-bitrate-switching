@@ -111,12 +111,19 @@ impl Obs {
 impl BroadcastingSoftwareLogic for Obs {
     async fn switch_scene(&self, scene: &str) -> Result<String, error::Error> {
         let scenes = self.get_scenes().await?;
+        let scene = scene.to_lowercase();
 
-        let fuse = fuse_rust::Fuse::default();
-        let res = fuse.search_text_in_iterable(scene, scenes.iter());
+        let res = scenes
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                let s = &s.to_lowercase();
+                (i, strsim::normalized_damerau_levenshtein(&scene, s))
+            })
+            .min_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
-        let scene = if !res.is_empty() {
-            &scenes[res[0].index]
+        let scene = if let Some(s) = res {
+            scenes[s.0].to_owned()
         } else {
             scene
         };
@@ -128,8 +135,8 @@ impl BroadcastingSoftwareLogic for Obs {
             None => return Err(error::Error::UnableInitialConnection),
         };
 
-        client.scenes().set_current_scene(scene).await?;
-        Ok(scene.to_owned())
+        client.scenes().set_current_scene(&scene).await?;
+        Ok(scene)
     }
 
     async fn start_streaming(&self) -> Result<(), error::Error> {

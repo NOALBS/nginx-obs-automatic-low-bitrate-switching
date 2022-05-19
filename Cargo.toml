@@ -12,7 +12,6 @@ argon2 = "0.3"
 async-trait = "0.1"
 base64 = "0.13"
 dotenv = "0.15"
-fuse-rust = "0.3"
 futures-util = "0.3"
 obws = { version = "0.9", features = ["events"] }
 quick-xml = { version = "0.22", features = ["serialize"] }
@@ -21,6 +20,7 @@ rand_core = { version = "0.6", features = ["std"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde = "1.0"
 serde_json = "1.0"
+strsim = "0.10.0"
 thiserror = "1.0"
 tokio = { version = "1.10", features = ["rt", "rt-multi-thread", "macros", "signal", "time", "sync"] }
 tokio-stream = "0.1"
