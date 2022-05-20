@@ -171,9 +171,12 @@ impl BroadcastingSoftwareLogic for Obs {
 
         use obws::responses::MediaState;
         let media_sources = client.sources().get_media_sources_list().await?;
-        let media_playing = media_sources
-            .iter()
-            .filter(|m| matches!(m.media_state, MediaState::Playing));
+        let media_playing = media_sources.iter().filter(|m| {
+            matches!(
+                m.media_state,
+                MediaState::Playing | MediaState::Buffering | MediaState::Opening
+            )
+        });
 
         for media in media_playing {
             let media_inputs = match media.source_kind.as_ref() {
