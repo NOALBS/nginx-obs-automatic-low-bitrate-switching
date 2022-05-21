@@ -50,6 +50,8 @@ zh_tw:
         errorIncorrectArguments: Error incorrect arguments given
     sceneSwitch:
         switch: 場景切換到 "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         public: 公用指令 %{condition}
         mod: Mod 指令 %{condition}

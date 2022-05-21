@@ -23,6 +23,7 @@ impl Switcher {
         let f = async move {
             let mut prev_switch_type: SwitchType = SwitchType::Offline;
             let mut same_type: u8 = 0;
+            let mut same_type_seconds = 0;
 
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
@@ -33,7 +34,14 @@ impl Switcher {
                     continue;
                 }
 
-                if let Err(e) = switcher.switch(&mut prev_switch_type, &mut same_type).await {
+                if let Err(e) = switcher
+                    .switch(
+                        &mut prev_switch_type,
+                        &mut same_type,
+                        &mut same_type_seconds,
+                    )
+                    .await
+                {
                     error!("Error when trying to switch: {}", e);
                 }
             }
@@ -81,6 +89,7 @@ impl Switcher {
         &self,
         prev_switch_type: &mut SwitchType,
         same_type: &mut u8,
+        same_type_seconds: &mut u32,
     ) -> Result<(), error::Error> {
         let state = self.state.read().await;
 
@@ -105,6 +114,7 @@ impl Switcher {
 
             *prev_switch_type = current_switch_type.to_owned();
             *same_type = 0;
+            *same_type_seconds = 0;
         }
 
         debug!("type: {:?}, same: {:?}", current_switch_type, same_type);
@@ -124,9 +134,42 @@ impl Switcher {
             return Ok(());
         }
 
+        *same_type_seconds += *same_type as u32;
         *same_type = 0;
 
+        debug!("Same type seconds: {}", same_type_seconds);
+
         if current_switch_type == SwitchType::Offline {
+            // TODO: Refactor the timeout code
+            if let Some(min) = &state.config.optional_options.offline_timeout {
+                if *same_type_seconds >= (min * 60) {
+                    if let Err(error) = state
+                        .broadcasting_software
+                        .connection
+                        .as_ref()
+                        .ok_or(error::Error::NoSoftwareSet)?
+                        .stop_streaming()
+                        .await
+                    {
+                        error!("Offline timeout error {:?}", error);
+                        return Ok(());
+                    }
+
+                    if state.broadcasting_software.is_streaming {
+                        if let Some(chat) = &state.config.chat {
+                            let message =
+                                chat::HandleMessage::InternalChatUpdate(chat::InternalChatUpdate {
+                                    platform: chat.platform.to_owned(),
+                                    channel: chat.username.to_owned(),
+                                    kind: chat::InternalUpdate::OfflineTimeout,
+                                });
+
+                            let _ = self.chat_sender.send(message).await;
+                        }
+                    }
+                }
+            }
+
             if let Some(name) = &state.switcher_state.last_used_server {
                 server = stream_servers.iter().find(|s| &s.name == name);
             }

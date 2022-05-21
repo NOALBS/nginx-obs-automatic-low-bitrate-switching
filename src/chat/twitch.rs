@@ -70,10 +70,13 @@ impl Twitch {
                 message::ServerMessage::HostTarget(host) => {
                     if let message::HostTargetAction::HostModeOn { .. } = host.action {
                         chat_handler_tx
-                            .send(HandleMessage::StartedHosting(chat::StartedHosting {
-                                channel: host.channel_login,
-                                platform: ChatPlatform::Twitch,
-                            }))
+                            .send(HandleMessage::InternalChatUpdate(
+                                chat::InternalChatUpdate {
+                                    channel: host.channel_login,
+                                    platform: ChatPlatform::Twitch,
+                                    kind: chat::InternalUpdate::StartedHosting,
+                                },
+                            ))
                             .await
                             .unwrap();
                     }

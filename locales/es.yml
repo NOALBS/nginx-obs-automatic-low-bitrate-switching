@@ -48,6 +48,8 @@ es:
         errorIncorrectArguments: Error. Datos incorrectos
     sceneSwitch:
         switch: Escena cambiada a "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         public: Comandos publicos %{condition}
         mod: Comandos de Moderador %{condition}

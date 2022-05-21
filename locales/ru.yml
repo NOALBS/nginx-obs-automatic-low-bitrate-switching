@@ -48,6 +48,8 @@ ru:
         errorIncorrectArguments: Ошибка неверные аргументы даны
     sceneSwitch:
         switch: Сцена переключена на "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         public: Публичные команды %{condition}
         mod: Команды модераторов %{condition}

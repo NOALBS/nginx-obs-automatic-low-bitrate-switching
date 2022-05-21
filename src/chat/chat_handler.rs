@@ -146,8 +146,12 @@ impl ChatHandler {
 
                     self.handle_chat_message(msg).await;
                 }
-                HandleMessage::StartedHosting(host) => {
-                    self.handle_hosting(host).await;
+                HandleMessage::InternalChatUpdate(update) => {
+                    use chat::InternalUpdate;
+                    match &update.kind {
+                        InternalUpdate::StartedHosting => self.handle_hosting(update).await,
+                        InternalUpdate::OfflineTimeout => self.handle_offline_timeout(update).await,
+                    };
                 }
                 HandleMessage::AutomaticSwitchingScene(ss) => {
                     self.handle_automatic_switching_message(ss).await;
@@ -301,7 +305,7 @@ impl ChatHandler {
         Some(permission_is_allowed(permission, user_permission))
     }
 
-    pub async fn handle_hosting(&self, host: chat::StartedHosting) -> Option<()> {
+    pub async fn handle_hosting(&self, host: chat::InternalChatUpdate) -> Option<()> {
         let user = self
             .user_manager
             .get_user_by_chat_platform(&host.channel, &host.platform)
@@ -344,6 +348,20 @@ impl ChatHandler {
         };
 
         tokio::spawn(async move { dc.run_command().await });
+
+        Some(())
+    }
+
+    pub async fn handle_offline_timeout(&self, host: chat::InternalChatUpdate) -> Option<()> {
+        let sender = self.chat_senders.get(&host.platform)?;
+        let user = self
+            .user_manager
+            .get_user_by_chat_platform(&host.channel, &host.platform)
+            .await?;
+        let lang = &user.chat_language().await.unwrap().to_string();
+        let msg = t!("offlineTimeout.timeout", locale = lang);
+
+        sender.send_message(host.channel, msg).await;
 
         Some(())
     }

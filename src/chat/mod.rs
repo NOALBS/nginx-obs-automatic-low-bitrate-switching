@@ -149,7 +149,7 @@ impl std::str::FromStr for ChatLanguage {
 #[derive(Debug)]
 pub enum HandleMessage {
     ChatMessage(ChatMessage),
-    StartedHosting(StartedHosting),
+    InternalChatUpdate(InternalChatUpdate),
     AutomaticSwitchingScene(AutomaticSwitchingScene),
 }
 
@@ -163,9 +163,17 @@ pub struct ChatMessage {
 }
 
 #[derive(Debug)]
-pub struct StartedHosting {
+//pub struct StartedHosting {
+pub struct InternalChatUpdate {
     pub platform: ChatPlatform,
     pub channel: String,
+    pub kind: InternalUpdate,
+}
+
+#[derive(Debug)]
+pub enum InternalUpdate {
+    StartedHosting,
+    OfflineTimeout,
 }
 
 #[derive(Debug)]

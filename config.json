@@ -134,7 +134,8 @@
   "optionalOptions": {
     "twitchTranscodingCheck": false,
     "twitchTranscodingRetries": 5,
-    "twitchTranscodingDelaySeconds": 15
+    "twitchTranscodingDelaySeconds": 15,
+    "offlineTimeout": null
   },
   "language": "en"
 }

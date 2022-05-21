@@ -236,6 +236,9 @@ pub struct OptionalOptions {
     pub twitch_transcoding_check: bool,
     pub twitch_transcoding_retries: u64,
     pub twitch_transcoding_delay_seconds: u64,
+
+    /// Automatically stop the stream after n minutes on the offline scene
+    pub offline_timeout: Option<u32>,
 }
 
 impl Default for OptionalOptions {
@@ -244,6 +247,7 @@ impl Default for OptionalOptions {
             twitch_transcoding_check: false,
             twitch_transcoding_retries: 5,
             twitch_transcoding_delay_seconds: 15,
+            offline_timeout: None,
         }
     }
 }

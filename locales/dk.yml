@@ -48,6 +48,8 @@ dk:
         errorIncorrectArguments: Error incorrect arguments given
     sceneSwitch:
         switch: Scene skiftet til "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         public: Offentlige kommandoer %{condition}
         mod: Mod kommandoer %{condition}

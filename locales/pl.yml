@@ -48,6 +48,8 @@ pl:
         errorIncorrectArguments: Błąd podano nieprawidłowe argumenty
     sceneSwitch:
         switch: Scena przełączona na "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         public: Publiczne komendy %{condition}
         mod: Mod polecenia %{condition}

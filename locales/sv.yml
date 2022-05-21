@@ -48,6 +48,8 @@ sv:
         errorIncorrectArguments: Felaktiga argument har angetts
     sceneSwitch:
         switch: Scenen byttes till "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         notify: Automatisk anmälan om växling %{condition}
         autostop: Automatiskt stopp för strömmen %{condition}

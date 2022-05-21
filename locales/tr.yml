@@ -48,6 +48,8 @@ tr:
         errorIncorrectArguments: Error incorrect arguments given
     sceneSwitch:
         switch: Sahne değiştirildi "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         public: Genel komutlar %{condition}
         mod: Mod komutları %{condition}

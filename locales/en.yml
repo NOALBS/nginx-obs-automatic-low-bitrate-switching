@@ -48,6 +48,8 @@ en:
         errorIncorrectArguments: Error incorrect arguments given
     sceneSwitch:
         switch: Scene switched to "%{scene}"
+    offlineTimeout:
+        timeout: Offline timeout reached, stopping the stream
     handleCommands:
         public: Public commands %{condition}
         mod: Mod commands %{condition}
