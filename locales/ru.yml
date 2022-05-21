@@ -34,6 +34,11 @@ ru:
     fix:
         try: Попытка исправить трансляцию
         error: Ошибка исправления трансляции
+    refresh:
+        try: Инициировано обновление трансляции
+        error: Ошибка обновления трансляции
+        success: Успешное обновление трансляции
+        noScene: No refresh scene set, using fix instead
     alias:
         success: Добавлен псевдоним %{alias} -> %{command}
         removed: Удален псевдоним %{alias}

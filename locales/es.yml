@@ -34,6 +34,11 @@ es:
     fix:
         try: Tratando de reparar el stream
         error: Error reparando el stream
+    refresh:
+        try: Refreshing the stream
+        error: Error refreshing the stream
+        success: Refreshing the stream completed
+        noScene: No refresh scene set, using fix instead
     alias:
         success: Agregado alias %{alias} -> %{command}
         removed: Alias %{alias} eliminado

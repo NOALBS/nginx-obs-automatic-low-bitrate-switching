@@ -124,7 +124,8 @@
   "optionalScenes": {
     "starting": null,
     "ending": null,
-    "privacy": "privacy"
+    "privacy": "privacy",
+    "refresh": null
   },
   "optionalOptions": {
     "twitchTranscodingCheck": false,

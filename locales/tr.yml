@@ -34,6 +34,11 @@ tr:
     fix:
         try: Yayını düzeltmeye çalışıyor
         error: Yayın düzeltilirken hata oluştu
+    refresh:
+        try: Yayın yenileniyor
+        error: Yayın yenilenirken hata oluştu
+        success: Yayın yenileme tamamlandı
+        noScene: No refresh scene set, using fix instead
     alias:
         success: Takma ad eklendi %{alias} -> %{command}
         removed: Takma ad kaldırıldı %{alias}

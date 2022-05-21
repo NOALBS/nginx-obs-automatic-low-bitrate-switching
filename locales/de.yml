@@ -34,6 +34,11 @@ de:
     fix:
         try: Versuche den Fehler zu beheben
         error: Fehler konnte nicht behoben werden
+    refresh:
+        try: Stream wird aktualisiert
+        error: Fehler beim aktualisieren des Streams
+        success: Stream wurde erfolgreich aktualisiert
+        noScene: No refresh scene set, using fix instead
     alias:
         success: Alias %{alias} hinzugefügt -> %{command}
         removed: Alias %{alias} erfolgreich entfernt

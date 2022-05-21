@@ -227,6 +227,7 @@ pub struct OptionalScenes {
     pub starting: Option<String>,
     pub ending: Option<String>,
     pub privacy: Option<String>,
+    pub refresh: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]

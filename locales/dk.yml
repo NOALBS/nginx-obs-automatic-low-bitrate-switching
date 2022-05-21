@@ -34,6 +34,11 @@ dk:
     fix:
         try: Forsøger at fixe forbindelse
         error: Kunne ikke fixe forbindelse
+    refresh:
+        try: Genstarter forbindelse
+        error: Fejl ved genstart af forbindelse
+        success: Genstart af forbindelse gennemført!
+        noScene: No refresh scene set, using fix instead
     alias:
         success: Tilføjet alias %{alias} -> %{command}
         removed: Alias %{alias} fjernet

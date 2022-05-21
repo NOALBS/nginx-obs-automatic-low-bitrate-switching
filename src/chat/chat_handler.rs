@@ -466,7 +466,7 @@ impl DispatchCommand {
             chat::Command::Autostop => self.autostop(params.next()).await,
             chat::Command::Bitrate => self.bitrate().await,
             chat::Command::Fix => self.fix().await,
-            chat::Command::Refresh => self.fix().await,
+            chat::Command::Refresh => self.refresh().await,
             chat::Command::Noalbs => self.noalbs(params.next(), params).await,
             chat::Command::Notify => self.notify(params.next()).await,
             chat::Command::Rec => self.record().await,
@@ -832,6 +832,45 @@ impl DispatchCommand {
         };
 
         self.send(msg).await;
+    }
+
+    async fn refresh(&self) {
+        let state = self.user.state.read().await;
+
+        let bsc = match &state.broadcasting_software.connection {
+            Some(b) => b,
+            None => return,
+        };
+
+        let scene = match &state.config.optional_scenes.refresh {
+            Some(s) => s,
+            None => {
+                self.send(t!("refresh.noScene", locale = &self.lang)).await;
+                self.fix().await;
+                return;
+            }
+        };
+
+        self.send(t!("refresh.try", locale = &self.lang)).await;
+
+        let err = t!("refresh.error", locale = &self.lang);
+        if (bsc.switch_scene(scene).await).is_err() {
+            self.send(err).await;
+            return;
+        };
+
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+
+        if (bsc
+            .switch_scene(&state.broadcasting_software.prev_scene)
+            .await)
+            .is_err()
+        {
+            self.send(err).await;
+            return;
+        };
+
+        self.send(t!("refresh.success", locale = &self.lang)).await;
     }
 
     // Record is a toggle
