@@ -1180,7 +1180,7 @@ async fn bitrate_msg(user: &Noalbs, lang: &str) -> String {
     let state = &user.state.read().await;
     let servers = &state.config.switcher.stream_servers;
 
-    for (i, s) in servers.iter().enumerate() {
+    for (i, s) in servers.iter().enumerate().filter(|(_, s)| s.enabled) {
         let t = s.stream_server.bitrate().await;
         let sep = if i == 0 || msg.is_empty() { "" } else { " - " };
 
