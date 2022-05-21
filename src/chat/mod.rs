@@ -163,7 +163,6 @@ pub struct ChatMessage {
 }
 
 #[derive(Debug)]
-//pub struct StartedHosting {
 pub struct InternalChatUpdate {
     pub platform: ChatPlatform,
     pub channel: String,
