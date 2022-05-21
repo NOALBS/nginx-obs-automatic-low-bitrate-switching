@@ -449,6 +449,7 @@ impl From<RtmpOld> for stream_servers::StreamServer {
             priority: Some(0),
             override_scenes: None,
             depends_on: None,
+            enabled: true,
         }
     }
 }

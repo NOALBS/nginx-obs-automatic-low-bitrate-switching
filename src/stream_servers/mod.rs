@@ -51,6 +51,10 @@ pub struct StreamServer {
     pub override_scenes: Option<switcher::SwitchingScenes>,
 
     pub depends_on: Option<DependsOn>,
+
+    /// Stream server enabled
+    #[serde(default = "default_server_enabled")]
+    pub enabled: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -58,4 +62,8 @@ pub struct StreamServer {
 pub struct DependsOn {
     pub name: String,
     pub backup_scenes: switcher::SwitchingScenes,
+}
+
+fn default_server_enabled() -> bool {
+    true
 }

@@ -35,7 +35,8 @@
         "name": "NMS",
         "priority": 0,
         "overrideScenes": null,
-        "dependsOn": null
+        "dependsOn": null,
+        "enabled": true
       },
       {
         "streamServer": {
@@ -53,7 +54,8 @@
             "low": "low",
             "offline": "Scene 2"
           }
-        }
+        },
+        "enabled": true
       },
       {
         "streamServer": {
@@ -64,7 +66,8 @@
         "name": "SLS2",
         "priority": 0,
         "overrideScenes": null,
-        "dependsOn": null
+        "dependsOn": null,
+        "enabled": true
       },
       {
         "streamServer": {
@@ -80,7 +83,8 @@
           "low": "low",
           "offline": "offline"
         },
-        "dependsOn": null
+        "dependsOn": null,
+        "enabled": true
       }
     ]
   },

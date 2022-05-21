@@ -176,6 +176,10 @@ impl Switcher {
         triggers: &'a Triggers,
     ) -> (Option<&'a stream_servers::StreamServer>, SwitchType) {
         for server in stream_servers {
+            if !server.enabled {
+                continue;
+            }
+
             let switch_type = server.stream_server.switch(triggers).await;
 
             if switch_type == SwitchType::Offline {
