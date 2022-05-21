@@ -98,7 +98,8 @@ Example stream server object:
     "low": "low",
     "offline": "offline"
   },
-  "dependsOn": null
+  "dependsOn": null,
+  "enabled": true
 }
 ```
 
