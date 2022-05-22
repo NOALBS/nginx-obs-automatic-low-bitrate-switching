@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
-argon2 = "0.3"
+argon2 = "0.4"
 async-trait = "0.1"
 base64 = "0.13"
 dotenv = "0.15"
@@ -24,7 +24,7 @@ strsim = "0.10.0"
 thiserror = "1.0"
 tokio = { version = "1.10", features = ["rt", "rt-multi-thread", "macros", "signal", "time", "sync"] }
 tokio-stream = "0.1"
-twitch-irc = "3.0"
+twitch-irc = "4.0"
 typetag = "0.1"
 
 # sqlx = { version = "0.5", features = ["runtime-tokio-rustls", "sqlite", "migrate", "macros"] }
@@ -37,8 +37,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 warp = "0.3"
 
-lazy_static = "1.4"
-rust-i18n = "0.5"
+once_cell = "1.10"
+rust-i18n = "0.6"
 
 [target.x86_64-unknown-linux-musl.dependencies]
-openssl = { version = "=0.10.38", features = ["vendored"] }
+openssl = { version = "=0.10.40", features = ["vendored"] }

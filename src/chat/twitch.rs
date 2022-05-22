@@ -110,7 +110,9 @@ impl Twitch {
 
     pub fn join_channel(&self, channel: String) {
         info!("Joining channel: {}", channel);
-        self.client.join(channel);
+        if let Err(e) = self.client.join(channel) {
+            error!("Error joining channel: {}", e);
+        }
     }
 }
 
