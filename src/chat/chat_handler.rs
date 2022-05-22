@@ -775,11 +775,7 @@ impl DispatchCommand {
         let value = match value.parse::<u32>() {
             Ok(v) => v,
             Err(_) => {
-                let msg = t!(
-                    "trigger.error",
-                    locale = &self.lang,
-                    number = &value.to_string()
-                );
+                let msg = t!("trigger.error", locale = &self.lang, number = value);
                 self.send(msg).await;
                 return;
             }
