@@ -134,10 +134,16 @@ impl Switcher {
             return Ok(());
         }
 
-        *same_type_seconds += *same_type as u32;
-        *same_type = 0;
+        if state.broadcasting_software.is_streaming {
+            *same_type_seconds += *same_type as u32;
+            debug!("Same type seconds: {}", same_type_seconds);
+        }
 
-        debug!("Same type seconds: {}", same_type_seconds);
+        if !state.broadcasting_software.is_streaming && *same_type_seconds > 0 {
+            *same_type_seconds = 0;
+        }
+
+        *same_type = 0;
 
         if current_switch_type == SwitchType::Offline {
             // TODO: Refactor the timeout code
