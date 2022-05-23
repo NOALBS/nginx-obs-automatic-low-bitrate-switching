@@ -35,10 +35,10 @@ es:
         try: Tratando de reparar el stream
         error: Error reparando el stream
     refresh:
-        try: Refreshing the stream
-        error: Error refreshing the stream
-        success: Refreshing the stream completed
-        noScene: No refresh scene set, using fix instead
+        try: Actualizando el stream
+        error: Error al actualizar stream
+        success: Actualizacion de stream completada
+        noScene: Sin escena configurada, usando reparar
     alias:
         success: Agregado alias %{alias} -> %{command}
         removed: Alias %{alias} eliminado
@@ -49,7 +49,7 @@ es:
     sceneSwitch:
         switch: Escena cambiada a "%{scene}"
     offlineTimeout:
-        timeout: Offline timeout reached, stopping the stream
+        timeout: Tiempo de espera agotado, Deteniendo el stream
     handleCommands:
         public: Comandos publicos %{condition}
         mod: Comandos de Moderador %{condition}
