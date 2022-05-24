@@ -840,12 +840,12 @@ impl DispatchCommand {
             None => return,
         };
 
-        let msg = match bsc.fix().await {
-            Ok(_) => t!("fix.try", locale = &self.lang),
-            Err(_) => t!("fix.error", locale = &self.lang),
-        };
+        self.send(t!("fix.try", locale = &self.lang)).await;
 
-        self.send(msg).await;
+        if bsc.fix().await.is_err() {
+            let msg = t!("fix.error", locale = &self.lang);
+            self.send(msg).await;
+        };
     }
 
     async fn refresh(&self) {

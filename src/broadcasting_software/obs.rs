@@ -1,8 +1,9 @@
 use std::{sync::Arc, time::Duration};
 
+use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::StreamExt;
-use obws::events::EventType;
+use obws::{events::EventType, responses::MediaState};
 use serde::Deserialize;
 use tokio::sync::{mpsc, Mutex};
 use tracing::{error, info, warn};
@@ -105,6 +106,71 @@ impl Obs {
 
         Ok(all_scenes)
     }
+
+    /// Grabs all the media sources from the current and nested scenes
+    /// that are currently active.
+    async fn get_media_sources(&self) -> Result<Vec<SourceItem>, error::Error> {
+        let connection = self.connection.lock().await;
+
+        let client = match &*connection {
+            Some(client) => client,
+            None => return Err(error::Error::UnableInitialConnection),
+        };
+
+        let mut sources: Vec<SourceItem> = Vec::new();
+        self.get_media_sources_rec(client, None, &mut Vec::new(), &mut sources)
+            .await;
+
+        Ok(sources)
+    }
+
+    #[async_recursion]
+    async fn get_media_sources_rec(
+        &self,
+        client: &obws::Client,
+        scene: Option<String>,
+        visited: &mut Vec<String>,
+        sources: &mut Vec<SourceItem>,
+    ) {
+        let items = client
+            .scene_items()
+            .get_scene_item_list(scene.as_deref())
+            .await
+            .unwrap();
+        let current_name = items.scene_name.to_owned();
+
+        for item in items.scene_items {
+            if matches!(item.source_kind.as_str(), "ffmpeg_source" | "vlc_source") {
+                let state = match client
+                    .media_control()
+                    .get_media_state(&item.source_name)
+                    .await
+                {
+                    Ok(s) => s,
+                    Err(_) => continue,
+                };
+
+                if matches!(
+                    state,
+                    MediaState::Playing | MediaState::Buffering | MediaState::Opening
+                ) {
+                    sources.push(SourceItem {
+                        scene_name: current_name.to_owned(),
+                        source_name: item.source_name,
+                        source_kind: item.source_kind,
+                    });
+                }
+
+                continue;
+            }
+
+            if item.source_kind == "scene" && !visited.contains(&item.source_name) {
+                visited.push(item.source_name.to_owned());
+                self.get_media_sources_rec(client, Some(item.source_name), visited, sources)
+                    .await;
+            }
+        }
+    }
 }
 
 #[async_trait]
@@ -162,21 +228,14 @@ impl BroadcastingSoftwareLogic for Obs {
     }
 
     async fn fix(&self) -> Result<(), error::Error> {
+        let media_playing = self.get_media_sources().await?;
+
         let connection = self.connection.lock().await;
 
         let client = match &*connection {
             Some(client) => client,
             None => return Err(error::Error::UnableInitialConnection),
         };
-
-        use obws::responses::MediaState;
-        let media_sources = client.sources().get_media_sources_list().await?;
-        let media_playing = media_sources.iter().filter(|m| {
-            matches!(
-                m.media_state,
-                MediaState::Playing | MediaState::Buffering | MediaState::Opening
-            )
-        });
 
         for media in media_playing {
             let media_inputs = match media.source_kind.as_ref() {
@@ -215,13 +274,25 @@ impl BroadcastingSoftwareLogic for Obs {
             }
 
             client
-                .media_control()
-                .stop_media(&media.source_name)
+                .scene_items()
+                .set_scene_item_render(obws::requests::SceneItemRender {
+                    scene_name: Some(&media.scene_name),
+                    source: &media.source_name,
+                    item: None,
+                    render: false,
+                })
                 .await?;
 
+            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
             client
-                .media_control()
-                .play_pause_media(&media.source_name, Some(false))
+                .scene_items()
+                .set_scene_item_render(obws::requests::SceneItemRender {
+                    scene_name: Some(&media.scene_name),
+                    source: &media.source_name,
+                    item: None,
+                    render: true,
+                })
                 .await?;
         }
 
@@ -376,6 +447,13 @@ impl Drop for Obs {
         self.connection_join.abort();
         self.event_join.abort();
     }
+}
+
+#[derive(Debug)]
+struct SourceItem {
+    pub scene_name: String,
+    pub source_name: String,
+    pub source_kind: String,
 }
 
 // From obws

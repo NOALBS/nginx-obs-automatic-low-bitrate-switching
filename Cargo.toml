@@ -9,6 +9,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0"
 argon2 = "0.4"
+async-recursion = "1.0.0"
 async-trait = "0.1"
 base64 = "0.13"
 dotenv = "0.15"
