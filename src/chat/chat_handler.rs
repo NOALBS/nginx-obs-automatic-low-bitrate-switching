@@ -599,14 +599,7 @@ impl DispatchCommand {
             }
         };
 
-        let state = self.user.state.read().await;
-        let bsc = &state.broadcasting_software.connection;
-
-        if bsc.is_none() {
-            return;
-        }
-
-        let msg = match bsc.as_ref().unwrap().switch_scene(name).await {
+        let msg = match self.switch_scene(name).await {
             Ok(scene) => t!("switch.success", locale = &self.lang, scene = &scene),
             Err(e) => {
                 error!("{}", e);
@@ -851,40 +844,46 @@ impl DispatchCommand {
     async fn refresh(&self) {
         let state = self.user.state.read().await;
 
-        let bsc = match &state.broadcasting_software.connection {
-            Some(b) => b,
-            None => return,
-        };
-
         let scene = match &state.config.optional_scenes.refresh {
-            Some(s) => s,
+            Some(s) => s.to_owned(),
             None => {
                 self.send(t!("refresh.noScene", locale = &self.lang)).await;
                 self.fix().await;
                 return;
             }
         };
+        let prev_scene = &state.broadcasting_software.prev_scene.to_owned();
+        drop(state);
 
         self.send(t!("refresh.try", locale = &self.lang)).await;
 
         let err = t!("refresh.error", locale = &self.lang);
-        if (bsc.switch_scene(scene).await).is_err() {
+        if (self.switch_scene(&scene).await).is_err() {
             self.send(err).await;
             return;
         };
 
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
-        if (bsc
-            .switch_scene(&state.broadcasting_software.prev_scene)
-            .await)
-            .is_err()
-        {
+        if (self.switch_scene(prev_scene).await).is_err() {
             self.send(err).await;
             return;
         };
 
         self.send(t!("refresh.success", locale = &self.lang)).await;
+    }
+
+    async fn switch_scene(&self, scene: &str) -> Result<String, error::Error> {
+        self.user
+            .state
+            .read()
+            .await
+            .broadcasting_software
+            .connection
+            .as_ref()
+            .ok_or(error::Error::NoSoftwareSet)?
+            .switch_scene(scene)
+            .await
     }
 
     // Record is a toggle
