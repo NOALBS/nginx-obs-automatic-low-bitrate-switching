@@ -1,0 +1,74 @@
+it:
+    start:
+        success: la diretta e iniziata con successo
+        error: "errore la diretta non puo iniziare: %{error}"
+    startTwitchTranscoding:
+        trying: sto provando ad iniziare la live co il transcoding
+        successNoTranscoding: la diretta e iniziata con successo senza il transcoding
+        success: diretta iniziata con il transcoding %{attemptsMessage}
+        attempts: ", ho impiegato %{count} tentativi"
+    stop:
+        success: ho fermato la diretta con successo
+        error: "Errore non posso fermare la diretta: %{error}"
+    switch:
+        noParams: non hai specificato la scena
+        success: hai cambiato la scena con successo "%{scene}"
+        error: Errore non posso cambiare scena "%{scene}"
+    bitrate:
+        success: "%{name}: %{message}"
+        error: "Nessuna connessione :("
+    trigger:
+        success: il Trigger e stato settato a %{number} Kbps
+        successDisabled: Trigger e stato disattivato con successo
+        error: si e verificato un errore disattivando il trigger %{number} non ha un valido valore
+        current: il trigger corrente e settato a %{number} Kbps
+        disabled: il trigger sorrente e stato disabilitato
+    sourceinfo:
+        noInfo: Nessuna informazione
+        notFound: "Errore nessun server trovato con il nome: %{name}"
+    rec:
+        started: registrazione iniziata
+        stopped: registrazione finita
+        errorStatus: Errore nessuna registrazione
+        errorToggle: Errore togglingdi registrazione
+    fix:
+        try: sto provando ad aggiustare la diretta
+        error: Errore non e possibile aggiustare la diretta
+    refresh:
+        try: aggiornamento di diretta
+        error: Errore di aggiornamento di diretta
+        success: aggiornamento di diretta completato
+        noScene: nessun aggiornamento settato, sto usando fix al posto suo
+    alias:
+        success: aggiunto un alias %{alias} -> %{command}
+        removed: Alias %{alias} rimosso
+        errorCommand: Comando  %{command} non esiste
+        errorAlias: questo Alias %{alias} non esiste
+        errorAlreadyUsed: questo "%{alias} e gia in uso "
+        errorIncorrectArguments: Errore mi e stato dato un argomento errato
+    sceneSwitch:
+        switch: la scena e stata cambiata a "%{scene}"
+    offlineTimeout:
+        timeout: Offline tempo limite raggiunto, fermiamo la diretta
+    handleCommands:
+        public: comando pubblico %{condition}
+        mod: comando dei moderatori %{condition}
+        notify: cambio di notifica automatico %{condition}
+        autostop: stop della diretta automatico %{condition}
+        enabled: e stato attivato
+        disabled: e stato disattivato
+    noalbs:
+        prefix: NOALBS prefix aggiornato a %{prefix}
+        errorPrefix: impossibile aggiornare NOALBS prefix
+        switcherEnabled: lo switcher e abilitato con successo
+        switcherDisabled: lo switcher e disabilitato con successo
+        instantSwitch: lo switch instantaneo a %{condition}
+        langError: non posso aggiornare il linguaggio di  NOALBS
+        langErrorInvalid: Errore di modifica linguaggio %{lang} non e un valore valido
+        langSuccess: il linguaggio di NOALBS e stato aggiornato a %{lang}
+        retryCount: le prove di attenti sono settete a  %{count}
+        retryError: Errore della modifica di prove di attenti %{count} il volume non e valido
+        retrySuccess: prove di attenti settati a %{count}
+    scene:
+        success: cambiamo la scena a %{scene}
+        error: nessuna %{scene} e stata settata
