@@ -10,12 +10,12 @@ NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes
 
 Don't feel like setting this all up by yourself? Check out these links for similar solutions/paid services:
 
-- [u³ - Endpoint Creator](https://u3.gg)
-- [AntiScuff](https://www.antiscuff.com/)
-- [IRLToolkit](https://irltoolkit.com/)
-- [psynapticmedia.com](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
-- [norip.io](https://www.norip.io)
-- [IRL Media Solutions](https://www.irlmediasolutions.com)
+- [u³.gg - Endpoint Creator](https://u3.gg)
+- [AntiScuff - Cloud-based OBS Hosting](https://www.antiscuff.com/)
+- [IRLToolkit - Step your stream up to the next level](https://irltoolkit.com/)
+- [Super Stream System by Psynaps](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
+- [noRIP.io - Services to stabilize your stream](https://www.norip.io)
+- [IRL Media Solutions - OBS Cloud Servers For IRL Streaming](https://www.irlmediasolutions.com)
 
 Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
 
