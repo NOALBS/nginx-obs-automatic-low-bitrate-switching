@@ -32,10 +32,9 @@ typetag = "0.1"
 # sqlx = { version = "0.5", features = ["runtime-tokio-rustls", "sqlite", "migrate", "macros"] }
 
 log = "0.4"
-pretty_env_logger = "0.4"
 tracing = "0.1"
 tracing-futures = "0.2"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "ansi"] }
 
 warp = "0.3"
 
