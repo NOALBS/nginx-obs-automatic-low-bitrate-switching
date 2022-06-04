@@ -17,7 +17,6 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 - [norip.io](https://www.norip.io)
 - [IRL Media Solutions](https://www.irlmediasolutions.com)
 
-
 Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
 
 ## Quick Start
@@ -79,7 +78,7 @@ The `config.json` file holds all the user configurations.
 
 ### Stream servers section
 
-Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server) and [BELABOX](#using-belabox-cloud).
+Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud) and [OBS Sources](#using-an-obs-source).
 You can have as many servers as you want to use in the config.
 
 Example stream server object:
@@ -237,6 +236,17 @@ Remember this is just an example, your ports and streamid may differ.
 ```
 
 You should be able to find the details in your [BELABOX cloud](https://cloud.belabox.net) account.
+
+---
+
+#### Using an OBS Source
+
+```JSON
+  "streamServer": {
+    "type": "Obs",
+    "source": "Media/VLC Source"
+  },
+```
 
 ### Depends on
 
