@@ -13,6 +13,7 @@ async-recursion = "1.0.0"
 async-trait = "0.1"
 base64 = "0.13"
 dotenv = "0.15"
+either = { version = "1.6.1", features = ["serde"] }
 futures-util = "0.3"
 obws = { version = "0.9", features = ["events"] }
 quick-xml = { version = "0.22", features = ["serialize"] }

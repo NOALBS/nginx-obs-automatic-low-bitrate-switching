@@ -1,9 +1,14 @@
-use std::{sync::Arc, time::Duration};
+use std::{path::Path, sync::Arc, time::Duration};
 
 use async_recursion::async_recursion;
 use async_trait::async_trait;
+use either::Either;
 use futures_util::StreamExt;
-use obws::{events::EventType, responses::MediaState};
+use obws::{
+    events::EventType,
+    requests::{Scale, SceneItemSpecification},
+    responses::MediaState,
+};
 use serde::Deserialize;
 use tokio::sync::{mpsc, Mutex};
 use tracing::{error, info, warn};
@@ -91,10 +96,9 @@ impl Obs {
     async fn get_scenes(&self) -> Result<Vec<String>, error::Error> {
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         let scenes = client.scenes().get_scene_list().await?;
 
@@ -112,10 +116,9 @@ impl Obs {
     async fn get_media_sources(&self) -> Result<Vec<SourceItem>, error::Error> {
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         let mut sources: Vec<SourceItem> = Vec::new();
         self.get_media_sources_rec(client, None, &mut Vec::new(), &mut sources)
@@ -196,10 +199,9 @@ impl BroadcastingSoftwareLogic for Obs {
 
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         client.scenes().set_current_scene(&scene).await?;
         Ok(scene)
@@ -208,10 +210,9 @@ impl BroadcastingSoftwareLogic for Obs {
     async fn start_streaming(&self) -> Result<(), error::Error> {
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         Ok(client.streaming().start_streaming(None).await?)
     }
@@ -219,10 +220,9 @@ impl BroadcastingSoftwareLogic for Obs {
     async fn stop_streaming(&self) -> Result<(), error::Error> {
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         Ok(client.streaming().stop_streaming().await?)
     }
@@ -232,10 +232,9 @@ impl BroadcastingSoftwareLogic for Obs {
 
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         for media in media_playing {
             let media_inputs = match media.source_kind.as_ref() {
@@ -302,10 +301,9 @@ impl BroadcastingSoftwareLogic for Obs {
     async fn toggle_recording(&self) -> Result<(), error::Error> {
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         Ok(client.recording().start_stop_recording().await?)
     }
@@ -313,13 +311,143 @@ impl BroadcastingSoftwareLogic for Obs {
     async fn is_recording(&self) -> Result<bool, error::Error> {
         let connection = self.connection.lock().await;
 
-        let client = match &*connection {
-            Some(client) => client,
-            None => return Err(error::Error::UnableInitialConnection),
-        };
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
 
         let status = client.recording().get_recording_status().await?;
         Ok(status.is_recording)
+    }
+
+    async fn get_media_source_status(
+        &self,
+        source_name: &str,
+    ) -> Result<(MediaState, i64), error::Error> {
+        let connection = &self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let state = client.media_control().get_media_state(source_name).await?;
+        let state_time = client.media_control().get_media_time(source_name).await?;
+        // println!("state: {:#?}, time?: {:#?}", state, state_time);
+        Ok((state, state_time.whole_seconds()))
+    }
+
+    async fn create_special_media_source(
+        &self,
+        source_name: &str,
+        scene_name: &str,
+    ) -> Result<String, error::Error> {
+        let connection = &self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let msl = client.sources().get_media_sources_list().await?;
+        let media = match msl.into_iter().find(|s| s.source_name == source_name) {
+            Some(m) => m,
+            None => return Err(error::Error::UnableInitialConnection),
+        };
+
+        let media_inputs = match media.source_kind.as_ref() {
+            "ffmpeg_source" => {
+                let source = client
+                    .sources()
+                    .get_source_settings::<FfmpegSource>(
+                        &media.source_name,
+                        Some(&media.source_kind),
+                    )
+                    .await?;
+
+                if let Some(input) = source.source_settings.input {
+                    Vec::from([input.to_lowercase()])
+                } else {
+                    Vec::from(["".to_string()])
+                }
+            }
+            "vlc_source" => client
+                .sources()
+                .get_source_settings::<VlcSource>(&media.source_name, Some(&media.source_kind))
+                .await?
+                .source_settings
+                .playlist
+                .iter()
+                .map(|s| s.value.to_lowercase())
+                .collect::<Vec<String>>(),
+            _ => return Err(error::Error::UnableInitialConnection),
+        };
+
+        let source_settings = serde_json::json!({
+            "is_local_file": false,
+            "local_file": Path::new(""),
+            "looping": false,
+            "buffering_mb": 1,
+            "input": media_inputs[0],
+            "input_format": "",
+            "reconnect_delay_sec": 1,
+            "restart_on_activate": true,
+            "clear_on_media_end": true,
+            "close_when_inactive": true,
+            "speed_percent": 1,
+            "color_range": 0,
+            "seekable": false,
+        });
+
+        let source_name = source_name.to_string() + "_noalbs";
+        let id = client
+            .sources()
+            .create_source(obws::requests::CreateSource {
+                source_name: &source_name,
+                source_kind: "ffmpeg_source",
+                scene_name,
+                source_settings: Some(&source_settings),
+                set_visible: None,
+            })
+            .await;
+
+        if id.is_ok() {
+            let props = obws::requests::SceneItemProperties {
+                scene_name: Some(scene_name),
+                item: Either::Left(&source_name),
+                scale: Some(Scale {
+                    x: Some(0.0),
+                    y: Some(0.0),
+                }),
+                ..Default::default()
+            };
+            let _ = client.scene_items().set_scene_item_properties(props).await;
+            let _ = client.sources().set_mute(&source_name, true).await;
+        }
+
+        Ok(source_name)
+    }
+
+    async fn remove_special_media_source(
+        &self,
+        source_name: &str,
+        scene: &str,
+    ) -> Result<(), error::Error> {
+        let connection = &self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let _ = client
+            .scene_items()
+            .delete_scene_item(
+                Some(scene),
+                SceneItemSpecification {
+                    name: Some(source_name),
+                    id: None,
+                },
+            )
+            .await;
+
+        Ok(())
     }
 }
 

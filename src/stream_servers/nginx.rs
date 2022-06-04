@@ -203,7 +203,11 @@ impl StreamServersCommands for Nginx {
 }
 
 #[typetag::serde]
-impl Bsl for Nginx {}
+impl Bsl for Nginx {
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+}
 
 // impl From<db::StreamServer> for Nginx {
 //     fn from(item: db::StreamServer) -> Self {

@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
@@ -7,7 +9,15 @@ pub mod belabox;
 pub mod nginx;
 pub mod nimble;
 pub mod nms;
+pub mod obs;
 pub mod sls;
+
+pub use belabox::Belabox;
+pub use nginx::Nginx;
+pub use nimble::Nimble;
+pub use nms::NodeMediaServer;
+pub use obs::Obs;
+pub use sls::SrtLiveServer;
 
 #[async_trait]
 #[typetag::serde(tag = "type")]
@@ -25,13 +35,13 @@ pub trait StreamServersCommands {
 }
 
 #[typetag::serde(tag = "type")]
-pub trait Bsl: SwitchLogic + StreamServersCommands + Send + Sync {}
+pub trait Bsl: SwitchLogic + StreamServersCommands + Send + Sync {
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+}
 
 #[derive(Debug)]
 pub struct Bitrate {
-    // pub name: &'a str,
     pub message: Option<String>,
-    // pub priority: i32,
 }
 
 // TODO: This needs a better name

@@ -887,6 +887,7 @@ dependencies = [
  "async-trait",
  "base64",
  "dotenv",
+ "either",
  "futures-util",
  "log",
  "obws",

@@ -220,4 +220,8 @@ impl StreamServersCommands for Nimble {
 }
 
 #[typetag::serde]
-impl Bsl for Nimble {}
+impl Bsl for Nimble {
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+}

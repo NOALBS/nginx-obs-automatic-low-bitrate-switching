@@ -139,4 +139,8 @@ impl StreamServersCommands for SrtLiveServer {
 }
 
 #[typetag::serde]
-impl Bsl for SrtLiveServer {}
+impl Bsl for SrtLiveServer {
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+}

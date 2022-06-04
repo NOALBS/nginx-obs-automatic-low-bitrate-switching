@@ -127,4 +127,8 @@ impl StreamServersCommands for NodeMediaServer {
 }
 
 #[typetag::serde]
-impl Bsl for NodeMediaServer {}
+impl Bsl for NodeMediaServer {
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+}

@@ -17,4 +17,21 @@ pub trait BroadcastingSoftwareLogic: Send + Sync {
     async fn is_recording(&self) -> Result<bool, Error>;
 
     async fn fix(&self) -> Result<(), Error>;
+
+    async fn get_media_source_status(
+        &self,
+        source_name: &str,
+    ) -> Result<(obws::responses::MediaState, i64), Error>;
+
+    async fn create_special_media_source(
+        &self,
+        source_name: &str,
+        scene: &str,
+    ) -> Result<String, Error>;
+
+    async fn remove_special_media_source(
+        &self,
+        source_name: &str,
+        scene: &str,
+    ) -> Result<(), Error>;
 }
