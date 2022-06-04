@@ -20,10 +20,10 @@ zh_tw:
         success: "%{name}: %{message}"
         error: "目前位元率: 離線"
     trigger:
-        success: 觸發流量成功設置為 %{number} Kbps
+        success: 觸發流量成功設置為 %{number}
         successDisabled: Trigger successfully disabled
         error: 編輯的觸發值 %{number} 錯誤的
-        current: 目前觸發值設定為 %{number} Kbps
+        current: 目前觸發值設定為 %{number}
         disabled: Current trigger is disabled
     sourceinfo:
         noInfo: No information

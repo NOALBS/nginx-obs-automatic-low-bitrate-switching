@@ -18,10 +18,10 @@ dk:
         success: "%{name}: %{message}"
         error: "Nuværende bitrate: OFFLINE"
     trigger:
-        success: Trigger skiftet til %{number} Kbps
+        success: Trigger skiftet til %{number}
         successDisabled: Trigger successfully disabled
         error: Fejl ved ændring af trigger %{number} er ikke en tilladt værdi
-        current: Nuværende trigger er sat til %{number} Kbps
+        current: Nuværende trigger er sat til %{number}
         disabled: Current trigger is disabled
     sourceinfo:
         noInfo: No information

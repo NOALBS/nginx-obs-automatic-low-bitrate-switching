@@ -18,10 +18,10 @@ en:
         success: "%{name}: %{message}"
         error: "No connection :("
     trigger:
-        success: Trigger successfully set to %{number} Kbps
+        success: Trigger successfully set to %{number}
         successDisabled: Trigger successfully disabled
         error: Error editing trigger %{number} is not a valid value
-        current: Current trigger set at %{number} Kbps
+        current: Current trigger set at %{number}
         disabled: Current trigger is disabled
     sourceinfo:
         noInfo: No information

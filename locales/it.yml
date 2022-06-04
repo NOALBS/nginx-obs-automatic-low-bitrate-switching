@@ -18,10 +18,10 @@ it:
         success: "%{name}: %{message}"
         error: "Nessuna connessione :("
     trigger:
-        success: il Trigger e stato settato a %{number} Kbps
+        success: il Trigger e stato settato a %{number}
         successDisabled: Trigger e stato disattivato con successo
         error: si e verificato un errore disattivando il trigger %{number} non ha un valido valore
-        current: il trigger corrente e settato a %{number} Kbps
+        current: il trigger corrente e settato a %{number}
         disabled: il trigger sorrente e stato disabilitato
     sourceinfo:
         noInfo: Nessuna informazione

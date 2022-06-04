@@ -18,10 +18,10 @@ de:
         success: "%{name}: %{message}"
         error: "Keine Verbindung :("
     trigger:
-        success: Auslöser erfolgreich auf %{number} Kbps gesetzt
+        success: Auslöser erfolgreich auf %{number} gesetzt
         successDisabled: Auslöser erfolgreich deaktiviert
         error: Fehler beim Bearbeiten des Auslösers, %{number} ist kein gültiger Wert
-        current: Aktueller Auslöser auf %{number} Kbps eingestellt
+        current: Aktueller Auslöser auf %{number} eingestellt
         disabled: Aktueller Auslöser ist deaktiviert
     sourceinfo:
         noInfo: Keine Information

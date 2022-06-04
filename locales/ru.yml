@@ -18,10 +18,10 @@ ru:
         success: "%{name}: %{message}"
         error: "Текущий битрейт: Не в сети"
     trigger:
-        success: Успешная установка триггера на %{number} kbps
+        success: Успешная установка триггера на %{number}
         successDisabled: Триггер успешно отключен
         error: "Ошибка: редактирование триггера на %{number} не является допустимым значением"
-        current: Текущий триггер установлен на %{number} kbps
+        current: Текущий триггер установлен на %{number}
         disabled: Текущий триггер отключен
     sourceinfo:
         noInfo: Нет информации

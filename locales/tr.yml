@@ -18,10 +18,10 @@ tr:
         success: "%{name}: %{message}"
         error: "Mevcut bit hızı: çevrimdışı"
     trigger:
-        success: Tetik başarıyla ayarlandı %{number} Kbps
+        success: Tetik başarıyla ayarlandı %{number}
         successDisabled: Trigger successfully disabled
         error: Tetik düzenlenirken hata oluştu %{number} geçerli bir değer değil
-        current: Şimdiki tetik %{number} Kbps
+        current: Şimdiki tetik %{number}
         disabled: Current trigger is disabled
     sourceinfo:
         noInfo: No information

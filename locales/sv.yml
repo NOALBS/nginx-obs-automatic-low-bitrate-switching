@@ -18,10 +18,10 @@ sv:
         success: "%{name}: %{message}"
         error: "Ingen anslutning"
     trigger:
-        success: Utlösaren har ställts in till %{number} Kbps
+        success: Utlösaren har ställts in till %{number}
         successDisabled: Utlösaren har inaktiverats framgångsrikt
         error: Fel i redigeringen av utlösaren %{number} är inte ett giltigt värde
-        current: Den nuvarande utlösaren är inställd på %{number} Kbps
+        current: Den nuvarande utlösaren är inställd på %{number}
         disabled: Den aktuella utlösaren är inaktiverad
     sourceinfo:
         noInfo: Ingen information

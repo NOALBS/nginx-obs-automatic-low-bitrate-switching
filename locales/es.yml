@@ -18,10 +18,10 @@ es:
         success: "%{name}: %{message}"
         error: "Sin conexion :("
     trigger:
-        success: Disparador establecido a %{number} Kbps
+        success: Disparador establecido a %{number}
         successDisabled: Disparador desactivado
         error: Error modificando disparador %{number} no es un valor valido
-        current: Disparador actual en %{number} Kbps
+        current: Disparador actual en %{number}
         disabled: Disparador actual descativado
     sourceinfo:
         noInfo: Sin informacion

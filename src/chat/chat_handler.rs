@@ -774,11 +774,16 @@ impl DispatchCommand {
             }
         };
 
+        let symbol = match kind {
+            switcher::TriggerType::Low | switcher::TriggerType::Offline => "Kbps",
+            switcher::TriggerType::Rtt => "ms",
+        };
+
         let msg = match &self.user.update_trigger(kind, value).await {
             Some(value) => t!(
                 "trigger.success",
                 locale = &self.lang,
-                number = &value.to_string()
+                number = &format!("{} {}", value, symbol)
             ),
             None => t!(
                 "trigger.successDisabled",

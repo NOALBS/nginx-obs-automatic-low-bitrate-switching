@@ -18,10 +18,10 @@ pl:
         success: "%{name}: %{message}"
         error: "Brak połączenia :("
     trigger:
-        success: Wyzwalacz pomyślnie ustawiony na %{number} Kbps
+        success: Wyzwalacz pomyślnie ustawiony na %{number}
         successDisabled: Wyzwalacz pomyślnie wyłączony
         error: Błąd edycji wyzwalacza %{number} nie jest prawidłową wartoscią
-        current: Aktualny wyzwalacz na %{number} Kbps
+        current: Aktualny wyzwalacz na %{number}
         disabled: Aktualny wyzwalacz jest wyłączony
     sourceinfo:
         noInfo: Brak informacji
