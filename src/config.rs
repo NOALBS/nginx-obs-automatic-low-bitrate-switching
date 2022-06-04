@@ -165,7 +165,7 @@ pub struct File {
 
 impl ConfigLogic for File {
     fn load(&self) -> Result<Config, error::Error> {
-        let mut file = std::fs::File::open(&self.name)?;
+        let mut file = std::fs::File::open(&self.name).map_err(error::Error::ConfigFileError)?;
         let mut config: Config = match serde_json::from_reader(&file) {
             Ok(c) => c,
             Err(e) => {

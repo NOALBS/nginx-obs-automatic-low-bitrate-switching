@@ -29,8 +29,11 @@ pub struct Noalbs {
 }
 
 impl Noalbs {
-    pub async fn new(storage: Box<dyn config::ConfigLogic>, chat_sender: ChatSender) -> Self {
-        let config = storage.load().unwrap();
+    pub async fn new(
+        storage: Box<dyn config::ConfigLogic>,
+        chat_sender: ChatSender,
+    ) -> Result<Self, error::Error> {
+        let config = storage.load()?;
         info!("Loaded user: {}", config.user.name);
 
         let mut state = State {
@@ -88,7 +91,7 @@ impl Noalbs {
 
         user.start_switcher().await;
 
-        user
+        Ok(user)
     }
 
     pub async fn add_stream_server(&self, stream_server: stream_servers::StreamServer) {

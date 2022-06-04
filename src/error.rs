@@ -40,4 +40,7 @@ pub enum Error {
 
     #[error("Language not supported")]
     LangNotSupported,
+
+    #[error("Config file error")]
+    ConfigFileError(#[source] std::io::Error),
 }

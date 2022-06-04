@@ -28,10 +28,10 @@ async fn main() -> Result<()> {
         let users = load_users_from_dir(env::var("CONFIG_DIR")?, chat_tx.clone()).await?;
 
         for user in users {
-            user_manager.add(user).await;
+            user_manager.add(user?).await;
         }
     } else {
-        let user = load_user_from_file("config.json".to_owned(), chat_tx.clone()).await;
+        let user = load_user_from_file("config.json".to_owned(), chat_tx.clone()).await?;
         user_manager.add(user).await;
     }
 
@@ -73,7 +73,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-pub async fn load_user_from_file<P>(path: P, broadcast_tx: noalbs::ChatSender) -> Noalbs
+pub async fn load_user_from_file<P>(
+    path: P,
+    broadcast_tx: noalbs::ChatSender,
+) -> Result<Noalbs, noalbs::error::Error>
 where
     P: Into<PathBuf>,
 {
@@ -83,7 +86,10 @@ where
     Noalbs::new(Box::new(file), broadcast_tx).await
 }
 
-pub async fn load_users_from_dir<P>(dir: P, broadcast_tx: noalbs::ChatSender) -> Result<Vec<Noalbs>>
+pub async fn load_users_from_dir<P>(
+    dir: P,
+    broadcast_tx: noalbs::ChatSender,
+) -> Result<Vec<Result<Noalbs, noalbs::error::Error>>>
 where
     P: Into<PathBuf>,
 {
