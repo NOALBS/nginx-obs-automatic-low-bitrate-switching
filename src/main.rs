@@ -5,6 +5,7 @@ use anyhow::Result;
 use tokio::signal;
 
 use noalbs::{chat::ChatPlatform, config, Noalbs};
+use tracing::warn;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,6 +25,8 @@ async fn main() -> Result<()> {
     } else {
         tracing_subscriber::fmt::init();
     }
+
+    check_env_file();
 
     let user_manager = noalbs::user_manager::UserManager::new();
 
@@ -140,4 +143,14 @@ async fn print_if_new_version() -> Result<(), noalbs::error::Error> {
 #[derive(serde::Deserialize, Debug)]
 struct GithubApi {
     tag_name: String,
+}
+
+fn check_env_file() {
+    if env::var("TWITCH_BOT_USERNAME").is_err() {
+        warn!("Couldn't load chat credentials from .env - continuing without connecting to chat.");
+        warn!(
+            "Hint: rename env.example to .env and edit it with your login information - see README"
+        );
+        warn!("https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/tree/v2#readme");
+    };
 }
