@@ -74,6 +74,8 @@ pub struct BroadcastingSoftwareState {
     pub status: ClientStatus,
     pub is_streaming: bool,
     pub last_stream_started_at: std::time::Instant,
+    pub initial_stream_status: Option<StreamStatus>,
+    pub stream_status: Option<StreamStatus>,
 
     // TODO?
     pub connection: Option<Box<dyn BroadcastingSoftwareLogic>>,
@@ -121,6 +123,8 @@ impl Default for BroadcastingSoftwareState {
             start_streaming_notifier: Arc::new(Notify::new()),
             switch_scene_notifier: Arc::new(Notify::new()),
             last_stream_started_at: std::time::Instant::now(),
+            stream_status: None,
+            initial_stream_status: None,
         }
     }
 }
@@ -129,6 +133,33 @@ impl Default for BroadcastingSoftwareState {
 pub enum ClientStatus {
     Connected,
     Disconnected,
+}
+
+#[derive(Debug, Default)]
+pub struct StreamStatus {
+    pub bitrate: u64,
+    pub fps: f64,
+    pub num_total_frames: u64,
+    pub num_dropped_frames: u64,
+    pub render_total_frames: u64,
+    pub render_missed_frames: u64,
+    pub output_total_frames: u64,
+    pub output_skipped_frames: u64,
+}
+
+impl StreamStatus {
+    pub fn calculate_current(&self, old: &Self) -> Self {
+        Self {
+            bitrate: self.bitrate,
+            fps: self.fps,
+            num_total_frames: self.num_total_frames - old.num_total_frames,
+            num_dropped_frames: self.num_dropped_frames - old.num_dropped_frames,
+            render_total_frames: self.render_total_frames - old.render_total_frames,
+            render_missed_frames: self.render_missed_frames - old.render_missed_frames,
+            output_total_frames: self.output_total_frames - old.output_total_frames,
+            output_skipped_frames: self.output_skipped_frames - old.output_skipped_frames,
+        }
+    }
 }
 
 #[derive(Debug)]

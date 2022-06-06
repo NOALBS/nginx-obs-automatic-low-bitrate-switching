@@ -26,6 +26,9 @@ sv:
     sourceinfo:
         noInfo: Ingen information
         notFound: "Fel ingen server hittades med namnet: %{name}"
+    serverinfo:
+        noInfo: No server information available
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Inspelning påbörjad
         stopped: Inspelningen har stoppats

@@ -26,6 +26,9 @@ tr:
     sourceinfo:
         noInfo: No information
         notFound: "Error no server found with the name: %{name}"
+    serverinfo:
+        noInfo: No server information available
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Kayıt başladı
         stopped: Kayıt durduruldu

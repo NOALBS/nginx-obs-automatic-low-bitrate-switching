@@ -28,6 +28,9 @@ zh_tw:
     sourceinfo:
         noInfo: No information
         notFound: "Error no server found with the name: %{name}"
+    serverinfo:
+        noInfo: No server information available
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: 開始錄影
         stopped: 停止錄影

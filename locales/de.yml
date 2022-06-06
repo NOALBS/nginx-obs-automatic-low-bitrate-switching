@@ -26,6 +26,9 @@ de:
     sourceinfo:
         noInfo: Keine Information
         notFound: Fehler kein Server mit dem Namen %{name} gefunden
+    serverinfo:
+        noInfo: No server information available
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Aufnahme gestartet
         stopped: Aufnahme gestoppt

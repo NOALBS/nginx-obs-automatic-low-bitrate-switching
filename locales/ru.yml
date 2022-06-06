@@ -26,6 +26,9 @@ ru:
     sourceinfo:
         noInfo: Нет информации
         notFound: "Ошибка: сервер с таким именем не найден: %{name}"
+    serverinfo:
+        noInfo: No server information available
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Успешное начало записи
         stopped: Успешная остановка записи

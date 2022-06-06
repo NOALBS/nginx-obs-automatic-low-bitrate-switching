@@ -68,7 +68,7 @@ impl ChatHandler {
         );
 
         default.insert(
-            Command::Obsinfo,
+            Command::ServerInfo,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
                 alias: None,
@@ -508,7 +508,7 @@ impl DispatchCommand {
             chat::Command::StartingScene => self.starting_scene().await,
             chat::Command::EndingScene => self.ending_scene().await,
             chat::Command::LiveScene => self.live_scene().await,
-            chat::Command::Obsinfo => {}
+            chat::Command::ServerInfo => self.server_info().await,
             chat::Command::Mod => self.enable_mod(params.next()).await,
             chat::Command::Public => self.enable_public(params.next()).await,
             chat::Command::Sourceinfo => self.source_info(params.next()).await,
@@ -1169,6 +1169,49 @@ impl DispatchCommand {
         if let Err(e) = self.user.save_config().await {
             error!("Error saving config: {}", e)
         }
+    }
+
+    async fn server_info(&self) {
+        let state = self.user.state.read().await;
+
+        let ss = match &state.broadcasting_software.stream_status {
+            Some(ss) => ss,
+            None => {
+                self.send(t!("serverinfo.noInfo", locale = &self.lang))
+                    .await;
+                return;
+            }
+        };
+
+        let network = format!(
+            "{} ({:.1}%)",
+            ss.num_dropped_frames,
+            (ss.num_dropped_frames as f64 / ss.num_total_frames as f64) * 100.0,
+        );
+
+        let rendering = format!(
+            "{} ({:.1}%)",
+            ss.render_missed_frames,
+            (ss.render_missed_frames as f64 / ss.render_total_frames as f64) * 100.0,
+        );
+
+        let encoding = format!(
+            "{} ({:.1}%)",
+            ss.output_skipped_frames,
+            (ss.output_skipped_frames as f64 / ss.output_total_frames as f64) * 100.0,
+        );
+
+        let msg = t!(
+            "serverinfo.success",
+            locale = &self.lang,
+            fps = &ss.fps.round().to_string(),
+            bitrate = &ss.bitrate.to_string(),
+            network = &network,
+            rendering = &rendering,
+            encoding = &encoding
+        );
+
+        self.send(msg).await;
     }
 }
 

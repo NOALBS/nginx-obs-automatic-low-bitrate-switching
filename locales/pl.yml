@@ -26,6 +26,9 @@ pl:
     sourceinfo:
         noInfo: Brak informacji
         notFound: "Błąd nie znaleziono serwera o tej nazwie: %{name}"
+    serverinfo:
+        noInfo: No server information available
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Nagranie rozpoczęte
         stopped: Nagranie zakończone

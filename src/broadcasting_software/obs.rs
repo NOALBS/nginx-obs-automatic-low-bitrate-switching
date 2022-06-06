@@ -13,7 +13,10 @@ use serde::Deserialize;
 use tokio::sync::{mpsc, Mutex};
 use tracing::{error, info, warn};
 
-use crate::{config, error, noalbs, state::ClientStatus};
+use crate::{
+    config, error, noalbs,
+    state::{self, ClientStatus},
+};
 
 use super::BroadcastingSoftwareLogic;
 
@@ -87,6 +90,44 @@ impl Obs {
                 EventType::StreamStopped => {
                     let mut l = state.write().await;
                     l.broadcasting_software.is_streaming = false;
+                    l.broadcasting_software.stream_status = None;
+                    l.broadcasting_software.initial_stream_status = None;
+                }
+                EventType::StreamStatus {
+                    kbits_per_sec,
+                    fps,
+                    num_total_frames,
+                    num_dropped_frames,
+                    render_total_frames,
+                    render_missed_frames,
+                    output_total_frames,
+                    output_skipped_frames,
+                    ..
+                } => {
+                    let ss = state::StreamStatus {
+                        bitrate: kbits_per_sec,
+                        fps,
+                        num_dropped_frames,
+                        render_missed_frames,
+                        output_skipped_frames,
+                        num_total_frames,
+                        render_total_frames,
+                        output_total_frames,
+                    };
+
+                    let mut l = state.write().await;
+
+                    if l.broadcasting_software.initial_stream_status.is_none() {
+                        l.broadcasting_software.initial_stream_status = Some(ss);
+                    } else {
+                        let ss = ss.calculate_current(
+                            l.broadcasting_software
+                                .initial_stream_status
+                                .as_ref()
+                                .unwrap(),
+                        );
+                        l.broadcasting_software.stream_status = Some(ss);
+                    }
                 }
                 _ => continue,
             }
