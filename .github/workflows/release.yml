@@ -60,7 +60,7 @@ jobs:
           folder="noalbs-${{ steps.get_version.outputs.version }}-${{ matrix.target }}"
           mkdir -p "$folder/"
 
-          cp {.env.example,config.json} "$folder/"
+          cp {.env,config.json} "$folder/"
 
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cp "target/${{ matrix.target }}/release/noalbs.exe" "$folder/"
