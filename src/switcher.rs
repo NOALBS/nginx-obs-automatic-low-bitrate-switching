@@ -367,6 +367,7 @@ pub enum TriggerType {
     Low,
     Rtt,
     Offline,
+    RttOffline,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -380,6 +381,9 @@ pub struct Triggers {
 
     /// Trigger to switch to the offline scene
     pub offline: Option<u32>,
+
+    /// Trigger to switch to the offline scene when RTT is high
+    pub rtt_offline: Option<u32>,
 }
 
 impl Triggers {
@@ -394,6 +398,7 @@ impl Default for Triggers {
             low: Some(800),
             rtt: Some(2500),
             offline: None,
+            rtt_offline: None,
         }
     }
 }

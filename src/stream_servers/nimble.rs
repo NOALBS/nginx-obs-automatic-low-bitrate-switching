@@ -176,6 +176,12 @@ impl SwitchLogic for Nimble {
             }
         }
 
+        if let Some(rtt_offline) = triggers.rtt_offline {
+            if stats.srt.stats.link.rtt >= rtt_offline.into() {
+                return SwitchType::Offline;
+            }
+        }
+
         if bitrate == 0 {
             return SwitchType::Normal;
         }

@@ -218,6 +218,7 @@ impl Noalbs {
             switcher::TriggerType::Low => triggers.low,
             switcher::TriggerType::Rtt => triggers.rtt,
             switcher::TriggerType::Offline => triggers.offline,
+            switcher::TriggerType::RttOffline => triggers.rtt_offline,
         }
     }
 
@@ -231,6 +232,7 @@ impl Noalbs {
             switcher::TriggerType::Low => triggers.low = real_value,
             switcher::TriggerType::Rtt => triggers.rtt = real_value,
             switcher::TriggerType::Offline => triggers.offline = real_value,
+            switcher::TriggerType::RttOffline => triggers.rtt_offline = real_value,
         }
 
         real_value

@@ -499,6 +499,10 @@ impl DispatchCommand {
                 self.trigger(switcher::TriggerType::Offline, params.next())
                     .await
             }
+            chat::Command::Ortrigger => {
+                self.trigger(switcher::TriggerType::RttOffline, params.next())
+                    .await
+            }
             chat::Command::Rtrigger => {
                 self.trigger(switcher::TriggerType::Rtt, params.next())
                     .await
@@ -776,7 +780,7 @@ impl DispatchCommand {
 
         let symbol = match kind {
             switcher::TriggerType::Low | switcher::TriggerType::Offline => "Kbps",
-            switcher::TriggerType::Rtt => "ms",
+            switcher::TriggerType::Rtt | switcher::TriggerType::RttOffline => "ms",
         };
 
         let msg = match &self.user.update_trigger(kind, value).await {

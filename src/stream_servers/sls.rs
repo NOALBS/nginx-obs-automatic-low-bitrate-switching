@@ -80,6 +80,12 @@ impl SwitchLogic for SrtLiveServer {
             }
         }
 
+        if let Some(rtt_offline) = triggers.rtt_offline {
+            if stats.rtt >= rtt_offline.into() {
+                return SwitchType::Offline;
+            }
+        }
+
         if stats.bitrate == 0 {
             return SwitchType::Previous;
         }

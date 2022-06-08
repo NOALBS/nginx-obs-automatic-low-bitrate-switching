@@ -327,6 +327,7 @@ impl From<ConfigOld> for Config {
                     low: Some(o.obs.low_bitrate_trigger),
                     rtt: o.obs.high_rtt_trigger,
                     offline: None,
+                    rtt_offline: None,
                 },
                 switching_scenes: switcher::SwitchingScenes {
                     normal: o.obs.normal_scene,
