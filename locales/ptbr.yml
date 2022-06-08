@@ -1,4 +1,4 @@
-en:
+pt_br:
     start:
         success: Stream iniciada
         error: "Erro ao iniciar a stream: %{error}"
@@ -26,6 +26,9 @@ en:
     sourceinfo:
         noInfo: Sem informações
         notFound: "Nenhum servidor encontrado: %{name}"
+    serverinfo:
+        noInfo: No server information available
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Gravação iniciada
         stopped: Gravação parada
