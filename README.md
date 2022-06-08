@@ -50,7 +50,9 @@ This script gives you the option to enable some simple chat commands to help you
 |     MODs     | !trigger (value)         | changes the low bitrate threshold to the defined value.                                                 | !trigger 800       |
 |     MODs     | !otrigger (value)        | changes the offline bitrate threshold to the defined value.                                             | !otrigger 200      |
 |     MODs     | !rtrigger (value)        | changes the RTT threshold to the defined value.                                                         | !rtrigger 2000     |
+|     MODs     | !ortrigger (value)       | changes the RTT based offline bitrate threshold to the defined value.                                   | !ortrigger 3000    |
 |     MODs     | !sourceinfo              | gives you details about the SOURCE in chat.                                                             | !sourceinfo        |
+|     MODs     | !serverinfo              | gives you details about the SERVER in chat.                                                             | !serverinfo        |
 |     MODs     | !fix                     | tries to fix the stream.                                                                                | !fix               |
 |     MODs     | !refresh                 | tries to fix the stream.                                                                                | !refresh           |
 |    Public    | !bitrate                 | returns the current bitrate.                                                                            | !bitrate           |
