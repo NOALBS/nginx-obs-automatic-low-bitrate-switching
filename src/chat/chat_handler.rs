@@ -752,6 +752,11 @@ impl DispatchCommand {
     }
 
     async fn trigger(&self, kind: switcher::TriggerType, value_string: Option<&str>) {
+        let symbol = match kind {
+            switcher::TriggerType::Low | switcher::TriggerType::Offline => "Kbps",
+            switcher::TriggerType::Rtt | switcher::TriggerType::RttOffline => "ms",
+        };
+
         let value = match value_string {
             Some(name) => name,
             None => {
@@ -759,7 +764,8 @@ impl DispatchCommand {
                     Some(bitrate) => t!(
                         "trigger.current",
                         locale = &self.lang,
-                        number = &bitrate.to_string()
+                        //number = &bitrate.to_string()
+                        number = &format!("{} {}", bitrate, symbol)
                     ),
                     None => t!("trigger.disabled", locale = &self.lang),
                 };
@@ -776,11 +782,6 @@ impl DispatchCommand {
                 self.send(msg).await;
                 return;
             }
-        };
-
-        let symbol = match kind {
-            switcher::TriggerType::Low | switcher::TriggerType::Offline => "Kbps",
-            switcher::TriggerType::Rtt | switcher::TriggerType::RttOffline => "ms",
         };
 
         let msg = match &self.user.update_trigger(kind, value).await {
