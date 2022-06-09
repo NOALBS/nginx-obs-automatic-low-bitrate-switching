@@ -764,7 +764,6 @@ impl DispatchCommand {
                     Some(bitrate) => t!(
                         "trigger.current",
                         locale = &self.lang,
-                        //number = &bitrate.to_string()
                         number = &format!("{} {}", bitrate, symbol)
                     ),
                     None => t!("trigger.disabled", locale = &self.lang),
