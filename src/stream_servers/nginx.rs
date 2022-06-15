@@ -43,10 +43,10 @@ pub struct Meta {
 #[derive(Deserialize, Debug)]
 #[allow(dead_code)]
 pub struct Video {
-    width: u32,
-    height: u32,
-    frame_rate: f64,
-    codec: String,
+    width: Option<u32>,
+    height: Option<u32>,
+    frame_rate: Option<f64>,
+    codec: Option<String>,
     profile: Option<String>,
     compat: Option<u32>,
     level: Option<f64>,
@@ -183,9 +183,9 @@ impl StreamServersCommands for Nginx {
 
         let v_info = format!(
             "{}p{} | {} {} {}",
-            video.height,
-            video.frame_rate,
-            video.codec,
+            video.height.unwrap_or_default(),
+            video.frame_rate.unwrap_or_default(),
+            video.codec.unwrap_or_default(),
             video.profile.unwrap_or_default(),
             video.level.unwrap_or_default()
         );
