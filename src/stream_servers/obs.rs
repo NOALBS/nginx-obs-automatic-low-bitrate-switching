@@ -82,6 +82,10 @@ impl StreamServersCommands for Obs {
             None => return super::Bitrate { message: None },
         };
 
+        if !matches!(state, MediaState::Playing) {
+            return super::Bitrate { message: None };
+        }
+
         let message = format!("{:?}", state);
         super::Bitrate {
             message: Some(message),
@@ -90,6 +94,10 @@ impl StreamServersCommands for Obs {
 
     async fn source_info(&self) -> Option<String> {
         let (state, sec) = self.get_stats().await?;
+
+        if !matches!(state, MediaState::Playing) {
+            return None;
+        }
 
         Some(format!("{state:?}, {sec} seconds"))
     }
