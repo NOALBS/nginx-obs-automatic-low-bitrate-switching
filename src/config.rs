@@ -239,6 +239,9 @@ pub struct OptionalOptions {
 
     /// Automatically stop the stream after n minutes on the offline scene
     pub offline_timeout: Option<u32>,
+
+    /// Automatically start recording while streaming
+    pub record_while_streaming: bool,
 }
 
 impl Default for OptionalOptions {
@@ -248,6 +251,7 @@ impl Default for OptionalOptions {
             twitch_transcoding_retries: 5,
             twitch_transcoding_delay_seconds: 15,
             offline_timeout: None,
+            record_while_streaming: false,
         }
     }
 }

@@ -135,7 +135,8 @@
     "twitchTranscodingCheck": false,
     "twitchTranscodingRetries": 5,
     "twitchTranscodingDelaySeconds": 15,
-    "offlineTimeout": null
+    "offlineTimeout": null,
+    "recordWhileStreaming": false
   },
   "language": "en"
 }

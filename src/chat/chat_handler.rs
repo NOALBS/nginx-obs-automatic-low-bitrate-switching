@@ -615,22 +615,25 @@ impl DispatchCommand {
     }
 
     async fn start(&self) {
-        let twitch_transcoding = {
-            self.user
-                .state
-                .read()
-                .await
-                .config
-                .optional_options
-                .twitch_transcoding_check
+        let (twitch_transcoding, record) = {
+            let state = self.user.state.read().await;
+            let options = &state.config.optional_options;
+            (
+                options.twitch_transcoding_check,
+                options.record_while_streaming,
+            )
         };
 
-        if self.chat_message.platform == chat::ChatPlatform::Twitch && twitch_transcoding {
-            self.start_twitch_transcoding().await;
-            return;
-        }
+        let success =
+            if self.chat_message.platform == chat::ChatPlatform::Twitch && twitch_transcoding {
+                self.start_twitch_transcoding().await
+            } else {
+                self.start_normal().await
+            };
 
-        self.start_normal().await;
+        if success && record {
+            self.record().await;
+        }
     }
 
     async fn start_bsc(&self) -> Result<(), error::Error> {
@@ -657,16 +660,20 @@ impl DispatchCommand {
         bsc.stop_streaming().await
     }
 
-    async fn start_normal(&self) {
-        let msg = match self.start_bsc().await {
+    async fn start_normal(&self) -> bool {
+        let start = self.start_bsc().await;
+
+        let msg = match start {
             Ok(_) => t!("start.success", locale = &self.lang),
-            Err(e) => t!("start.error", locale = &self.lang, error = &e.to_string()),
+            Err(ref e) => t!("start.error", locale = &self.lang, error = &e.to_string()),
         };
 
         self.send(msg).await;
+
+        start.is_ok()
     }
 
-    async fn start_twitch_transcoding(&self) {
+    async fn start_twitch_transcoding(&self) -> bool {
         let (retry, delay) = {
             let options = &self.user.state.read().await.config.optional_options;
             let retry = options.twitch_transcoding_retries;
@@ -689,7 +696,7 @@ impl DispatchCommand {
                     error = &e.to_string()
                 ))
                 .await;
-                return;
+                return false;
             };
 
             time::sleep(time::Duration::from_secs(delay)).await;
@@ -706,7 +713,7 @@ impl DispatchCommand {
                     locale = &self.lang
                 ))
                 .await;
-                return;
+                return true;
             }
 
             debug!("[{}] Stopping stream", i);
@@ -717,7 +724,7 @@ impl DispatchCommand {
                     error = &e.to_string()
                 ))
                 .await;
-                return;
+                return false;
             };
 
             time::sleep(time::Duration::from_secs(5)).await;
@@ -740,15 +747,33 @@ impl DispatchCommand {
         );
 
         self.send(msg).await;
+
+        true
     }
 
     async fn stop(&self) {
-        let msg = match self.stop_bsc().await {
+        let record = {
+            self.user
+                .state
+                .read()
+                .await
+                .config
+                .optional_options
+                .record_while_streaming
+        };
+
+        let stop = self.stop_bsc().await;
+
+        let msg = match stop {
             Ok(_) => t!("stop.success", locale = &self.lang),
-            Err(e) => t!("stop.error", locale = &self.lang, error = &e.to_string()),
+            Err(ref e) => t!("stop.error", locale = &self.lang, error = &e.to_string()),
         };
 
         self.send(msg).await;
+
+        if stop.is_ok() && record {
+            self.record().await;
+        }
     }
 
     async fn trigger(&self, kind: switcher::TriggerType, value_string: Option<&str>) {
