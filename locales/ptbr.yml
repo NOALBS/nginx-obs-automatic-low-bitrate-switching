@@ -27,8 +27,8 @@ pt_br:
         noInfo: Sem informações
         notFound: "Nenhum servidor encontrado: %{name}"
     serverinfo:
-        noInfo: No server information available
-        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+        noInfo: Nenhuma informação do servidor disponível
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, caiu devido a network: %{network}, lag de renderização: %{rendering}, lag de encoding: %{encoding}"
     rec:
         started: Gravação iniciada
         stopped: Gravação parada
@@ -73,5 +73,5 @@ pt_br:
         retryError: Erro ao editar as tentativas %{count}, não é um valor valido
         retrySuccess: "Tentativa escolhida: %{count}"
     scene:
-        success: Trocando para cena %{scene}
+        success: Trocando para cena "%{scene}"
         error: A cena %{scene} não pode ser escolhida
