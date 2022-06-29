@@ -11,7 +11,7 @@ NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes
 Don't feel like setting this all up by yourself? Check out these links for similar solutions/paid services:
 
 - [BELABOX cloud - the only SRT/SRTLA service optimised for bonding](https://cloud.belabox.net)
-- [u³.gg - Endpoint Creator](https://u3.gg)
+- [u³.gg - RTMP/SRT(LA) Endpoint Service Provider](https://u3.gg)
 - [AntiScuff - Cloud-based OBS Hosting](https://www.antiscuff.com/)
 - [IRLToolkit - Step your stream up to the next level](https://irltoolkit.com/)
 - [Super Stream System by Psynaps](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
