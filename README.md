@@ -6,6 +6,8 @@ Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the cu
 
 NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
 
+## NOALBS has a Discord Server finally, join here: https://discord.gg/efWu5HWM2u
+
 ## Similar Solutions / Paid Services
 
 Don't feel like setting this all up by yourself? Check out these links for similar solutions/paid services:
