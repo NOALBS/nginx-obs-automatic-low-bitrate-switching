@@ -25,7 +25,7 @@ Do you offer a similar solution or paid service? Want your link here? Message [b
 ## Quick Start
 
 - Download the latest binary from [releases](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
-- Have [OBS-Studio](https://github.com/obsproject/obs-studio/) and [OBS-WebSocket](https://github.com/obsproject/obs-websocket/releases/latest) installed
+- Have [OBS-Studio](https://github.com/obsproject/obs-studio/) and [OBS-WebSocket](https://github.com/obsproject/obs-websocket/releases/tag/4.9.1) 4.9.1 installed
 - [Configure NOALBS](#configure-noalbs)
 - Run the executable
 
