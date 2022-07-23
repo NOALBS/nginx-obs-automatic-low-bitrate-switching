@@ -12,6 +12,9 @@ pub enum Error {
     #[error("OBS error {0}")]
     ObsError(#[from] obws::Error),
 
+    #[error("OBS error {0}")]
+    ObsV5Error(#[from] obwsv5::Error),
+
     #[error("SwitchType conversion not allowed")]
     SwitchTypeNotSupported,
 

@@ -4,7 +4,7 @@ use tokio::sync::{mpsc, RwLock};
 use tracing::{debug, info};
 
 use crate::{
-    broadcasting_software::obs::Obs,
+    broadcasting_software::{obs::Obs, obs_v5::Obsv5, BroadcastingSoftwareLogic},
     chat, config, error,
     state::{self, State},
     stream_servers,
@@ -52,14 +52,19 @@ impl Noalbs {
         {
             let mut w_state = state.write().await;
 
-            let connection = match w_state.config.software {
+            let connection: Box<dyn BroadcastingSoftwareLogic> = match w_state.config.software {
+                config::SoftwareConnection::ObsOld(ref obs_conf) => {
+                    let obs = Obs::new(obs_conf.clone(), state.clone());
+                    Box::new(obs)
+                }
                 config::SoftwareConnection::Obs(ref obs_conf) => {
-                    Obs::new(obs_conf.clone(), state.clone())
+                    let obs = Obsv5::new(obs_conf.clone(), state.clone());
+                    Box::new(obs)
                 }
             };
 
             // Do i need this option here?
-            w_state.broadcasting_software.connection = Some(Box::new(connection));
+            w_state.broadcasting_software.connection = Some(connection);
         }
 
         // Add state to any OBS stream servers

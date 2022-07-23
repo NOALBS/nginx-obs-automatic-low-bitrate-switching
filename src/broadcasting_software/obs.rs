@@ -202,6 +202,7 @@ impl Obs {
                         scene_name: current_name.to_owned(),
                         source_name: item.source_name,
                         source_kind: item.source_kind,
+                        id: item.item_id,
                     });
                 }
 
@@ -372,7 +373,7 @@ impl BroadcastingSoftwareLogic for Obs {
 
         let state = client.media_control().get_media_state(source_name).await?;
         let state_time = client.media_control().get_media_time(source_name).await?;
-        // println!("state: {:#?}, time?: {:#?}", state, state_time);
+
         Ok((state, state_time.whole_seconds()))
     }
 
@@ -619,7 +620,8 @@ impl Drop for Obs {
 }
 
 #[derive(Debug)]
-struct SourceItem {
+pub struct SourceItem {
+    pub id: i64,
     pub scene_name: String,
     pub source_name: String,
     pub source_kind: String,
@@ -628,21 +630,21 @@ struct SourceItem {
 // From obws
 /// Settings specific to a **FFmpeg** video source.
 #[derive(Deserialize)]
-struct FfmpegSource {
+pub struct FfmpegSource {
     /// URL of the remote media file. Only used if [`Self::is_local_file`] is set to `false`.
     pub input: Option<String>,
 }
 
 /// Settings specific to a **VLC** video source.
 #[derive(Deserialize)]
-struct VlcSource {
+pub struct VlcSource {
     /// List of files to play.
     pub playlist: Vec<SlideshowFile>,
 }
 
 /// Single file as part of a [`Slideshow`].
 #[derive(Deserialize)]
-struct SlideshowFile {
+pub struct SlideshowFile {
     /// Location of the file to display.
     pub value: String,
 }

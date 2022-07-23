@@ -3,6 +3,7 @@ use async_trait::async_trait;
 use crate::error::Error;
 
 pub mod obs;
+pub mod obs_v5;
 
 #[async_trait]
 pub trait BroadcastingSoftwareLogic: Send + Sync {
