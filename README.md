@@ -6,7 +6,7 @@ Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the cu
 
 NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
 
-## NOALBS has a Discord Server finally, join here: https://discord.gg/efWu5HWM2u
+## NOALBS has a Discord Server finally, join here: <https://discord.gg/efWu5HWM2u>
 
 ## Similar Solutions / Paid Services
 
@@ -25,7 +25,7 @@ Do you offer a similar solution or paid service? Want your link here? Message [b
 ## Quick Start
 
 - Download the latest binary from [releases](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
-- Have [OBS-Studio](https://github.com/obsproject/obs-studio/) and [OBS-WebSocket](https://github.com/obsproject/obs-websocket/releases/tag/4.9.1) 4.9.1 installed
+- Have [OBS-Studio](https://github.com/obsproject/obs-studio/) and [OBS-WebSocket](https://github.com/obsproject/obs-websocket/releases/latest) 5.0.0 or higher installed
 - [Configure NOALBS](#configure-noalbs)
 - Run the executable
 
@@ -80,6 +80,21 @@ Use <https://twitchapps.com/tmi> to get your oauth from Twitch.
 > We recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
 
 The `config.json` file holds all the user configurations.
+
+### Software section
+
+```json
+"software": {
+  "type": "Obs",
+  "host": "localhost",
+  "password": "password",
+  "port": 4455
+}
+```
+
+- `type`: Replace this with the software you're using.
+
+NOALBS supports OBS WebSocket v4 and v5. To still use v4 use type `ObsOld`.
 
 ### Stream servers section
 
