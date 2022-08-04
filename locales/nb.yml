@@ -1,0 +1,77 @@
+dk:
+    start:
+        success: Strøm startet!
+        error: "Feil: %{error}"
+    startTwitchTranscoding:
+        trying: Prøver å starte strømmen med omkoding
+        successNoTranscoding: Startet strømmen uten omkoding
+        success: Startet strømming med omkoding %{attemptsMessage}
+        attempts: ", brukte %{count} forsøk"
+    stop:
+        success: Strøm avsluttet!
+        error: "Feil kan ikke stoppe strømmen: %{error}"
+    switch:
+        noParams: Ingen scene valgt
+        success: Scene er byttet til "%{scene}"
+        error: "Feil: {scene}"
+    bitrate:
+        success: "%{name}: %{message}"
+        error: "Gjeldende bitrate: OFFLINE"
+    trigger:
+        success: Utløser byttet til %{number}
+        successDisabled: Utløser er deaktivert
+        error: Feil under endring av utløser %{number} (ikke en tillatt verdi)
+        current: Gjeldende utløser er satt til %{number}
+        disabled: Gjeldende utløser er deaktivert
+    sourceinfo:
+        noInfo: Ingen informasjon
+        notFound: "Feil, ingen server funnet med navn: %{name}"
+    serverinfo:
+        noInfo: Ingen serverinformasjon tilgjengelig
+        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, tapt grunnet: nettverk: %{network}, gjengivelsesforsinkelse: %{rendering}, kodingsforsinkelse: %{encoding}"
+    rec:
+        started: Opptak startet!
+        stopped: Opptak stoppet!
+        errorStatus: Feil under henting av opptaksstatus
+        errorToggle: Feil under veksling av opptak
+    fix:
+        try: Forsøker å reparere strømmen
+        error: Feil under reparasjon av strømmen
+    refresh:
+        try: Starter forbindelse på nytt
+        error: Feil under omstart av forbindelse
+        success: Forbindelse startet på nytt
+        noScene: Ingen restart-scene er valgt, bruk fix istedet
+    alias:
+        success: Lagt til alias %{alias} -> %{command}
+        removed: Alias %{alias} fjernet
+        errorCommand: Feil, %{command} eksisterer ikke
+        errorAlias: Feil, alias %{alias} eksisterer ikke
+        errorAlreadyUsed: "%{alias} brukes allerede som alias"
+        errorIncorrectArguments: Feilaktige argument brukt
+    sceneSwitch:
+        switch: Scene byttet til "%{scene}"
+    offlineTimeout:
+        timeout: Tidsavbrudd uten nett er nådd, stopper strømmen
+    handleCommands:
+        public: Offentlige kommandoer %{condition}
+        mod: Mod-kommandoer %{condition}
+        notify: Automatisk varsel om scenebytte %{condition}
+        autostop: Automatisk stopp av strømmen %{condition}
+        enabled: er aktivert
+        disabled: er deaktivert
+    noalbs:
+        prefix: NOALBS-prefiks endret til %{prefix}
+        errorPrefix: Kan ikke endre NOALBS-prefiks
+        switcherEnabled: Bytting av scene er aktivert
+        switcherDisabled: Bytting av scene er deaktivert
+        instantSwitch: Bytt automatisk når gjenopprettet %{condition}
+        langError: Kunne ikke endre NOALBS-språk
+        langErrorInvalid: Feil ved endring av %{lang}, verdi ugyldig
+        langSuccess: NOALBS-språk endret til %{lang}
+        retryCount: Gjeldende gjenopprettingsforsøk er %{count}
+        retryError: Feil ved endring av gjenopprettingsforsøk, %{count} er ikke en gyldig verdi
+        retrySuccess: Gjenopprettingsforsøk satt til %{count}
+    scene:
+        success: Bytter til %{scene}-scene
+        error: Ingen %{scene}-scene valgt
