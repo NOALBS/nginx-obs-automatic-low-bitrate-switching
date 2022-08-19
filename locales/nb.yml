@@ -1,4 +1,4 @@
-dk:
+nb:
     start:
         success: Strøm startet!
         error: "Feil: %{error}"
