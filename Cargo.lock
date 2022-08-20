@@ -911,8 +911,8 @@ dependencies = [
  "either",
  "futures-util",
  "log",
- "obws 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "obws 0.9.1 (git+https://github.com/dnaka91/obws)",
+ "obws 0.10.0-beta.2",
+ "obws 0.9.1",
  "once_cell",
  "openssl",
  "quick-xml",
@@ -999,8 +999,9 @@ dependencies = [
 
 [[package]]
 name = "obws"
-version = "0.9.1"
-source = "git+https://github.com/dnaka91/obws#dd02c166daa6a9e7c7a848b5b7e8a624af2a65fe"
+version = "0.10.0-beta.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "745a915f9feb75fc7df9028d597482d7658dbfe82e408d83153e3db5ee6247fd"
 dependencies = [
  "async-stream",
  "base64",
