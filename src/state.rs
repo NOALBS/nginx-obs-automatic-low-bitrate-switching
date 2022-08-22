@@ -129,7 +129,7 @@ impl Default for BroadcastingSoftwareState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ClientStatus {
     Connected,
     Disconnected,

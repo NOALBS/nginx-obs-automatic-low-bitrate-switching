@@ -403,7 +403,7 @@ impl Default for Triggers {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum SwitchType {
     Normal,
     Low,

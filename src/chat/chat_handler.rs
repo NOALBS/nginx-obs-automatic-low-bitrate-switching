@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Write as _;
 use std::sync::Arc;
 
 use rust_i18n::t;
@@ -177,7 +178,7 @@ impl ChatHandler {
         match ss.switch_type {
             Normal | Low => {
                 let bitrate = bitrate_msg(&user, lang).await;
-                msg += &format!(" | {}", bitrate);
+                let _ = write!(msg, " | {}", bitrate);
             }
             Previous | Offline => {}
         }
@@ -1296,7 +1297,7 @@ async fn bitrate_msg(user: &Noalbs, lang: &str) -> String {
                 name = &s.name,
                 message = &bitrate_message
             );
-            msg += &format!("{}{}", sep, locale);
+            let _ = write!(msg, "{}{}", sep, locale);
         }
     }
 

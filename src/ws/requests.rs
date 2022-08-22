@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Message that will be received from a client
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RequestMessage {
     #[serde(flatten)]
     pub request: Request,
@@ -12,7 +12,7 @@ pub struct RequestMessage {
 }
 
 /// All requests available to a WS client
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "type")]
 pub enum Request {
@@ -22,14 +22,14 @@ pub enum Request {
     Logout,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Auth {
     pub username: String,
     pub password: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SetPassword {
     pub password: String,
