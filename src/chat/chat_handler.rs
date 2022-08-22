@@ -887,28 +887,12 @@ impl DispatchCommand {
                 return;
             }
         };
-
-        let err = t!("refresh.error", locale = &self.lang);
-        let bsc = match state.broadcasting_software.connection.as_ref() {
-            Some(b) => b,
-            None => {
-                self.send(err).await;
-                return;
-            }
-        };
-
-        let prev_scene = match bsc.as_ref().current_scene().await {
-            Ok(s) => s,
-            Err(_) => {
-                self.send(err).await;
-                return;
-            }
-        };
-
+        let prev_scene = state.broadcasting_software.current_scene.to_owned();
         drop(state);
 
         self.send(t!("refresh.try", locale = &self.lang)).await;
 
+        let err = t!("refresh.error", locale = &self.lang);
         if (self.switch_scene(&scene).await).is_err() {
             self.send(err).await;
             return;
