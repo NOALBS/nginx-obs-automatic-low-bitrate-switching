@@ -121,7 +121,7 @@ impl Obsv5 {
 
         let mut sources: Vec<SourceItem> = Vec::new();
         let current_scene = client.scenes().current_program_scene().await?;
-        self.get_media_sources_rec(client, current_scene, &mut Vec::new(), &mut sources)
+        self.get_media_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false)
             .await;
 
         Ok(sources)
@@ -134,8 +134,13 @@ impl Obsv5 {
         scene: String,
         visited: &mut Vec<String>,
         sources: &mut Vec<SourceItem>,
+        group: bool,
     ) {
-        let items = client.scene_items().list(&scene).await.unwrap();
+        let items = if !group {
+            client.scene_items().list(&scene).await.unwrap()
+        } else {
+            client.scene_items().list_group(&scene).await.unwrap()
+        };
         let current_name = scene;
 
         for item in items {
@@ -167,7 +172,11 @@ impl Obsv5 {
             ) && !visited.contains(&item.source_name)
             {
                 visited.push(item.source_name.to_owned());
-                self.get_media_sources_rec(client, item.source_name, visited, sources)
+
+                // Should always be present because of the type check
+                let group = item.is_group.unwrap();
+
+                self.get_media_sources_rec(client, item.source_name, visited, sources, group)
                     .await;
             }
         }
