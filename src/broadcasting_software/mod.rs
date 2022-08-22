@@ -19,6 +19,8 @@ pub trait BroadcastingSoftwareLogic: Send + Sync {
 
     async fn fix(&self) -> Result<(), Error>;
 
+    async fn current_scene(&self) -> Result<String, Error>;
+
     async fn get_media_source_status(
         &self,
         source_name: &str,

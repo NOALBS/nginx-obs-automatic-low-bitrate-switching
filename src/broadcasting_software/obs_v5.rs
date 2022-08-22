@@ -336,6 +336,16 @@ impl BroadcastingSoftwareLogic for Obsv5 {
     ) -> Result<(), error::Error> {
         Err(error::Error::UnableInitialConnection)
     }
+
+    async fn current_scene(&self) -> Result<String, error::Error> {
+        let connection = self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        Ok(client.scenes().current_program_scene().await?)
+    }
 }
 
 pub struct InnerConnection {

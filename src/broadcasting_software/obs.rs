@@ -491,6 +491,18 @@ impl BroadcastingSoftwareLogic for Obs {
 
         Ok(())
     }
+
+    async fn current_scene(&self) -> Result<String, error::Error> {
+        let connection = &self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let current = client.scenes().get_current_scene().await?;
+
+        Ok(current.name)
+    }
 }
 
 /// The real connection to OBS, automatically keeps trying to connect.
