@@ -6,13 +6,13 @@ use futures_util::StreamExt;
 use obwsv5::{
     events::Event, requests::scene_items::SetEnabled, responses::media_inputs::MediaState, Client,
 };
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{self, mpsc, Mutex};
 use tracing::{error, info, warn};
 
 use crate::{
     config::{self, ObsConfig},
     error, noalbs,
-    state::ClientStatus,
+    state::{self, ClientStatus},
 };
 
 use super::{
@@ -81,6 +81,23 @@ impl Obsv5 {
                         l.broadcasting_software
                             .start_streaming_notifier()
                             .notify_waiters();
+
+                        drop(l);
+
+                        let ss = {
+                            let read = &user_state.read().await;
+                            if let Some(client) = &read.broadcasting_software.connection {
+                                client.info(read).await.ok()
+                            } else {
+                                None
+                            }
+                        };
+
+                        user_state
+                            .write()
+                            .await
+                            .broadcasting_software
+                            .initial_stream_status = ss;
                     } else {
                         l.broadcasting_software.is_streaming = false;
                         l.broadcasting_software.stream_status = None;
@@ -355,6 +372,63 @@ impl BroadcastingSoftwareLogic for Obsv5 {
 
         Ok(client.scenes().current_program_scene().await?)
     }
+
+    async fn info(
+        &self,
+        state: &sync::RwLockReadGuard<state::State>,
+    ) -> Result<state::StreamStatus, error::Error> {
+        let connection = self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let stats = client
+            .general()
+            .stats()
+            .await
+            .map_err(error::Error::ObsV5Error)?;
+
+        let prev_stream = client
+            .streaming()
+            .status()
+            .await
+            .map_err(error::Error::ObsV5Error)?;
+
+        tokio::time::sleep(Duration::from_secs(2)).await;
+
+        let stream = client
+            .streaming()
+            .status()
+            .await
+            .map_err(error::Error::ObsV5Error)?;
+
+        let bytes_delta = (stream.bytes - prev_stream.bytes) as f64 * 8.0;
+        let time_delta = stream.duration.as_seconds_f64() - prev_stream.duration.as_seconds_f64();
+
+        let mut ss = state::StreamStatus {
+            bitrate: (bytes_delta / time_delta / 1000.0) as u64,
+            fps: stats.active_fps,
+            num_dropped_frames: stream.skipped_frames as u64,
+            num_total_frames: stream.total_frames as u64,
+            output_total_frames: stats.output_total_frames as u64,
+            output_skipped_frames: stats.output_skipped_frames as u64,
+            render_missed_frames: stats.render_skipped_frames as u64,
+            render_total_frames: stats.render_total_frames as u64,
+        };
+
+        if state.broadcasting_software.initial_stream_status.is_some() {
+            ss = ss.calculate_current(
+                state
+                    .broadcasting_software
+                    .initial_stream_status
+                    .as_ref()
+                    .unwrap(),
+            );
+        };
+
+        Ok(ss)
+    }
 }
 
 pub struct InnerConnection {
@@ -414,6 +488,28 @@ impl InnerConnection {
             {
                 let mut connection = self.connection.lock().await;
                 *connection = Some(client);
+            }
+
+            {
+                let ss = {
+                    let read = &self.state.read().await;
+                    let bs = &read.broadcasting_software;
+                    let mut status = None;
+
+                    if bs.is_streaming {
+                        if let Some(client) = &bs.connection {
+                            status = client.info(&read).await.ok()
+                        }
+                    }
+
+                    status
+                };
+
+                self.state
+                    .write()
+                    .await
+                    .broadcasting_software
+                    .initial_stream_status = ss;
             }
 
             Self::event_loop(event_stream.unwrap(), self.event_sender.clone()).await;

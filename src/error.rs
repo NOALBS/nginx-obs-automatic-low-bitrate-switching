@@ -46,4 +46,7 @@ pub enum Error {
 
     #[error("Config file error")]
     ConfigFileError(#[source] std::io::Error),
+
+    #[error("No server info available")]
+    NoServerInfo,
 }

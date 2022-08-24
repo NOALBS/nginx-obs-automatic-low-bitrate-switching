@@ -1204,9 +1204,20 @@ impl DispatchCommand {
     async fn server_info(&self) {
         let state = self.user.state.read().await;
 
-        let ss = match &state.broadcasting_software.stream_status {
-            Some(ss) => ss,
-            None => {
+        if state.broadcasting_software.initial_stream_status.is_none() {
+            self.send(t!("serverinfo.noInfo", locale = &self.lang))
+                .await;
+            return;
+        };
+
+        let bsc = match &state.broadcasting_software.connection {
+            Some(b) => b,
+            None => return,
+        };
+
+        let ss = match bsc.info(&state).await {
+            Ok(ss) => ss,
+            Err(_) => {
                 self.send(t!("serverinfo.noInfo", locale = &self.lang))
                     .await;
                 return;

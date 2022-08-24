@@ -135,7 +135,7 @@ pub enum ClientStatus {
     Disconnected,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct StreamStatus {
     pub bitrate: u64,
     pub fps: f64,

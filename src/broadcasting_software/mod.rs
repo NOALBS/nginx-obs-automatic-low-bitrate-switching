@@ -1,6 +1,7 @@
 use async_trait::async_trait;
+use tokio::sync;
 
-use crate::error::Error;
+use crate::{error::Error, state};
 
 pub mod obs;
 pub mod obs_v5;
@@ -20,6 +21,11 @@ pub trait BroadcastingSoftwareLogic: Send + Sync {
     async fn fix(&self) -> Result<(), Error>;
 
     async fn current_scene(&self) -> Result<String, Error>;
+
+    async fn info(
+        &self,
+        state: &sync::RwLockReadGuard<state::State>,
+    ) -> Result<state::StreamStatus, Error>;
 
     async fn get_media_source_status(
         &self,

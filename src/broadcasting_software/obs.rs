@@ -10,7 +10,7 @@ use obws::{
     responses::MediaState,
 };
 use serde::Deserialize;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{self, mpsc, Mutex};
 use tracing::{error, info, warn};
 
 use crate::{
@@ -502,6 +502,18 @@ impl BroadcastingSoftwareLogic for Obs {
         let current = client.scenes().get_current_scene().await?;
 
         Ok(current.name)
+    }
+
+    async fn info(
+        &self,
+        state: &sync::RwLockReadGuard<state::State>,
+    ) -> Result<state::StreamStatus, error::Error> {
+        state
+            .broadcasting_software
+            .stream_status
+            .as_ref()
+            .cloned()
+            .ok_or(error::Error::NoServerInfo)
     }
 }
 
