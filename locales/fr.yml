@@ -28,7 +28,7 @@ fr:
         notFound: "Erreur aucun serveur trouvé avec le nom: %{name}"
     serverinfo:
         noInfo: Aucun serveur disponible
-        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Enregistrement démarré
         stopped: Enregistrement stoppé

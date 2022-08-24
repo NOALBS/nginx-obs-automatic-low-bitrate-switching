@@ -28,7 +28,7 @@ nb:
         notFound: "Feil, ingen server funnet med navn: %{name}"
     serverinfo:
         noInfo: Ingen serverinformasjon tilgjengelig
-        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, tapt grunnet: nettverk: %{network}, gjengivelsesforsinkelse: %{rendering}, kodingsforsinkelse: %{encoding}"
+        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, tapt grunnet: nettverk: %{network}, gjengivelsesforsinkelse: %{rendering}, kodingsforsinkelse: %{encoding}"
     rec:
         started: Opptak startet!
         stopped: Opptak stoppet!

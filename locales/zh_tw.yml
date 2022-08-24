@@ -30,7 +30,7 @@ zh_tw:
         notFound: "錯誤目前沒有伺服器: %{name} 的資訊"
     serverinfo:
         noInfo: 目前讀取不到伺服器的資訊
-        success: "目前流量: %{bitrate} Kbps, 目前幀數: %{fps}, 當前丟失資料資訊: 網路卡頓丟失影格: %{network}, 繪製錯卡頓失影格率: %{rendering}, 編碼卡頓略過影格率: %{encoding}"
+        success: "場景: %{scene}, 目前流量: %{bitrate} Kbps, 目前幀數: %{fps}, 當前丟失資料資訊: 網路卡頓丟失影格: %{network}, 繪製錯卡頓失影格率: %{rendering}, 編碼卡頓略過影格率: %{encoding}"
     rec:
         started: 開始錄影
         stopped: 停止錄影

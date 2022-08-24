@@ -1231,6 +1231,8 @@ impl DispatchCommand {
             (ss.output_skipped_frames as f64 / ss.output_total_frames as f64) * 100.0,
         );
 
+        let scene = &state.broadcasting_software.current_scene;
+
         let msg = t!(
             "serverinfo.success",
             locale = &self.lang,
@@ -1238,7 +1240,8 @@ impl DispatchCommand {
             bitrate = &ss.bitrate.to_string(),
             network = &network,
             rendering = &rendering,
-            encoding = &encoding
+            encoding = &encoding,
+            scene = scene
         );
 
         self.send(msg).await;

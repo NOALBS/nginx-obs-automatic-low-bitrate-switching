@@ -28,7 +28,7 @@ dk:
         notFound: "Error no server found with the name: %{name}"
     serverinfo:
         noInfo: No server information available
-        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
     rec:
         started: Optagelse startet!
         stopped: Optagelse stoppet!

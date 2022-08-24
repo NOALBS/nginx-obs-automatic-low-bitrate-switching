@@ -28,7 +28,7 @@ pt_br:
         notFound: "Nenhum servidor encontrado: %{name}"
     serverinfo:
         noInfo: Nenhuma informação do servidor disponível
-        success: "bitrate: %{bitrate} Kbps, fps: %{fps}, caiu devido a network: %{network}, lag de renderização: %{rendering}, lag de encoding: %{encoding}"
+        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, caiu devido a network: %{network}, lag de renderização: %{rendering}, lag de encoding: %{encoding}"
     rec:
         started: Gravação iniciada
         stopped: Gravação parada
