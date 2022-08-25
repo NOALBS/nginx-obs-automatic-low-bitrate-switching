@@ -498,7 +498,7 @@ impl InnerConnection {
 
                     if bs.is_streaming {
                         if let Some(client) = &bs.connection {
-                            status = client.info(&read).await.ok()
+                            status = client.info(read).await.ok()
                         }
                     }
 
