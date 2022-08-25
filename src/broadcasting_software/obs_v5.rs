@@ -551,6 +551,10 @@ impl InnerConnection {
                 }
                 Err(e) => {
                     warn!("Unable to connect due to: {}", e);
+
+                    if let obwsv5::Error::Handshake(h) = e {
+                        error!("{}", h);
+                    }
                 }
             };
 
