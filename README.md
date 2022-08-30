@@ -83,6 +83,7 @@ Node-Media-Server is also built into NOALBS for an easy all-in-one streaming sol
 
 -   `git clone <repository-url>` or download from [RELEASES](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
 -   Change into the new directory.
+-   `git switch -f master`
 -   `npm install --production`
 
 If you already have NGINX-RTMP server
