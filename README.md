@@ -1,6 +1,6 @@
-## ========================!! ALERT ALERT !!========================
+## =======!! ALERT ALERT !!=======
 ## NOALBS V1 IS NO LONGER MAINTAINED OR SUPPORTED PLEASE USE V2 => [[HERE]](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases/latest)
-## ========================!! ALERT ALERT !!========================
+## =======!! ALERT ALERT !!=======
 
 ```
     ███╗   ██╗ ██████╗  █████╗ ██╗     ██████╗ ███████╗
@@ -84,8 +84,11 @@ Node-Media-Server is also built into NOALBS for an easy all-in-one streaming sol
 ---
 ## Installation from Source and NGINX Setup
 
+-   Open your operating systems command prompt or terminal
 -   `git clone <repository-url>` or download from [RELEASES](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases/tag/v1.9.5)
--   Change into the new directory.
+-   Change into the new directory. To do this in the same command window or terminal type:
+
+    `cd nginx-obs-automatic-low-bitrate-switching`
 -   `git switch -f master`
 -   `npm install --production`
 
