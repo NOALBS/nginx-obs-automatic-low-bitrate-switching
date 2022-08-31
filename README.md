@@ -1,3 +1,6 @@
+## ========================!! ALERT ALERT !!========================
+## NOALBS V1 IS NO LONGER MAINTAINED OR SUPPORTED PLEASE USE V2 => [[HERE]](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases/latest)
+## ========================!! ALERT ALERT !!========================
 
 ```
     ███╗   ██╗ ██████╗  █████╗ ██╗     ██████╗ ███████╗
