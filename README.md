@@ -81,6 +81,99 @@ Use <https://twitchapps.com/tmi> to get your oauth from Twitch.
 
 The `config.json` file holds all the user configurations.
 
+## EXAMPLE CONFIG.JSON (DO NOT COPY PASTA)
+```json
+{
+  "user": { 
+    "id": null,                                     // Leave ID null, this is for future use.
+    "name": "example",                              // You can change "example" to your name if you like, for instance "b3ck"
+    "passwordHash": null                            // Leave passwordHash null, this is for future use.
+  },
+  "switcher": {
+    "bitrateSwitcherEnabled": true,                 // Enable or Disable auto scene switching in OBS based on your current bitrate.
+    "onlySwitchWhenStreaming": false,               // Enable or Disable the requirement switching only if OBS has streaming active.
+    "instantlySwitchOnRecover": true,               // Bypass retryAttempts and instantly switch to live on bitrate recovery.
+    "autoSwitchNotification": true,                 // Enable or Disable chat notifications when auto switching scenes.
+    "retryAttempts": 5,                             // Number of retry attempts NOALBS will check bitrate before actually switching.
+    "triggers": {
+      "low": 500,                                   // Low Bitrate threshold in kbps.
+      "rtt": 1000,                                  // RTT threshold in ms for SRT.
+      "offline": 450                                // Bitrate in kbps to switch to your offline scene.
+    },
+    "switchingScenes": {
+      "normal": "Live",                             // Scene you want to use in OBS when your bitrate is above your low bitrate threshold.
+      "low": "Low",                                 // Scene you want to use in OBS when your bitrate is below your low bitrate threshold.
+      "offline": "Disconnected"                     // Scene you want to use in OBS when your bitrate is below your offline threshold.
+    },
+    "streamServers": [
+      {
+        "streamServer": {
+          "type": "Belabox",                        // This can either; Nginx, NodeMediaServer, Nimble, SrtLiveServer or Belabox
+          "statsUrl": "http://example.com/stats",   // URL to your stats page.
+          "publisher": "example"                    // Publisher that you're using for the server.
+        },
+        "name": "BELABOX cloud",                    // Name you want to give you server which will be shown in chat when you do !bitrate
+        "priority": 0                               // Priorty you want NOALBS to see this server in, 0 behing the highest.
+      }
+    ]
+  },
+  "software": {
+    "type": "Obs",                                  // NOALBS supports OBS WebSocket v4 and v5. To still use v4 use type ObsOld.
+    "host": "localhost",                            // Host of your OBS, most commonly used is; localhost.
+    "password": "example",                          // Password to the OBS Websockets.
+    "port": 4455                                    // Port to the OBS Websockets.
+  },
+  "chat": {
+    "platform": "Twitch",                           // Twitch is the only current platform supported as of right now.
+    "username": "example",                          // Username of your main Twitch Account.
+    "admins": [                                     // List of admins in the form of an array, the last name in the array doesn't need a comma.
+      "username1",
+      "username2",
+      "username3"
+    ],
+    "prefix": "!",                                  // Prefix you want to use in chat to send commands to NOALBS from chat.
+    "enablePublicCommands": false,                  // Enable or Disable public commands to anyone can use !bitrate in chat.
+    "enableModCommands": true,                      // Enable or Disable mod only commands.
+    "enableAutoStopStreamOnHostOrRaid": true,       // Enable or Disable auto stop stream in OBS when raiding or hosting.
+    "commands": {                                   // Command Options to override defaults to be used in chat.
+      "Fix": {                                      // Full Command Name
+        "permission": null,                         // null = Public, Mod = Moderators, Admin = Administrators
+        "alias": [
+          "f"                                       // Alias to be used in chat, so for this example, !f would replace !fix
+        ]
+      },
+      "Switch": {
+        "permission": "Mod",
+        "alias": [
+          "ss"
+        ]
+      },
+      "Bitrate": {
+        "permission": null,
+        "alias": [
+          "b"
+        ]
+      }
+    }
+  },
+  "optionalScenes": {                               // Optional scenes you can switch to from chat with these simple commands;
+    "starting": null,                               // !starting
+    "ending": null,                                 // !ending
+    "privacy": "privacy",                           // !privacy
+    "refresh": null                                 // !refresh
+  },
+  "optionalOptions": {
+    "twitchTranscodingCheck": false,                // Enable or Disable transcoding check on twitch for your stream. (Non-Partners Only)
+    "twitchTranscodingRetries": 5,                  // How many times you would like the transcoding checked before giving up.
+    "twitchTranscodingDelaySeconds": 15,            // How long you want to wait to check inbetween checks.
+    "offlineTimeout": null,                         // OBS will stop streaming when you you've been in your offline scene for this amount of time.
+    "recordWhileStreaming": false                   // Automatically record when you start streaming.
+  },
+  "language": "en"                                  // Language you would like to use for NOALBS in chat.
+}
+```
+
+## More In-Depth Explanations of each section below:
 ### Software section
 
 ```json
