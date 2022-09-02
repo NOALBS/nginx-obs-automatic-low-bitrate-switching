@@ -181,7 +181,7 @@ impl Switcher {
             }
         }
 
-        let scenes = if let Some(scenes) = self.get_optional_scenes(server).await {
+        let scenes = if let Some(scenes) = get_optional_scenes(server, &state).await {
             scenes
         } else {
             &switcher_config.switching_scenes
@@ -241,36 +241,6 @@ impl Switcher {
         (None, SwitchType::Offline)
     }
 
-    async fn get_optional_scenes<'a>(
-        &'a self,
-        server: Option<&'a stream_servers::StreamServer>,
-    ) -> Option<&'a SwitchingScenes> {
-        if let Some(depends) = &server?.depends_on {
-            if !self.is_stream_server_online(&depends.name).await {
-                debug!("The depended stream server is offline. Going to use the backup scenes.");
-                return Some(&depends.backup_scenes);
-            }
-        }
-
-        server?.override_scenes.as_ref()
-    }
-
-    async fn is_stream_server_online(&self, server_name: &str) -> bool {
-        match self
-            .state
-            .read()
-            .await
-            .config
-            .switcher
-            .stream_servers
-            .iter()
-            .find(|&x| x.name == server_name)
-        {
-            Some(server) => server.stream_server.bitrate().await.message.is_some(),
-            None => false,
-        }
-    }
-
     pub async fn switch_if_necessary(
         &self,
         switch_scene: &str,
@@ -327,6 +297,36 @@ impl Switcher {
         }
 
         Ok(())
+    }
+}
+
+async fn get_optional_scenes<'a>(
+    server: Option<&'a stream_servers::StreamServer>,
+    state: &tokio::sync::RwLockReadGuard<'_, crate::state::State>,
+) -> Option<&'a SwitchingScenes> {
+    if let Some(depends) = &server?.depends_on {
+        if !is_stream_server_online(&depends.name, state).await {
+            debug!("The depended stream server is offline. Going to use the backup scenes.");
+            return Some(&depends.backup_scenes);
+        }
+    }
+
+    server?.override_scenes.as_ref()
+}
+
+async fn is_stream_server_online(
+    server_name: &str,
+    state: &tokio::sync::RwLockReadGuard<'_, crate::state::State>,
+) -> bool {
+    match state
+        .config
+        .switcher
+        .stream_servers
+        .iter()
+        .find(|&x| x.name == server_name)
+    {
+        Some(server) => server.stream_server.bitrate().await.message.is_some(),
+        None => false,
     }
 }
 
