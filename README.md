@@ -113,7 +113,9 @@ The `config.json` file holds all the user configurations.
           "publisher": "example"                    // Publisher that you're using for the server.
         },
         "name": "BELABOX cloud",                    // Name you want to give you server which will be shown in chat when you do !bitrate
-        "priority": 0,                              // Priorty you want NOALBS to see this server in, 0 behing the highest.
+        "priority": 0,                              // Priority you want NOALBS to see this server in, 0 behing the highest.
+        "overrideScenes": null,                     // Optional field to override the default scenes.
+        "dependsOn": null,                          // Optional field explained here: https://github.com/715209/nginx-obs-automatic-low-bitrate-switching#depends-on
         "enabled": true                             // Enable or Disable the server, this allows you to have mutiple servers saved, then pick and choose which ones you want enabled.
       }
     ]
@@ -217,7 +219,8 @@ Example stream server object:
 }
 ```
 
-- `streamServer`: Replace this with the [server](#stream-server-objects) you would like to use
+- `streamServer`: Replace the entire `streamServer` section with the one of [these](#stream-server-objects).
+- `type`: Nginx, NodeMediaServer, Nimble, SrtLiveServer, or Belabox
 - `name`: A unique name to distinguish the server
 - `priority`: Decides which stream server to monitor when multiple are online. 0 is consired the highest.
 - `overrideScenes`: Optional field to override the default scenes
