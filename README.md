@@ -113,7 +113,8 @@ The `config.json` file holds all the user configurations.
           "publisher": "example"                    // Publisher that you're using for the server.
         },
         "name": "BELABOX cloud",                    // Name you want to give you server which will be shown in chat when you do !bitrate
-        "priority": 0                               // Priorty you want NOALBS to see this server in, 0 behing the highest.
+        "priority": 0,                              // Priorty you want NOALBS to see this server in, 0 behing the highest.
+        "enabled": true                             // Enable or Disable the server, this allows you to have mutiple servers saved, then pick and choose which ones you want enabled.
       }
     ]
   },
