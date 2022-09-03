@@ -31,6 +31,7 @@ impl Switcher {
 
                 if let Some(notifier) = switcher.get_sleep_notifier_if_necessary().await {
                     notifier.notified().await;
+                    info!("Switcher running");
                     continue;
                 }
 
