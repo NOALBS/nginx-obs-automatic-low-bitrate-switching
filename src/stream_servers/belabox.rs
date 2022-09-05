@@ -1,7 +1,7 @@
 use async_trait::async_trait;
-use log::{error, trace};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use tracing::{error, trace};
 
 use super::{Bsl, StreamServersCommands, SwitchLogic};
 use crate::switcher::{SwitchType, Triggers};
@@ -27,8 +27,8 @@ impl Belabox {
     pub async fn get_stats(&self) -> Option<Stat> {
         let res = match reqwest::get(&self.stats_url).await {
             Ok(res) => res,
-            Err(_) => {
-                error!("Stats page ({}) is unreachable", self.stats_url);
+            Err(e) => {
+                error!("Stats page is unreachable, {}", e);
                 return None;
             }
         };
