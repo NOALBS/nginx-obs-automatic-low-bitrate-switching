@@ -924,7 +924,7 @@ dependencies = [
 
 [[package]]
 name = "noalbs"
-version = "2.7.1"
+version = "2.7.2"
 dependencies = [
  "anyhow",
  "argon2",
