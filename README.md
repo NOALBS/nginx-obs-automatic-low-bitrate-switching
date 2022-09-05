@@ -82,6 +82,7 @@ Use <https://twitchapps.com/tmi> to get your oauth from Twitch.
 The `config.json` file holds all the user configurations.
 
 ## EXAMPLE CONFIG.JSON (DO NOT COPY PASTA)
+
 ```json
 {
   "user": { 
@@ -176,7 +177,8 @@ The `config.json` file holds all the user configurations.
 }
 ```
 
-## More In-Depth Explanations of each section below:
+## More In-Depth Explanations of each section below
+
 ### Software section
 
 ```json
