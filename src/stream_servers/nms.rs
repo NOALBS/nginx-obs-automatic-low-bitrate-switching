@@ -33,13 +33,17 @@ pub struct NodeMediaServer {
     pub key: String,
 
     pub auth: Option<Auth>,
+
+    /// Client to make HTTP requests with
+    #[serde(skip)]
+    pub client: reqwest::Client,
 }
 
 impl NodeMediaServer {
     pub async fn get_stats(&self) -> Option<Stat> {
         let url = format!("{}/{}/{}", &self.stats_url, &self.application, &self.key);
 
-        let client = reqwest::Client::new();
+        let client = &self.client;
         let mut request = client.get(url);
 
         if let Some(auth) = &self.auth {

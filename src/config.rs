@@ -420,18 +420,21 @@ impl From<RtmpOld> for stream_servers::StreamServer {
                 stats_url: r.stats,
                 application: r.application.unwrap(),
                 key: r.key.unwrap(),
+                client: reqwest::Client::new(),
             }),
             "node-media-server" => Box::new(stream_servers::nms::NodeMediaServer {
                 stats_url: r.stats,
                 application: r.application.unwrap(),
                 key: r.key.unwrap(),
                 auth: None,
+                client: reqwest::Client::new(),
             }),
             "nimble" => Box::new(stream_servers::nimble::Nimble {
                 id: r.id.unwrap(),
                 stats_url: r.stats,
                 application: r.application.unwrap(),
                 key: r.key.unwrap(),
+                client: reqwest::Client::new(),
             }),
             "srt-live-server" => {
                 let stats_url = r.stats;
@@ -442,11 +445,13 @@ impl From<RtmpOld> for stream_servers::StreamServer {
                     Box::new(stream_servers::belabox::Belabox {
                         stats_url,
                         publisher,
+                        client: reqwest::Client::new(),
                     })
                 } else {
                     Box::new(stream_servers::sls::SrtLiveServer {
                         stats_url,
                         publisher,
+                        client: reqwest::Client::new(),
                     })
                 }
             }

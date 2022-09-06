@@ -71,6 +71,10 @@ pub struct Nginx {
 
     /// Stream key
     pub key: String,
+
+    /// Client to make HTTP requests with
+    #[serde(skip)]
+    pub client: reqwest::Client,
 }
 
 impl Nginx {
@@ -78,7 +82,7 @@ impl Nginx {
     /// the stats update every 10 seconds.
     pub async fn get_stats(&self) -> Option<NginxRtmpStream> {
         //TODO: keep the reqwest object around for future requests
-        let res = match reqwest::get(&self.stats_url).await {
+        let res = match self.client.get(&self.stats_url).send().await {
             Ok(res) => res,
             Err(_) => {
                 error!("Stats page ({}) is unreachable", self.stats_url);

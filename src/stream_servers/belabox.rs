@@ -21,11 +21,15 @@ pub struct Belabox {
 
     /// StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
     pub publisher: String,
+
+    /// Client to make HTTP requests with
+    #[serde(skip)]
+    pub client: reqwest::Client,
 }
 
 impl Belabox {
     pub async fn get_stats(&self) -> Option<Stat> {
-        let res = match reqwest::get(&self.stats_url).await {
+        let res = match self.client.get(&self.stats_url).send().await {
             Ok(res) => res,
             Err(e) => {
                 error!("Stats page is unreachable, {}", e);

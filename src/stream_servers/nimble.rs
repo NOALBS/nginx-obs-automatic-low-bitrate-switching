@@ -95,13 +95,17 @@ pub struct Nimble {
 
     /// Outgoing stream "Stream Name"
     pub key: String,
+
+    /// Client to make HTTP requests with
+    #[serde(skip)]
+    pub client: reqwest::Client,
 }
 
 impl Nimble {
     pub async fn get_stats(&self) -> Option<Stat> {
         let url = format!("{}/manage/srt_receiver_stats", &self.stats_url);
 
-        let res = match reqwest::get(&url).await {
+        let res = match self.client.get(&url).send().await {
             Ok(res) => res,
             Err(_) => {
                 error!("Stats page ({}) is unreachable", self.stats_url);

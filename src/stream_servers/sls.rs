@@ -29,11 +29,15 @@ pub struct SrtLiveServer {
 
     /// StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
     pub publisher: String,
+
+    /// Client to make HTTP requests with
+    #[serde(skip)]
+    pub client: reqwest::Client,
 }
 
 impl SrtLiveServer {
     pub async fn get_stats(&self) -> Option<Stat> {
-        let res = match reqwest::get(&self.stats_url).await {
+        let res = match self.client.get(&self.stats_url).send().await {
             Ok(res) => res,
             Err(_) => {
                 error!("Stats page ({}) is unreachable", self.stats_url);
