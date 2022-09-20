@@ -108,7 +108,10 @@ where
     let noalbs_users = std::fs::read_dir(dir)?
         .filter_map(|f| f.ok())
         .map(|f| f.path())
-        .filter(|e| e.extension().unwrap() == "json")
+        .filter(|e| match e.extension() {
+            Some(extension) => extension == "json",
+            None => false,
+        })
         .map(|p| Noalbs::new(Box::new(config::File { name: p }), broadcast_tx.clone()))
         .collect::<Vec<_>>();
 
