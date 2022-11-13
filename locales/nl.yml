@@ -1,4 +1,4 @@
-en:
+nl:
     start:
         success: Stream is met succes gestart
         error: "Fout, kan de stream niet starten: %{error}"
