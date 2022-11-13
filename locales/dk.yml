@@ -14,6 +14,12 @@ dk:
         noParams: Ingen scene angivet
         success: Scene er skiftet til "%{scene}"
         error: "Fejl: {scene}"
+    source:
+        noParams: No source specified
+        success: Source "%{name}" successfully %{status}
+        error: Error toggling source "%{name}"
+        enabled: enabled
+        disabled: disabled
     bitrate:
         success: "%{name}: %{message}"
         error: "Nuværende bitrate: OFFLINE"

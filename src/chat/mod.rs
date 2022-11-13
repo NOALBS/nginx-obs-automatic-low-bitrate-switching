@@ -33,6 +33,7 @@ pub enum Command {
     Rec,
     Refresh,
     Rtrigger,
+    Source,
     Sourceinfo,
     Start,
     Stop,
@@ -70,6 +71,7 @@ impl From<&str> for Command {
             "stop" => Command::Stop,
             "switch" => Command::Switch,
             "trigger" => Command::Trigger,
+            "source" => Command::Source,
 
             "noalbsversion" => Command::Version,
 

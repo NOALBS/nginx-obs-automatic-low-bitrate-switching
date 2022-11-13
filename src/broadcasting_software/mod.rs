@@ -22,6 +22,8 @@ pub trait BroadcastingSoftwareLogic: Send + Sync {
 
     async fn current_scene(&self) -> Result<String, Error>;
 
+    async fn toggle_source(&self, source: &str) -> Result<(String, bool), Error>;
+
     async fn info(
         &self,
         state: &sync::RwLockReadGuard<state::State>,

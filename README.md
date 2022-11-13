@@ -44,6 +44,7 @@ This script gives you the option to enable some simple chat commands to help you
 |    Admins    | !alias (alias) (command) | add an alias for a command.                                                                             | !alias ss switch   |
 |    Admins    | !alias rem (alias)       | removes an alias for a command.                                                                         | !alias rem ss      |
 |    Admins    | !switch (scene)          | switches to the provided SCENE ([fuzzy match](https://wikipedia.org/wiki/Approximate_string_matching)). | !switch INTRO      |
+|    Admins    | !source (value)          | Toggles an OBS source item visibility on the current scene                                              | !source media      |
 |    Admins    | !live                    | switch to the live scene.                                                                               | !live              |
 |    Admins    | !privacy                 | switch to the privacy scene.                                                                            | !privacy           |
 |    Admins    | !starting                | switch to the starting scene.                                                                           | !starting          |

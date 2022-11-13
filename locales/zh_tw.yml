@@ -16,6 +16,12 @@ zh_tw:
         noParams: 沒有指定場景
         success: 場景成功切換到 "%{scene}"
         error: 錯誤 無法切換到 "%{scene}"
+    source:
+        noParams: No source specified
+        success: Source "%{name}" successfully %{status}
+        error: Error toggling source "%{name}"
+        enabled: enabled
+        disabled: disabled
     bitrate:
         success: "%{name}: %{message}"
         error: "目前位元率: 離線"

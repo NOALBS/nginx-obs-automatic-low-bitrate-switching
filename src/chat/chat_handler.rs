@@ -517,6 +517,7 @@ impl DispatchCommand {
             chat::Command::Mod => self.enable_mod(params.next()).await,
             chat::Command::Public => self.enable_public(params.next()).await,
             chat::Command::Sourceinfo => self.source_info(params.next()).await,
+            chat::Command::Source => self.source(params.next()).await,
             chat::Command::Unknown(_) => {}
         };
     }
@@ -1256,6 +1257,51 @@ impl DispatchCommand {
         );
 
         self.send(msg).await;
+    }
+
+    async fn source(&self, name: Option<&str>) {
+        let name = match name {
+            Some(name) => name,
+            None => {
+                self.send(t!("source.noParams", locale = &self.lang)).await;
+                return;
+            }
+        };
+
+        let msg = match self.toggle_source(name).await {
+            Ok((scene, status)) => {
+                let status = if status {
+                    t!("source.enabled", locale = &self.lang)
+                } else {
+                    t!("source.disabled", locale = &self.lang)
+                };
+
+                t!(
+                    "source.success",
+                    locale = &self.lang,
+                    name = &scene,
+                    status = &status
+                )
+            }
+            Err(e) => {
+                error!("{}", e);
+                t!("source.error", locale = &self.lang, name = name)
+            }
+        };
+
+        self.send(msg).await;
+    }
+    async fn toggle_source(&self, scene: &str) -> Result<(String, bool), error::Error> {
+        self.user
+            .state
+            .read()
+            .await
+            .broadcasting_software
+            .connection
+            .as_ref()
+            .ok_or(error::Error::NoSoftwareSet)?
+            .toggle_source(scene)
+            .await
     }
 }
 

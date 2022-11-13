@@ -14,6 +14,12 @@ ru:
         noParams: "Ошибка: сцена не указана"
         success: Успешное переключение сцены на "%{scene}"
         error: Ошибка не удается переключиться на другую сцену "%{scene}"
+    source:
+        noParams: No source specified
+        success: Source "%{name}" successfully %{status}
+        error: Error toggling source "%{name}"
+        enabled: enabled
+        disabled: disabled
     bitrate:
         success: "%{name}: %{message}"
         error: "Текущий битрейт: Не в сети"

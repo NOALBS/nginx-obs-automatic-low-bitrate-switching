@@ -29,6 +29,9 @@ pub enum Error {
     #[error("No software set for user")]
     NoSoftwareSet,
 
+    #[error("No source found with that name")]
+    NoSourceFound,
+
     #[error("Unable to convert enabled to bool")]
     EnabledToBoolConversionError,
 

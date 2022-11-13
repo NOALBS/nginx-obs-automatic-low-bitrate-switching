@@ -14,6 +14,12 @@ es:
         noParams: No se especifico escena
         success: Escena cambiada a "%{scene}"
         error: Error no se pudo cambiar a escena "%{scene}"
+    source:
+        noParams: No source specified
+        success: Source "%{name}" successfully %{status}
+        error: Error toggling source "%{name}"
+        enabled: enabled
+        disabled: disabled
     bitrate:
         success: "%{name}: %{message}"
         error: "Sin conexion :("

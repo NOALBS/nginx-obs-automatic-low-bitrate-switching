@@ -222,6 +222,29 @@ impl Obs {
             }
         }
     }
+
+    async fn get_sources(&self) -> Result<Vec<SourceItem>, error::Error> {
+        let connection = self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let scene_items = client.scene_items().get_scene_item_list(None).await?;
+
+        let scene_items = scene_items
+            .scene_items
+            .iter()
+            .map(|s| SourceItem {
+                id: s.item_id,
+                scene_name: scene_items.scene_name.to_owned(),
+                source_name: s.source_name.to_owned(),
+                source_kind: s.source_kind.to_owned(),
+            })
+            .collect::<Vec<SourceItem>>();
+
+        Ok(scene_items)
+    }
 }
 
 #[async_trait]
@@ -520,6 +543,51 @@ impl BroadcastingSoftwareLogic for Obs {
             .as_ref()
             .cloned()
             .ok_or(error::Error::NoServerInfo)
+    }
+
+    async fn toggle_source(&self, source: &str) -> Result<(String, bool), error::Error> {
+        let sources = self.get_sources().await?;
+        let source = source.to_lowercase();
+
+        let res = sources
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                let s = &s.source_name.to_lowercase();
+                (i, strsim::normalized_damerau_levenshtein(&source, s))
+            })
+            .min_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+        let source = if let Some(s) = res {
+            &sources[s.0]
+        } else {
+            return Err(error::Error::NoSourceFound);
+        };
+
+        let connection = self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let item_prop = client
+            .scene_items()
+            .get_scene_item_properties(Some(&source.scene_name), Either::Left(&source.source_name))
+            .await?;
+
+        let render = !item_prop.visible;
+
+        client
+            .scene_items()
+            .set_scene_item_render(obws::requests::SceneItemRender {
+                scene_name: Some(&source.scene_name),
+                source: &source.source_name,
+                item: None,
+                render,
+            })
+            .await?;
+
+        Ok((source.source_name.to_owned(), render))
     }
 }
 

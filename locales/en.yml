@@ -14,6 +14,12 @@ en:
         noParams: No scene specified
         success: Scene successfully switched to "%{scene}"
         error: Error can't switch to scene "%{scene}"
+    source:
+        noParams: No source specified
+        success: Source "%{name}" successfully %{status}
+        error: Error toggling source "%{name}"
+        enabled: enabled
+        disabled: disabled
     bitrate:
         success: "%{name}: %{message}"
         error: "No connection :("

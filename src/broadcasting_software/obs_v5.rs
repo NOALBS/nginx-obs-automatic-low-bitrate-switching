@@ -204,6 +204,61 @@ impl Obsv5 {
             }
         }
     }
+
+    async fn get_sources(&self) -> Result<Vec<SourceItem>, error::Error> {
+        let connection = self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let mut sources: Vec<SourceItem> = Vec::new();
+        let current_scene = client.scenes().current_program_scene().await?;
+        self.get_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false)
+            .await;
+
+        Ok(sources)
+    }
+
+    #[async_recursion]
+    async fn get_sources_rec(
+        &self,
+        client: &Client,
+        scene: String,
+        visited: &mut Vec<String>,
+        sources: &mut Vec<SourceItem>,
+        group: bool,
+    ) {
+        let items = if !group {
+            client.scene_items().list(&scene).await.unwrap()
+        } else {
+            client.scene_items().list_group(&scene).await.unwrap()
+        };
+        let current_name = scene;
+
+        for item in items {
+            sources.push(SourceItem {
+                id: item.id,
+                scene_name: current_name.to_owned(),
+                source_name: item.source_name.to_owned(),
+                source_kind: String::new(), // Doesn't matter
+            });
+
+            if matches!(
+                item.source_type,
+                obwsv5::responses::scene_items::SourceType::Scene
+            ) && !visited.contains(&item.source_name)
+            {
+                visited.push(item.source_name.to_owned());
+
+                // Should always be present because of the type check
+                let group = item.is_group.unwrap();
+
+                self.get_sources_rec(client, item.source_name, visited, sources, group)
+                    .await;
+            }
+        }
+    }
 }
 
 #[async_trait]
@@ -434,6 +489,48 @@ impl BroadcastingSoftwareLogic for Obsv5 {
         };
 
         Ok(ss)
+    }
+
+    async fn toggle_source(&self, source: &str) -> Result<(String, bool), error::Error> {
+        let sources = self.get_sources().await?;
+        let source = source.to_lowercase();
+
+        let res = sources
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                let s = &s.source_name.to_lowercase();
+                (i, strsim::normalized_damerau_levenshtein(&source, s))
+            })
+            .min_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+        let source = if let Some(s) = res {
+            &sources[s.0]
+        } else {
+            return Err(error::Error::NoSourceFound);
+        };
+
+        let connection = self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let enabled = !client
+            .scene_items()
+            .enabled(&source.scene_name, source.id)
+            .await?;
+
+        client
+            .scene_items()
+            .set_enabled(SetEnabled {
+                scene: &source.scene_name,
+                item_id: source.id,
+                enabled,
+            })
+            .await?;
+
+        Ok((source.source_name.to_owned(), enabled))
     }
 }
 
