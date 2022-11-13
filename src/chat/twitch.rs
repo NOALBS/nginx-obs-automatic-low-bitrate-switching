@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use tokio::sync::mpsc;
-use tracing::{error, info};
+use tracing::{error, info, trace};
 use twitch_irc::{
     login::StaticLoginCredentials,
     message,
@@ -12,6 +12,7 @@ use twitch_irc::{
 
 use crate::{
     chat::{self, ChatPlatform, HandleMessage},
+    twitch_pubsub::PubsubManager,
     ChatSender,
 };
 
@@ -35,7 +36,9 @@ impl Twitch {
         let (incoming_messages, client) =
             TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(config);
 
-        let event_loop_handle = tokio::spawn(Self::chat_loop(incoming_messages, chat_handler_tx));
+        let pubsub = PubsubManager::new(chat_handler_tx.clone());
+        let event_loop_handle =
+            tokio::spawn(Self::chat_loop(incoming_messages, chat_handler_tx, pubsub));
 
         Self {
             client,
@@ -50,11 +53,20 @@ impl Twitch {
     async fn chat_loop(
         mut incoming_messages: mpsc::UnboundedReceiver<message::ServerMessage>,
         chat_handler_tx: tokio::sync::mpsc::Sender<super::HandleMessage>,
+        pubsub: PubsubManager,
     ) {
         while let Some(message) = incoming_messages.recv().await {
             // println!("Received message: {:?}", message);
 
             match message {
+                message::ServerMessage::RoomState(state) => {
+                    trace!(
+                        "user_id: {}, user_name: {}",
+                        state.channel_id,
+                        state.channel_login
+                    );
+                    pubsub.add_raid(state.channel_id, state.channel_login).await;
+                }
                 message::ServerMessage::Notice(msg) => {
                     if msg.message_text == "Login authentication failed" {
                         error!("Twitch authentication failed");

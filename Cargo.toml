@@ -27,6 +27,7 @@ strsim = "0.10.0"
 thiserror = "1.0"
 tokio = { version = "1.10", features = ["rt", "rt-multi-thread", "macros", "signal", "time", "sync"] }
 tokio-stream = "0.1"
+tokio-tungstenite = { version = "0.17", features = [ "native-tls" ] }
 twitch-irc = "4.0"
 typetag = "0.2"
 

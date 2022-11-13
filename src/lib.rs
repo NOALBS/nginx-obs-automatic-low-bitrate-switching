@@ -7,6 +7,7 @@ pub mod noalbs;
 pub mod state;
 pub mod stream_servers;
 pub mod switcher;
+pub mod twitch_pubsub;
 pub mod user_manager;
 pub mod web_server;
 pub mod ws;
