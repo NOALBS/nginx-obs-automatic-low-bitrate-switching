@@ -1,0 +1,77 @@
+en:
+    start:
+        success: Stream is met succes gestart
+        error: "Fout, kan de stream niet starten: %{error}"
+    startTwitchTranscoding:
+        trying: Probeer de stream te starten met transcodering
+        successNoTranscoding: De stream is gestart zonder transcodering
+        success: Stream gestart met transcodering %{attemptsMessage}
+        attempts: ", %{count} pogingen"
+    stop:
+        success: Stream is succesvol gestopt
+        error: "Fout, kan de stream niet stoppen: %{error}"
+    switch:
+        noParams: Geen scène opgegeven
+        success: Scène succesvol overgeschakeld naar "%{scene}"
+        error: Fout, kan niet overschakelen naar scène "%{scene}"
+    bitrate:
+        success: "%{name}: %{message}"
+        error: "Geen verbinding :("
+    trigger:
+        success: Trigger succesvol ingesteld op %{number}
+        successDisabled: Trigger succesvol uitgeschakeld
+        error: Fout bij bewerken trigger %{number} is geen geldige waarde
+        current: Huidige trigger ingesteld op %{number}
+        disabled: Huidige trigger is uitgeschakeld
+    sourceinfo:
+        noInfo: Geen informatie
+        notFound: "Fout geen server gevonden met de naam: %{name}"
+    serverinfo:
+        noInfo: Geen serverinformatie beschikbaar
+        success: "Scène: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, gedaald als gevolg van: netwerk: %{network}, weergavevertraging: %{rendering}, coderingsvertraging: %{encoding}"
+    rec:
+        started: Opname gestart
+        stopped: Opname gestopt
+        errorStatus: Fout bij ophalen van opnamestatus
+        errorToggle: Fout bij het wisselen tussen opname
+    fix:
+        try: Proberen de stream te repareren
+        error: Fout bij het repareren van de stream
+    refresh:
+        try: Stream vernieuwen
+        error: Fout bij het vernieuwen van de stream
+        success: Verversen van de stream voltooid
+        noScene: Geen ververscène ingesteld, gebruik fix
+    alias:
+        success: Alias ​​toegevoegd %{alias} -> %{command}
+        removed: Alias %{alias} verwijderd
+        errorCommand: Opdracht %{command} bestaat niet
+        errorAlias: Alias %{alias} bestaat niet
+        errorAlreadyUsed: "%{alias} al gebruikt als alias"
+        errorIncorrectArguments: Fout, onjuiste argumenten gegeven
+    sceneSwitch:
+        switch: Scène overgeschakeld naar "%{scene}"
+    offlineTimeout:
+        timeout: Offline time-out bereikt, de stream wordt gestopt
+    handleCommands:
+        public: Openbare opdrachten %{condition}
+        mod: Mod opdrachten %{condition}
+        notify: Melding automatisch wisselen %{condition}
+        autostop: Stream automatisch stoppen %{condition}
+        enabled: is ingeschakeld
+        disabled: is uitgeschakeld
+    noalbs:
+        prefix: NOALBS prefix bijwerken naar %{prefix}
+        errorPrefix: Kan NOALBS niet bijwerken
+        switcherEnabled: De wisselaar is ingeschakeld
+        switcherDisabled: De wisselaar is uitgeschakeld
+        instantSwitch: Onmiddellijk inschakelen herstellen %{condition}
+        langError: Kan de NOALBS taal niet bijwerken
+        langErrorInvalid: Fout bij het bewerken van taal %{lang} is geen geldige waarde
+        langSuccess: NOALBS taal geüpdatet naar %{lang}
+        retryCount: Huidige poging ingesteld op %{count}
+        retryError: Fout bij het bewerken van nieuwe pogingen %{count} is geen geldige waarde
+        retrySuccess: Opnieuw proberen ingesteld op %{count}
+    scene:
+        success: Overschakelen naar %{scene} scène
+        error: Geen %{scene} scène ingesteld
