@@ -11,7 +11,7 @@ use obws::{
 };
 use serde::Deserialize;
 use tokio::sync::{self, mpsc, Mutex};
-use tracing::{error, info, warn};
+use tracing::{error, info, warn, Instrument};
 
 use crate::{
     config, error, noalbs,
@@ -36,16 +36,22 @@ impl Obs {
 
         let connection_inner = connection.clone();
         let state_inner = state.clone();
-        let connection_join = tokio::spawn(async move {
-            let connection = InnerConnection {
-                connection_info,
-                state: state_inner,
-                connection: connection_inner,
-                event_sender: event_tx,
-            };
+        let connection_join = tokio::spawn(async {
+            let user = { state_inner.read().await.config.user.name.to_owned() };
 
-            // TODO: Any errors to handle?
-            connection.run().await;
+            async move {
+                let connection = InnerConnection {
+                    connection_info,
+                    state: state_inner,
+                    connection: connection_inner,
+                    event_sender: event_tx,
+                };
+
+                // TODO: Any errors to handle?
+                connection.run().await;
+            }
+            .instrument(tracing::info_span!("OBS", %user))
+            .await
         });
 
         let event_join = tokio::spawn(Self::event_handler(event_rx, state));
