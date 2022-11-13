@@ -74,24 +74,6 @@ impl Twitch {
                         // TODO: Handle panic
                         // panic!("Twitch authentication failed");
                     }
-
-                    // if msg.message_id == Some("host_on".to_string()) {
-                    //     debug!("Channel started hosting, stopping the stream");
-                    // }
-                }
-                message::ServerMessage::HostTarget(host) => {
-                    if let message::HostTargetAction::HostModeOn { .. } = host.action {
-                        chat_handler_tx
-                            .send(HandleMessage::InternalChatUpdate(
-                                chat::InternalChatUpdate {
-                                    channel: host.channel_login,
-                                    platform: ChatPlatform::Twitch,
-                                    kind: chat::InternalUpdate::StartedHosting,
-                                },
-                            ))
-                            .await
-                            .unwrap();
-                    }
                 }
                 message::ServerMessage::Privmsg(msg) => {
                     let mut permission = chat::Permission::Public;
