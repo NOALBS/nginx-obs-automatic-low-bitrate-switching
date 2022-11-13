@@ -43,7 +43,7 @@ nl:
         success: Verversen van de stream voltooid
         noScene: Geen ververscène ingesteld, gebruik fix
     alias:
-        success: Alias ​​toegevoegd %{alias} -> %{command}
+        success: Alias toegevoegd %{alias} -> %{command}
         removed: Alias %{alias} verwijderd
         errorCommand: Opdracht %{command} bestaat niet
         errorAlias: Alias %{alias} bestaat niet
