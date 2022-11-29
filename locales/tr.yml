@@ -9,6 +9,7 @@ tr:
         attempts: ", took %{count} attempts"
     stop:
         success: Yayın başarıyla durduruldu
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Hata oluştu: %{error}"
     switch:
         noParams: Sahne belirtilmedi

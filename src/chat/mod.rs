@@ -45,6 +45,9 @@ pub enum Command {
     EndingScene,
     PrivacyScene,
     Unknown(String),
+
+    // Internal only
+    StopOnRaid(RaidedInfo),
 }
 
 impl From<&str> for Command {
@@ -190,8 +193,14 @@ pub struct InternalChatUpdate {
 
 #[derive(Debug)]
 pub enum InternalUpdate {
-    StartedHosting,
+    Raided(RaidedInfo),
     OfflineTimeout,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct RaidedInfo {
+    pub target: String,
+    pub display: String,
 }
 
 #[derive(Debug)]

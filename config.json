@@ -104,6 +104,7 @@
     "enablePublicCommands": false,
     "enableModCommands": true,
     "enableAutoStopStreamOnHostOrRaid": true,
+    "announceRaidOnAutoStop": true,
     "commands": {
       "Fix": {
         "permission": null,

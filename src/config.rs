@@ -135,6 +135,7 @@ pub struct Chat {
     pub enable_public_commands: bool,
     pub enable_mod_commands: bool,
     pub enable_auto_stop_stream_on_host_or_raid: bool,
+    pub announce_raid_on_auto_stop: bool,
     pub commands: Option<HashMap<chat::Command, CommandInfo>>,
 }
 
@@ -149,6 +150,7 @@ impl Default for Chat {
             enable_public_commands: true,
             enable_mod_commands: true,
             enable_auto_stop_stream_on_host_or_raid: true,
+            announce_raid_on_auto_stop: true,
             commands: None,
         }
     }

@@ -9,6 +9,7 @@ nl:
         attempts: ", %{count} pogingen"
     stop:
         success: Stream is succesvol gestopt
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Fout, kan de stream niet stoppen: %{error}"
     switch:
         noParams: Geen scène opgegeven

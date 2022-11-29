@@ -149,8 +149,11 @@ impl ChatHandler {
                 }
                 HandleMessage::InternalChatUpdate(update) => {
                     use chat::InternalUpdate;
-                    match &update.kind {
-                        InternalUpdate::StartedHosting => self.handle_hosting(update).await,
+                    match update.kind {
+                        InternalUpdate::Raided(ref target_info) => {
+                            let target_info = target_info.to_owned();
+                            self.handle_raid(update, target_info).await
+                        }
                         InternalUpdate::OfflineTimeout => self.handle_offline_timeout(update).await,
                     };
                 }
@@ -306,10 +309,14 @@ impl ChatHandler {
         Some(permission_is_allowed(permission, user_permission))
     }
 
-    pub async fn handle_hosting(&self, host: chat::InternalChatUpdate) -> Option<()> {
+    pub async fn handle_raid(
+        &self,
+        raid: chat::InternalChatUpdate,
+        target_info: chat::RaidedInfo,
+    ) -> Option<()> {
         let user = self
             .user_manager
-            .get_user_by_chat_platform(&host.channel, &host.platform)
+            .get_user_by_chat_platform(&raid.channel, &raid.platform)
             .await?;
 
         let state = user.state.read().await;
@@ -328,23 +335,28 @@ impl ChatHandler {
             return None;
         }
 
+        let command = if state.config.chat.as_ref()?.announce_raid_on_auto_stop {
+            chat::Command::StopOnRaid(target_info)
+        } else {
+            chat::Command::Stop
+        };
+
         info!(
-            "Channel started hosting, stopping the stream ({:?}) {}",
-            host.platform, host.channel
+            "Channel raided, stopping the stream ({:?}) {}",
+            raid.platform, raid.channel
         );
 
         let dc = DispatchCommand {
             user: user.clone(),
             lang: user.chat_language().await.unwrap().to_string(),
-            chat_sender: self.chat_senders.get(&host.platform)?.clone(),
-            command: chat::Command::Stop,
+            chat_sender: self.chat_senders.get(&raid.platform)?.clone(),
+            command,
             chat_message: chat::ChatMessage {
-                platform: host.platform,
+                platform: raid.platform,
                 permission: chat::Permission::Admin,
-                channel: host.channel,
+                channel: raid.channel,
                 sender: "NOALBSbot".to_string(),
-                message: "Hi your channel started hosting and I would like to stop it for you"
-                    .to_string(),
+                message: "Hi your channel raided and I would like to stop it for you".to_string(),
             },
         };
 
@@ -480,7 +492,7 @@ impl DispatchCommand {
         let mut params = self.chat_message.message.split_whitespace();
         params.next();
 
-        match self.command {
+        match &self.command {
             chat::Command::Alias => self.alias(params).await,
             chat::Command::Autostop => self.autostop(params.next()).await,
             chat::Command::Bitrate => self.bitrate().await,
@@ -490,7 +502,7 @@ impl DispatchCommand {
             chat::Command::Notify => self.notify(params.next()).await,
             chat::Command::Rec => self.record().await,
             chat::Command::Start => self.start().await,
-            chat::Command::Stop => self.stop().await,
+            chat::Command::Stop => self.stop(None).await,
             chat::Command::Switch => self.switch(params.next()).await,
             chat::Command::Trigger => {
                 self.trigger(switcher::TriggerType::Low, params.next())
@@ -519,6 +531,10 @@ impl DispatchCommand {
             chat::Command::Sourceinfo => self.source_info(params.next()).await,
             chat::Command::Source => self.source(params.next()).await,
             chat::Command::Unknown(_) => {}
+
+            chat::Command::StopOnRaid(target_info) => {
+                self.stop_on_raid(target_info.to_owned()).await;
+            }
         };
     }
 
@@ -753,7 +769,7 @@ impl DispatchCommand {
         true
     }
 
-    async fn stop(&self) {
+    async fn stop(&self, raid: Option<chat::RaidedInfo>) {
         let record = {
             self.user
                 .state
@@ -766,8 +782,19 @@ impl DispatchCommand {
 
         let stop = self.stop_bsc().await;
 
+        let success_msg = if let Some(info) = raid {
+            t!(
+                "stop.raid",
+                locale = &self.lang,
+                channel = &info.target,
+                display_channel = &info.display
+            )
+        } else {
+            t!("stop.success", locale = &self.lang)
+        };
+
         let msg = match stop {
-            Ok(_) => t!("stop.success", locale = &self.lang),
+            Ok(_) => success_msg,
             Err(ref e) => t!("stop.error", locale = &self.lang, error = &e.to_string()),
         };
 
@@ -1291,6 +1318,7 @@ impl DispatchCommand {
 
         self.send(msg).await;
     }
+
     async fn toggle_source(&self, scene: &str) -> Result<(String, bool), error::Error> {
         self.user
             .state
@@ -1302,6 +1330,10 @@ impl DispatchCommand {
             .ok_or(error::Error::NoSoftwareSet)?
             .toggle_source(scene)
             .await
+    }
+
+    async fn stop_on_raid(&self, target_info: chat::RaidedInfo) {
+        self.stop(Some(target_info)).await;
     }
 }
 

@@ -9,6 +9,7 @@ pt_br:
         attempts: ", após %{count} tentativas"
     stop:
         success: Stream parada
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Não foi possível parar a stream: %{error}"
     switch:
         noParams: Nenhuma cena especificada

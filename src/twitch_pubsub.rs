@@ -396,12 +396,17 @@ async fn handle_messages(
                             continue;
                         }
 
+                        let target = chat::RaidedInfo {
+                            target: raid.target_login,
+                            display: raid.target_display_name,
+                        };
+
                         chat_handler_tx
                             .send(chat::HandleMessage::InternalChatUpdate(
                                 chat::InternalChatUpdate {
                                     channel,
                                     platform: chat::ChatPlatform::Twitch,
-                                    kind: chat::InternalUpdate::StartedHosting,
+                                    kind: chat::InternalUpdate::Raided(target),
                                 },
                             ))
                             .await

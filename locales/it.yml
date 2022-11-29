@@ -9,6 +9,7 @@ it:
         attempts: ", ho impiegato %{count} tentativi"
     stop:
         success: ho fermato la diretta con successo
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Errore non posso fermare la diretta: %{error}"
     switch:
         noParams: non hai specificato la scena

@@ -9,6 +9,7 @@ nb:
         attempts: ", brukte %{count} forsøk"
     stop:
         success: Strøm avsluttet!
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Feil kan ikke stoppe strømmen: %{error}"
     switch:
         noParams: Ingen scene valgt

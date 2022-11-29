@@ -11,6 +11,7 @@ zh_tw:
         attempts: ", 獲取 %{count} 次嘗試"
     stop:
         success: 成功停止直播
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: 錯誤 %{error}
     switch:
         noParams: 沒有指定場景

@@ -9,6 +9,7 @@ es:
         attempts: ", tomo %{count} intentos"
     stop:
         success: Stream detenido correctamente
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Error al detener stream: %{error}"
     switch:
         noParams: No se especifico escena

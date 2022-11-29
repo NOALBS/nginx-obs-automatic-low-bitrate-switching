@@ -9,6 +9,7 @@ de:
         attempts: ", took %{count} attempts"
     stop:
         success: Stream erfolgreich gestoppt
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Fehler: %{error}"
     switch:
         noParams: Keine Szene angegeben

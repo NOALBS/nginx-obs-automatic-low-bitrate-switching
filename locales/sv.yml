@@ -9,6 +9,7 @@ sv:
         attempts: ", took %{count} attempts"
     stop:
         success: Stoppade strömmen med framgång
+        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
         error: "Fel kan inte stoppa strömmen: %{error}"
     switch:
         noParams: Ingen scen specificerad
