@@ -9,7 +9,7 @@ use thiserror::Error;
 use tokio::{
     net::TcpStream,
     sync::{mpsc, oneshot, Mutex},
-    time,
+    time::{self, Instant},
 };
 use tokio_tungstenite::{
     tungstenite::{self, protocol::CloseFrame, Message as TMessage},
@@ -142,8 +142,13 @@ pub struct TwitchPubSub {
 }
 
 struct State {
-    users: HashMap<String, String>,
+    users: HashMap<String, User>,
     connected: bool,
+}
+
+struct User {
+    username: String,
+    last_raid: Instant,
 }
 
 impl TwitchPubSub {
@@ -207,11 +212,17 @@ impl TwitchPubSub {
             }
         }
 
-        state.users.insert(twitch_id, username);
+        state.users.insert(
+            twitch_id,
+            User {
+                username,
+                last_raid: Instant::now(),
+            },
+        );
     }
 }
 
-fn create_raid_topic_from_users(users: &HashMap<String, String>) -> Vec<String> {
+fn create_raid_topic_from_users(users: &HashMap<String, User>) -> Vec<String> {
     let mut topics = Vec::new();
 
     for id in users.keys() {
@@ -370,11 +381,20 @@ async fn handle_messages(
                     if let TopicMessage::RaidGoV2 { raid } = data.message {
                         debug!(?raid, "Raided");
 
-                        let channel = {
-                            let lock = state.lock().await;
-                            let c = lock.users.get(&raid.source_id);
-                            c.unwrap().to_owned()
+                        let (channel, ignore) = {
+                            let mut lock = state.lock().await;
+                            let user = lock.users.get_mut(&raid.source_id).unwrap();
+                            let ignore = user.last_raid.elapsed().as_secs() < 10;
+                            let channel = user.username.to_owned();
+
+                            user.last_raid = Instant::now();
+
+                            (channel, ignore)
                         };
+
+                        if ignore {
+                            continue;
+                        }
 
                         chat_handler_tx
                             .send(chat::HandleMessage::InternalChatUpdate(
