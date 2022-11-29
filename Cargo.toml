@@ -16,7 +16,7 @@ dotenv = "0.15"
 either = { version = "1.6.1", features = ["serde"] }
 futures-util = "0.3"
 obws = { version = "0.9", features = ["events"] }
-obwsv5 = { version = "0.10.0-beta.4", package = "obws", features = ["events"]}
+obwsv5 = { version = "0.10.0", package = "obws", features = ["events"]}
 quick-xml = { version = "0.26", features = ["serialize"] }
 rand = "0.8"
 rand_core = { version = "0.6", features = ["std"] }
@@ -27,7 +27,7 @@ strsim = "0.10.0"
 thiserror = "1.0"
 tokio = { version = "1.10", features = ["rt", "rt-multi-thread", "macros", "signal", "time", "sync"] }
 tokio-stream = "0.1"
-tokio-tungstenite = { version = "0.17", features = [ "native-tls" ] }
+tokio-tungstenite = { version = "0.18", features = [ "native-tls" ] }
 twitch-irc = "5.0"
 typetag = "0.2"
 
@@ -44,4 +44,4 @@ once_cell = "1.10"
 rust-i18n = "0.6"
 
 [target.x86_64-unknown-linux-musl.dependencies]
-openssl = { version = "=0.10.42", features = ["vendored"] }
+openssl = { version = "=0.10.43", features = ["vendored"] }
