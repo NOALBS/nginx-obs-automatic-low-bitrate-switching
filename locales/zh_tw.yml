@@ -9,19 +9,19 @@ startTwitchTranscoding:
     success: 成功經由編碼直播 %{attemptsMessage}
     attempts: ", 獲取 %{count} 次嘗試"
 stop:
-    success: 成功停止直播
-    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    success: 成功停止實況
+    raid: 實況成功停止 目前正揪團給 %{display_channel} 請大家追隨一下 https://twitch.tv/%{channel}
     error: 錯誤 %{error}
 switch:
     noParams: 沒有指定場景
     success: 場景成功切換到 "%{scene}"
     error: 錯誤 無法切換到 "%{scene}"
 source:
-    noParams: No source specified
-    success: Source "%{name}" successfully %{status}
-    error: Error toggling source "%{name}"
-    enabled: enabled
-    disabled: disabled
+    noParams: 沒有找到指定的來源
+    success: 來源 "%{name}" 成功 %{status}
+    error: 切換來源 "%{name}" 時發生錯誤
+    enabled: 開啟
+    disabled: 關閉
 bitrate:
     success: "%{name}: %{message}"
     error: "目前位元率: 離線"
