@@ -1,84 +1,83 @@
-en:
-    start:
-        success: Successfully started the stream
-        error: "Error can't start the stream: %{error}"
-    startTwitchTranscoding:
-        trying: Trying to start the stream with transcoding
-        successNoTranscoding: Successfully started the stream without transcoding
-        success: Started stream with transcoding %{attemptsMessage}
-        attempts: ", took %{count} attempts"
-    stop:
-        success: Successfully stopped the stream
-        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
-        error: "Error can't stop the stream: %{error}"
-    switch:
-        noParams: No scene specified
-        success: Scene successfully switched to "%{scene}"
-        error: Error can't switch to scene "%{scene}"
-    source:
-        noParams: No source specified
-        success: Source "%{name}" successfully %{status}
-        error: Error toggling source "%{name}"
-        enabled: enabled
-        disabled: disabled
-    bitrate:
-        success: "%{name}: %{message}"
-        error: "No connection :("
-    trigger:
-        success: Trigger successfully set to %{number}
-        successDisabled: Trigger successfully disabled
-        error: Error editing trigger %{number} is not a valid value
-        current: Current trigger set at %{number}
-        disabled: Current trigger is disabled
-    sourceinfo:
-        noInfo: No information
-        notFound: "Error no server found with the name: %{name}"
-    serverinfo:
-        noInfo: No server information available
-        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
-    rec:
-        started: Recording started
-        stopped: Recording stopped
-        errorStatus: Error getting recording status
-        errorToggle: Error toggling recording
-    fix:
-        try: Trying to fix the stream
-        error: Error fixing the stream
-    refresh:
-        try: Refreshing the stream
-        error: Error refreshing the stream
-        success: Refreshing the stream completed
-        noScene: No refresh scene set, using fix instead
-    alias:
-        success: Added alias %{alias} -> %{command}
-        removed: Alias %{alias} removed
-        errorCommand: Command %{command} doesn't exist
-        errorAlias: Alias %{alias} doesn't exist
-        errorAlreadyUsed: "%{alias} already used as alias"
-        errorIncorrectArguments: Error incorrect arguments given
-    sceneSwitch:
-        switch: Scene switched to "%{scene}"
-    offlineTimeout:
-        timeout: Offline timeout reached, stopping the stream
-    handleCommands:
-        public: Public commands %{condition}
-        mod: Mod commands %{condition}
-        notify: Auto switch notification %{condition}
-        autostop: Auto stop stream %{condition}
-        enabled: is enabled
-        disabled: is disabled
-    noalbs:
-        prefix: NOALBS prefix updated to %{prefix}
-        errorPrefix: Can't update NOALBS prefix
-        switcherEnabled: Successfully enabled the switcher
-        switcherDisabled: Successfully disabled the switcher
-        instantSwitch: Instant switch on recover %{condition}
-        langError: Can't update NOALBS language
-        langErrorInvalid: Error editing language %{lang} is not a valid value
-        langSuccess: NOALBS language updated to %{lang}
-        retryCount: Current retry set at %{count}
-        retryError: Error editing retry attempts %{count} is not a valid value
-        retrySuccess: Retry attempts set to %{count}
-    scene:
-        success: Switching to %{scene} scene
-        error: No %{scene} scene set
+start:
+    success: Successfully started the stream
+    error: "Error can't start the stream: %{error}"
+startTwitchTranscoding:
+    trying: Trying to start the stream with transcoding
+    successNoTranscoding: Successfully started the stream without transcoding
+    success: Started stream with transcoding %{attemptsMessage}
+    attempts: ", took %{count} attempts"
+stop:
+    success: Successfully stopped the stream
+    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    error: "Error can't stop the stream: %{error}"
+switch:
+    noParams: No scene specified
+    success: Scene successfully switched to "%{scene}"
+    error: Error can't switch to scene "%{scene}"
+source:
+    noParams: No source specified
+    success: Source "%{name}" successfully %{status}
+    error: Error toggling source "%{name}"
+    enabled: enabled
+    disabled: disabled
+bitrate:
+    success: "%{name}: %{message}"
+    error: "No connection :("
+trigger:
+    success: Trigger successfully set to %{number}
+    successDisabled: Trigger successfully disabled
+    error: Error editing trigger %{number} is not a valid value
+    current: Current trigger set at %{number}
+    disabled: Current trigger is disabled
+sourceinfo:
+    noInfo: No information
+    notFound: "Error no server found with the name: %{name}"
+serverinfo:
+    noInfo: No server information available
+    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+rec:
+    started: Recording started
+    stopped: Recording stopped
+    errorStatus: Error getting recording status
+    errorToggle: Error toggling recording
+fix:
+    try: Trying to fix the stream
+    error: Error fixing the stream
+refresh:
+    try: Refreshing the stream
+    error: Error refreshing the stream
+    success: Refreshing the stream completed
+    noScene: No refresh scene set, using fix instead
+alias:
+    success: Added alias %{alias} -> %{command}
+    removed: Alias %{alias} removed
+    errorCommand: Command %{command} doesn't exist
+    errorAlias: Alias %{alias} doesn't exist
+    errorAlreadyUsed: "%{alias} already used as alias"
+    errorIncorrectArguments: Error incorrect arguments given
+sceneSwitch:
+    switch: Scene switched to "%{scene}"
+offlineTimeout:
+    timeout: Offline timeout reached, stopping the stream
+handleCommands:
+    public: Public commands %{condition}
+    mod: Mod commands %{condition}
+    notify: Auto switch notification %{condition}
+    autostop: Auto stop stream %{condition}
+    enabled: is enabled
+    disabled: is disabled
+noalbs:
+    prefix: NOALBS prefix updated to %{prefix}
+    errorPrefix: Can't update NOALBS prefix
+    switcherEnabled: Successfully enabled the switcher
+    switcherDisabled: Successfully disabled the switcher
+    instantSwitch: Instant switch on recover %{condition}
+    langError: Can't update NOALBS language
+    langErrorInvalid: Error editing language %{lang} is not a valid value
+    langSuccess: NOALBS language updated to %{lang}
+    retryCount: Current retry set at %{count}
+    retryError: Error editing retry attempts %{count} is not a valid value
+    retrySuccess: Retry attempts set to %{count}
+scene:
+    success: Switching to %{scene} scene
+    error: No %{scene} scene set

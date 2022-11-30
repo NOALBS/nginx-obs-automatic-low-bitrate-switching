@@ -1,86 +1,85 @@
 # Translation by twitch.tv/ladell
 
-zh_tw:
-    start:
-        success: 成功開始直播
-        error: "錯誤: %{error}"
-    startTwitchTranscoding:
-        trying: 嘗試開始直播經由編碼
-        successNoTranscoding: 成功開始直播不經由編碼
-        success: 成功經由編碼直播 %{attemptsMessage}
-        attempts: ", 獲取 %{count} 次嘗試"
-    stop:
-        success: 成功停止直播
-        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
-        error: 錯誤 %{error}
-    switch:
-        noParams: 沒有指定場景
-        success: 場景成功切換到 "%{scene}"
-        error: 錯誤 無法切換到 "%{scene}"
-    source:
-        noParams: No source specified
-        success: Source "%{name}" successfully %{status}
-        error: Error toggling source "%{name}"
-        enabled: enabled
-        disabled: disabled
-    bitrate:
-        success: "%{name}: %{message}"
-        error: "目前位元率: 離線"
-    trigger:
-        success: 觸發流量成功設置為 %{number}
-        successDisabled: 成功設置觸發流量為 關閉
-        error: 編輯的觸發值 %{number} 錯誤的
-        current: 目前觸發值設定為 %{number}
-        disabled: 當前流量觸發為 關閉
-    sourceinfo:
-        noInfo: 目前沒有來源資訊
-        notFound: "錯誤目前沒有伺服器: %{name} 的資訊"
-    serverinfo:
-        noInfo: 目前讀取不到伺服器的資訊
-        success: "場景: %{scene}, 目前流量: %{bitrate} Kbps, 目前幀數: %{fps}, 當前丟失資料資訊: 網路卡頓丟失影格: %{network}, 繪製錯卡頓失影格率: %{rendering}, 編碼卡頓略過影格率: %{encoding}"
-    rec:
-        started: 開始錄影
-        stopped: 停止錄影
-        errorStatus: 開啟錄影失敗,無法獲取當前錄影狀態
-        errorToggle: 開啟錄影失敗,無法開始錄影
-    fix:
-        try: 嘗試修復直播
-        error: 修復直播出錯
-    refresh:
-        try: 更新畫面
-        error: 更新失敗
-        success: 更新畫面完成
-        noScene: 因沒有設置重置場景,無法完成重置
-    alias:
-        success: 新增別名 %{alias} -> %{command}
-        removed: 已刪除別名 %{alias}
-        errorCommand: 錯誤 "%{command}" 不存在
-        errorAlias: 錯誤 "%{alias}" 不存在
-        errorAlreadyUsed: "%{alias} 已存在"
-        errorIncorrectArguments: 語法錯誤,請確認後重新嘗試
-    sceneSwitch:
-        switch: 場景切換到 "%{scene}"
-    offlineTimeout:
-        timeout: 離線畫面超時,正在結束直播
-    handleCommands:
-        public: 公用指令 %{condition}
-        mod: Mod 指令 %{condition}
-        notify: 自動切換通知 %{condition}
-        autostop: 自動停止直播 %{condition}
-        enabled: 開啟
-        disabled: 關閉
-    noalbs:
-        prefix: NOALBS 指令符號更新為 %{prefix}
-        errorPrefix: 錯誤 無法更新 NOALBS 指令符號
-        switcherEnabled: 成功 "開啟" 場景切換
-        switcherDisabled: 成功 "關閉" 場景切換
-        instantSwitch: 即時切換恢復功能 %{condition}
-        langError: 無法更新 NOALBS 語言
-        langErrorInvalid: 發生錯誤 選擇之語言 %{lang} 並不存在
-        langSuccess: NOALBS 語言更新為 %{lang}
-        retryCount: 目前重試設置為 %{count} 次
-        retryError: 發生錯誤 設置重試為 %{count} 次 不為正確數值
-        retrySuccess: 成功試置重試嘗試次數為 %{count} 次
-    scene:
-        success: 正在切換到 %{scene}
-        error: 沒有找到場景名稱為 %{scene} 的廠景
+start:
+    success: 成功開始直播
+    error: "錯誤: %{error}"
+startTwitchTranscoding:
+    trying: 嘗試開始直播經由編碼
+    successNoTranscoding: 成功開始直播不經由編碼
+    success: 成功經由編碼直播 %{attemptsMessage}
+    attempts: ", 獲取 %{count} 次嘗試"
+stop:
+    success: 成功停止直播
+    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    error: 錯誤 %{error}
+switch:
+    noParams: 沒有指定場景
+    success: 場景成功切換到 "%{scene}"
+    error: 錯誤 無法切換到 "%{scene}"
+source:
+    noParams: No source specified
+    success: Source "%{name}" successfully %{status}
+    error: Error toggling source "%{name}"
+    enabled: enabled
+    disabled: disabled
+bitrate:
+    success: "%{name}: %{message}"
+    error: "目前位元率: 離線"
+trigger:
+    success: 觸發流量成功設置為 %{number}
+    successDisabled: 成功設置觸發流量為 關閉
+    error: 編輯的觸發值 %{number} 錯誤的
+    current: 目前觸發值設定為 %{number}
+    disabled: 當前流量觸發為 關閉
+sourceinfo:
+    noInfo: 目前沒有來源資訊
+    notFound: "錯誤目前沒有伺服器: %{name} 的資訊"
+serverinfo:
+    noInfo: 目前讀取不到伺服器的資訊
+    success: "場景: %{scene}, 目前流量: %{bitrate} Kbps, 目前幀數: %{fps}, 當前丟失資料資訊: 網路卡頓丟失影格: %{network}, 繪製錯卡頓失影格率: %{rendering}, 編碼卡頓略過影格率: %{encoding}"
+rec:
+    started: 開始錄影
+    stopped: 停止錄影
+    errorStatus: 開啟錄影失敗,無法獲取當前錄影狀態
+    errorToggle: 開啟錄影失敗,無法開始錄影
+fix:
+    try: 嘗試修復直播
+    error: 修復直播出錯
+refresh:
+    try: 更新畫面
+    error: 更新失敗
+    success: 更新畫面完成
+    noScene: 因沒有設置重置場景,無法完成重置
+alias:
+    success: 新增別名 %{alias} -> %{command}
+    removed: 已刪除別名 %{alias}
+    errorCommand: 錯誤 "%{command}" 不存在
+    errorAlias: 錯誤 "%{alias}" 不存在
+    errorAlreadyUsed: "%{alias} 已存在"
+    errorIncorrectArguments: 語法錯誤,請確認後重新嘗試
+sceneSwitch:
+    switch: 場景切換到 "%{scene}"
+offlineTimeout:
+    timeout: 離線畫面超時,正在結束直播
+handleCommands:
+    public: 公用指令 %{condition}
+    mod: Mod 指令 %{condition}
+    notify: 自動切換通知 %{condition}
+    autostop: 自動停止直播 %{condition}
+    enabled: 開啟
+    disabled: 關閉
+noalbs:
+    prefix: NOALBS 指令符號更新為 %{prefix}
+    errorPrefix: 錯誤 無法更新 NOALBS 指令符號
+    switcherEnabled: 成功 "開啟" 場景切換
+    switcherDisabled: 成功 "關閉" 場景切換
+    instantSwitch: 即時切換恢復功能 %{condition}
+    langError: 無法更新 NOALBS 語言
+    langErrorInvalid: 發生錯誤 選擇之語言 %{lang} 並不存在
+    langSuccess: NOALBS 語言更新為 %{lang}
+    retryCount: 目前重試設置為 %{count} 次
+    retryError: 發生錯誤 設置重試為 %{count} 次 不為正確數值
+    retrySuccess: 成功試置重試嘗試次數為 %{count} 次
+scene:
+    success: 正在切換到 %{scene}
+    error: 沒有找到場景名稱為 %{scene} 的廠景

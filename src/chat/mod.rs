@@ -158,7 +158,7 @@ impl std::str::FromStr for ChatLanguage {
             "nb" => Ok(ChatLanguage::NB),
             "nl" => Ok(ChatLanguage::NL),
             "pl" => Ok(ChatLanguage::PL),
-            "ptbr" => Ok(ChatLanguage::PTBR),
+            "pt_br" => Ok(ChatLanguage::PTBR),
             "ru" => Ok(ChatLanguage::RU),
             "sv" => Ok(ChatLanguage::SV),
             "tr" => Ok(ChatLanguage::TR),

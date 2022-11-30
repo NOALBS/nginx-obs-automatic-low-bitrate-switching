@@ -1,84 +1,83 @@
-fr:
-    start:
-        success: Stream démarré avec succès
-        error: "Erreur impossible de démarrer le stream: %{error}"
-    startTwitchTranscoding:
-        trying: Tentative de démarrage du stream avec transcodeur
-        successNoTranscoding: Stream démarré avec succès sans transcodeur
-        success: Stream démarré avec transcodeur %{attemptsMessage}
-        attempts: ", à pris %{count} essais"
-    stop:
-        success: Stream stoppé avec succès
-        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
-        error: "Erreur impossible d'arréter le stream: %{error}"
-    switch:
-        noParams: Aucune scène spécifiée
-        success: Scène changée avec succès pour "%{scene}"
-        error: Erreur impossible de changer la scène pour "%{scene}"
-    source:
-        noParams: No source specified
-        success: Source "%{name}" successfully %{status}
-        error: Error toggling source "%{name}"
-        enabled: enabled
-        disabled: disabled
-    bitrate:
-        success: "%{name}: %{message}"
-        error: "Aucune connexion :("
-    trigger:
-        success: Palier configuré avec succès à %{number}
-        successDisabled: Palier désactivé avec succès
-        error: Erreur le palier %{number} n'est pas une valeur valide
-        current: le palier courant est configuré à %{number}
-        disabled: le palier courant est désactivé
-    sourceinfo:
-        noInfo: Aucune information
-        notFound: "Erreur aucun serveur trouvé avec le nom: %{name}"
-    serverinfo:
-        noInfo: Aucun serveur disponible
-        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
-    rec:
-        started: Enregistrement démarré
-        stopped: Enregistrement stoppé
-        errorStatus: Erreur lors de la récupération du statut de l'enregistrement
-        errorToggle: Erreur lors du changement de statut de l'enregistrement
-    fix:
-        try: Tentative de correction du stream
-        error: Erreur de tentative de correction du stream
-    refresh:
-        try: Raffraichissement du stream
-        error: Erreur lors du raffraichissement du stream
-        success: Raffraichissement du stream complété
-        noScene: Pas de scène de raffraichissement configurée, utilisation de la scène de fix
-    alias:
-        success: Ajout de l'alias %{alias} -> %{command}
-        removed: Alias %{alias} supprimé
-        errorCommand: La commande %{command} n'existe pas
-        errorAlias: L'alias %{alias} n'existe pas
-        errorAlreadyUsed: "%{alias} est déjà un alias"
-        errorIncorrectArguments: Erreur paramètres incorrects
-    sceneSwitch:
-        switch: Scène changée pour "%{scene}"
-    offlineTimeout:
-        timeout: Temps d'attente hors ligne atteints, arrêt du stream
-    handleCommands:
-        public: Commandes publiques %{condition}
-        mod: Commandes modérateurs %{condition}
-        notify: Notification de changement automatique %{condition}
-        autostop: Arret automatique du stream %{condition}
-        enabled: est activé
-        disabled: et désactivé
-    noalbs:
-        prefix: NOALBS préfixe changé pour %{prefix}
-        errorPrefix: Impossible de mettre à jour le préfixe pour NOALBS
-        switcherEnabled: Changeur de scène activé avec succès
-        switcherDisabled: Changeur de scène désactivé avec succès
-        instantSwitch: Changement instantanné en récupération %{condition}
-        langError: Impossible de mettre à jour la langue de NOALBS
-        langErrorInvalid: Erreur lors du changement de la langue, %{lang} n'est pas une valeur valide
-        langSuccess: Langue de NOALBS mise à jour pour %{lang}
-        retryCount: Actuellement configuré à %{count}
-        retryError: Erreur lors de la modification du nombre de tentatives, %{count} n'est pas une valeur valide
-        retrySuccess: Nombre de tentatives configurée à %{count}
-    scene:
-        success: Changement de scène pour %{scene}
-        error: Pas de scène %{scene} configurée
+start:
+    success: Stream démarré avec succès
+    error: "Erreur impossible de démarrer le stream: %{error}"
+startTwitchTranscoding:
+    trying: Tentative de démarrage du stream avec transcodeur
+    successNoTranscoding: Stream démarré avec succès sans transcodeur
+    success: Stream démarré avec transcodeur %{attemptsMessage}
+    attempts: ", à pris %{count} essais"
+stop:
+    success: Stream stoppé avec succès
+    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    error: "Erreur impossible d'arréter le stream: %{error}"
+switch:
+    noParams: Aucune scène spécifiée
+    success: Scène changée avec succès pour "%{scene}"
+    error: Erreur impossible de changer la scène pour "%{scene}"
+source:
+    noParams: No source specified
+    success: Source "%{name}" successfully %{status}
+    error: Error toggling source "%{name}"
+    enabled: enabled
+    disabled: disabled
+bitrate:
+    success: "%{name}: %{message}"
+    error: "Aucune connexion :("
+trigger:
+    success: Palier configuré avec succès à %{number}
+    successDisabled: Palier désactivé avec succès
+    error: Erreur le palier %{number} n'est pas une valeur valide
+    current: le palier courant est configuré à %{number}
+    disabled: le palier courant est désactivé
+sourceinfo:
+    noInfo: Aucune information
+    notFound: "Erreur aucun serveur trouvé avec le nom: %{name}"
+serverinfo:
+    noInfo: Aucun serveur disponible
+    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+rec:
+    started: Enregistrement démarré
+    stopped: Enregistrement stoppé
+    errorStatus: Erreur lors de la récupération du statut de l'enregistrement
+    errorToggle: Erreur lors du changement de statut de l'enregistrement
+fix:
+    try: Tentative de correction du stream
+    error: Erreur de tentative de correction du stream
+refresh:
+    try: Raffraichissement du stream
+    error: Erreur lors du raffraichissement du stream
+    success: Raffraichissement du stream complété
+    noScene: Pas de scène de raffraichissement configurée, utilisation de la scène de fix
+alias:
+    success: Ajout de l'alias %{alias} -> %{command}
+    removed: Alias %{alias} supprimé
+    errorCommand: La commande %{command} n'existe pas
+    errorAlias: L'alias %{alias} n'existe pas
+    errorAlreadyUsed: "%{alias} est déjà un alias"
+    errorIncorrectArguments: Erreur paramètres incorrects
+sceneSwitch:
+    switch: Scène changée pour "%{scene}"
+offlineTimeout:
+    timeout: Temps d'attente hors ligne atteints, arrêt du stream
+handleCommands:
+    public: Commandes publiques %{condition}
+    mod: Commandes modérateurs %{condition}
+    notify: Notification de changement automatique %{condition}
+    autostop: Arret automatique du stream %{condition}
+    enabled: est activé
+    disabled: et désactivé
+noalbs:
+    prefix: NOALBS préfixe changé pour %{prefix}
+    errorPrefix: Impossible de mettre à jour le préfixe pour NOALBS
+    switcherEnabled: Changeur de scène activé avec succès
+    switcherDisabled: Changeur de scène désactivé avec succès
+    instantSwitch: Changement instantanné en récupération %{condition}
+    langError: Impossible de mettre à jour la langue de NOALBS
+    langErrorInvalid: Erreur lors du changement de la langue, %{lang} n'est pas une valeur valide
+    langSuccess: Langue de NOALBS mise à jour pour %{lang}
+    retryCount: Actuellement configuré à %{count}
+    retryError: Erreur lors de la modification du nombre de tentatives, %{count} n'est pas une valeur valide
+    retrySuccess: Nombre de tentatives configurée à %{count}
+scene:
+    success: Changement de scène pour %{scene}
+    error: Pas de scène %{scene} configurée

@@ -1,84 +1,83 @@
-pl:
-    start:
-        success: pomyślnie uruchomiono transmisję
-        error: "błąd nie moge urchomic streama: %{error}"
-    startTwitchTranscoding:
-        trying: Próbuję rozpocząć transmisję z kodowaniem
-        successNoTranscoding: Pomyślnie uruchomiono transmisję bez kodowania
-        success: Rozpoczęto transmisję z transkodowaniem %{attemptsMessage}
-        attempts: ", wziął %{count} próbowanie"
-    stop:
-        success: pomyślnie zakończono transmisję
-        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
-        error: "Błąd nie mogę zakończyć transmisji: %{error}"
-    switch:
-        noParams: Nie określono sceny
-        success: Pomyślnie zmieniono scene do "%{scene}"
-        error: Błąd nie mogę zmienić sceny "%{scene}"
-    source:
-        noParams: No source specified
-        success: Source "%{name}" successfully %{status}
-        error: Error toggling source "%{name}"
-        enabled: enabled
-        disabled: disabled
-    bitrate:
-        success: "%{name}: %{message}"
-        error: "Brak połączenia :("
-    trigger:
-        success: Wyzwalacz pomyślnie ustawiony na %{number}
-        successDisabled: Wyzwalacz pomyślnie wyłączony
-        error: Błąd edycji wyzwalacza %{number} nie jest prawidłową wartoscią
-        current: Aktualny wyzwalacz na %{number}
-        disabled: Aktualny wyzwalacz jest wyłączony
-    sourceinfo:
-        noInfo: Brak informacji
-        notFound: "Błąd nie znaleziono serwera o tej nazwie: %{name}"
-    serverinfo:
-        noInfo: No server information available
-        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
-    rec:
-        started: Nagranie rozpoczęte
-        stopped: Nagranie zakończone
-        errorStatus: Błąd podczas uzyskiwania statusu nagrywania
-        errorToggle: Błąd podczas przełączania nagrywania
-    fix:
-        try: Próbuję naprawić stream
-        error: Błąd naprawy streama
-    refresh:
-        try: Refreshing the stream
-        error: Error refreshing the stream
-        success: Refreshing the stream completed
-        noScene: No refresh scene set, using fix instead
-    alias:
-        success: Dodano alias %{alias} -> %{command}
-        removed: Alias %{alias} usunięty
-        errorCommand: Komenda %{command} nie istnieje
-        errorAlias: Alias %{alias} nie istnieje
-        errorAlreadyUsed: "%{alias} już używany jako alias"
-        errorIncorrectArguments: Błąd podano nieprawidłowe argumenty
-    sceneSwitch:
-        switch: Scena przełączona na "%{scene}"
-    offlineTimeout:
-        timeout: Offline timeout reached, stopping the stream
-    handleCommands:
-        public: Publiczne komendy %{condition}
-        mod: Mod polecenia %{condition}
-        notify: Powiadomienie o automatycznym przęłączaniu %{condition}
-        autostop: Automatyczne zatrzymanie strumienia %{condition}
-        enabled: jest włączony
-        disabled: jest wyłączony
-    noalbs:
-        prefix: Zaktualizowano prefiks NOALBS do %{prefix}
-        errorPrefix: Nie moge zaktualizowac NOALBS prefiks
-        switcherEnabled: Pomyślnie włączono przełącznik
-        switcherDisabled: Pomyślnie wyłączono przełącznik
-        instantSwitch: Natychmiastowe włączenie przy odzyskiwaniu %{condition}
-        langError: Nie można zaktualizowac języka NOALBS
-        langErrorInvalid: Błąd edycji języka %{lang} nie jest prawdiłową wartoscią
-        langSuccess: Język NOALBS zaktualizowany do %{lang}
-        retryCount: Bieżaca próba ustawiona na %{count}
-        retryError: Błąd edycji ponownych prób %{count} nie jest prawidłową wartoscią
-        retrySuccess: Ponowne próby ustawiono na %{count}
-    scene:
-        success: Przełączono na %{scene} scena
-        error: Nie %{scene} zestaw scena
+start:
+    success: pomyślnie uruchomiono transmisję
+    error: "błąd nie moge urchomic streama: %{error}"
+startTwitchTranscoding:
+    trying: Próbuję rozpocząć transmisję z kodowaniem
+    successNoTranscoding: Pomyślnie uruchomiono transmisję bez kodowania
+    success: Rozpoczęto transmisję z transkodowaniem %{attemptsMessage}
+    attempts: ", wziął %{count} próbowanie"
+stop:
+    success: pomyślnie zakończono transmisję
+    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    error: "Błąd nie mogę zakończyć transmisji: %{error}"
+switch:
+    noParams: Nie określono sceny
+    success: Pomyślnie zmieniono scene do "%{scene}"
+    error: Błąd nie mogę zmienić sceny "%{scene}"
+source:
+    noParams: No source specified
+    success: Source "%{name}" successfully %{status}
+    error: Error toggling source "%{name}"
+    enabled: enabled
+    disabled: disabled
+bitrate:
+    success: "%{name}: %{message}"
+    error: "Brak połączenia :("
+trigger:
+    success: Wyzwalacz pomyślnie ustawiony na %{number}
+    successDisabled: Wyzwalacz pomyślnie wyłączony
+    error: Błąd edycji wyzwalacza %{number} nie jest prawidłową wartoscią
+    current: Aktualny wyzwalacz na %{number}
+    disabled: Aktualny wyzwalacz jest wyłączony
+sourceinfo:
+    noInfo: Brak informacji
+    notFound: "Błąd nie znaleziono serwera o tej nazwie: %{name}"
+serverinfo:
+    noInfo: No server information available
+    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+rec:
+    started: Nagranie rozpoczęte
+    stopped: Nagranie zakończone
+    errorStatus: Błąd podczas uzyskiwania statusu nagrywania
+    errorToggle: Błąd podczas przełączania nagrywania
+fix:
+    try: Próbuję naprawić stream
+    error: Błąd naprawy streama
+refresh:
+    try: Refreshing the stream
+    error: Error refreshing the stream
+    success: Refreshing the stream completed
+    noScene: No refresh scene set, using fix instead
+alias:
+    success: Dodano alias %{alias} -> %{command}
+    removed: Alias %{alias} usunięty
+    errorCommand: Komenda %{command} nie istnieje
+    errorAlias: Alias %{alias} nie istnieje
+    errorAlreadyUsed: "%{alias} już używany jako alias"
+    errorIncorrectArguments: Błąd podano nieprawidłowe argumenty
+sceneSwitch:
+    switch: Scena przełączona na "%{scene}"
+offlineTimeout:
+    timeout: Offline timeout reached, stopping the stream
+handleCommands:
+    public: Publiczne komendy %{condition}
+    mod: Mod polecenia %{condition}
+    notify: Powiadomienie o automatycznym przęłączaniu %{condition}
+    autostop: Automatyczne zatrzymanie strumienia %{condition}
+    enabled: jest włączony
+    disabled: jest wyłączony
+noalbs:
+    prefix: Zaktualizowano prefiks NOALBS do %{prefix}
+    errorPrefix: Nie moge zaktualizowac NOALBS prefiks
+    switcherEnabled: Pomyślnie włączono przełącznik
+    switcherDisabled: Pomyślnie wyłączono przełącznik
+    instantSwitch: Natychmiastowe włączenie przy odzyskiwaniu %{condition}
+    langError: Nie można zaktualizowac języka NOALBS
+    langErrorInvalid: Błąd edycji języka %{lang} nie jest prawdiłową wartoscią
+    langSuccess: Język NOALBS zaktualizowany do %{lang}
+    retryCount: Bieżaca próba ustawiona na %{count}
+    retryError: Błąd edycji ponownych prób %{count} nie jest prawidłową wartoscią
+    retrySuccess: Ponowne próby ustawiono na %{count}
+scene:
+    success: Przełączono na %{scene} scena
+    error: Nie %{scene} zestaw scena

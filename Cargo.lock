@@ -1399,9 +1399,9 @@ checksum = "3603b7d71ca82644f79b5a06d1220e9a58ede60bd32255f698cb1af8838b8db3"
 
 [[package]]
 name = "rust-i18n"
-version = "0.6.1"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23355ba4db77e057f2a48a4edf15a01c0f914702ef8c47e91edfdde715782f04"
+checksum = "74fc70cf975ae6f84a016d477f05d475209edef8852ea0595754f7ea1f8019a7"
 dependencies = [
  "anyhow",
  "clap",

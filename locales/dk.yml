@@ -1,84 +1,83 @@
-dk:
-    start:
-        success: Stream startet!
-        error: "Fejl: %{error}"
-    startTwitchTranscoding:
-        trying: Trying to start the stream with transcoding
-        successNoTranscoding: Successfully started the stream without transcoding
-        success: Started stream with transcoding %{attemptsMessage}
-        attempts: ", took %{count} attempts"
-    stop:
-        success: Stream afsluttet!
-        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
-        error: "Error can't stop the stream: %{error}"
-    switch:
-        noParams: Ingen scene angivet
-        success: Scene er skiftet til "%{scene}"
-        error: "Fejl: {scene}"
-    source:
-        noParams: No source specified
-        success: Source "%{name}" successfully %{status}
-        error: Error toggling source "%{name}"
-        enabled: enabled
-        disabled: disabled
-    bitrate:
-        success: "%{name}: %{message}"
-        error: "Nuværende bitrate: OFFLINE"
-    trigger:
-        success: Trigger skiftet til %{number}
-        successDisabled: Trigger successfully disabled
-        error: Fejl ved ændring af trigger %{number} er ikke en tilladt værdi
-        current: Nuværende trigger er sat til %{number}
-        disabled: Current trigger is disabled
-    sourceinfo:
-        noInfo: No information
-        notFound: "Error no server found with the name: %{name}"
-    serverinfo:
-        noInfo: No server information available
-        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
-    rec:
-        started: Optagelse startet!
-        stopped: Optagelse stoppet!
-        errorStatus: Error getting recording status
-        errorToggle: Error toggling recording
-    fix:
-        try: Forsøger at fixe forbindelse
-        error: Kunne ikke fixe forbindelse
-    refresh:
-        try: Genstarter forbindelse
-        error: Fejl ved genstart af forbindelse
-        success: Genstart af forbindelse gennemført!
-        noScene: No refresh scene set, using fix instead
-    alias:
-        success: Tilføjet alias %{alias} -> %{command}
-        removed: Alias %{alias} fjernet
-        errorCommand: Fejl %{command} eksistere ikke
-        errorAlias: Fejl alias %{alias} eksisterer ikke
-        errorAlreadyUsed: "%{alias} er allerede brugt som alias"
-        errorIncorrectArguments: Error incorrect arguments given
-    sceneSwitch:
-        switch: Scene skiftet til "%{scene}"
-    offlineTimeout:
-        timeout: Offline timeout reached, stopping the stream
-    handleCommands:
-        public: Offentlige kommandoer %{condition}
-        mod: Mod kommandoer %{condition}
-        notify: Automatiske sceneskift notifikationer %{condition}
-        autostop: Auto stop stream %{condition}
-        enabled: slået til
-        disabled: slået fra
-    noalbs:
-        prefix: NOALBS prefix updated to %{prefix}
-        errorPrefix: Can't update NOALBS prefix
-        switcherEnabled: Successfully enabled the switcher
-        switcherDisabled: Successfully disabled the switcher
-        instantSwitch: Instant switch on recover %{condition}
-        langError: Can't update NOALBS language
-        langErrorInvalid: Error editing language %{lang} is not a valid value
-        langSuccess: NOALBS language updated to %{lang}
-        retryCount: Current retry set at %{count}
-        retryError: Error editing retry attempts %{count} is not a valid value
-        retrySuccess: Retry attempts set to %{count}
-    scene:
-        success: Switching to %{scene} scene
-        error: No %{scene} scene set
+start:
+    success: Stream startet!
+    error: "Fejl: %{error}"
+startTwitchTranscoding:
+    trying: Trying to start the stream with transcoding
+    successNoTranscoding: Successfully started the stream without transcoding
+    success: Started stream with transcoding %{attemptsMessage}
+    attempts: ", took %{count} attempts"
+stop:
+    success: Stream afsluttet!
+    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    error: "Error can't stop the stream: %{error}"
+switch:
+    noParams: Ingen scene angivet
+    success: Scene er skiftet til "%{scene}"
+    error: "Fejl: {scene}"
+source:
+    noParams: No source specified
+    success: Source "%{name}" successfully %{status}
+    error: Error toggling source "%{name}"
+    enabled: enabled
+    disabled: disabled
+bitrate:
+    success: "%{name}: %{message}"
+    error: "Nuværende bitrate: OFFLINE"
+trigger:
+    success: Trigger skiftet til %{number}
+    successDisabled: Trigger successfully disabled
+    error: Fejl ved ændring af trigger %{number} er ikke en tilladt værdi
+    current: Nuværende trigger er sat til %{number}
+    disabled: Current trigger is disabled
+sourceinfo:
+    noInfo: No information
+    notFound: "Error no server found with the name: %{name}"
+serverinfo:
+    noInfo: No server information available
+    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+rec:
+    started: Optagelse startet!
+    stopped: Optagelse stoppet!
+    errorStatus: Error getting recording status
+    errorToggle: Error toggling recording
+fix:
+    try: Forsøger at fixe forbindelse
+    error: Kunne ikke fixe forbindelse
+refresh:
+    try: Genstarter forbindelse
+    error: Fejl ved genstart af forbindelse
+    success: Genstart af forbindelse gennemført!
+    noScene: No refresh scene set, using fix instead
+alias:
+    success: Tilføjet alias %{alias} -> %{command}
+    removed: Alias %{alias} fjernet
+    errorCommand: Fejl %{command} eksistere ikke
+    errorAlias: Fejl alias %{alias} eksisterer ikke
+    errorAlreadyUsed: "%{alias} er allerede brugt som alias"
+    errorIncorrectArguments: Error incorrect arguments given
+sceneSwitch:
+    switch: Scene skiftet til "%{scene}"
+offlineTimeout:
+    timeout: Offline timeout reached, stopping the stream
+handleCommands:
+    public: Offentlige kommandoer %{condition}
+    mod: Mod kommandoer %{condition}
+    notify: Automatiske sceneskift notifikationer %{condition}
+    autostop: Auto stop stream %{condition}
+    enabled: slået til
+    disabled: slået fra
+noalbs:
+    prefix: NOALBS prefix updated to %{prefix}
+    errorPrefix: Can't update NOALBS prefix
+    switcherEnabled: Successfully enabled the switcher
+    switcherDisabled: Successfully disabled the switcher
+    instantSwitch: Instant switch on recover %{condition}
+    langError: Can't update NOALBS language
+    langErrorInvalid: Error editing language %{lang} is not a valid value
+    langSuccess: NOALBS language updated to %{lang}
+    retryCount: Current retry set at %{count}
+    retryError: Error editing retry attempts %{count} is not a valid value
+    retrySuccess: Retry attempts set to %{count}
+scene:
+    success: Switching to %{scene} scene
+    error: No %{scene} scene set

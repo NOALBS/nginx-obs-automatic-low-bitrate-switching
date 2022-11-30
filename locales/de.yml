@@ -1,84 +1,83 @@
-de:
-    start:
-        success: Stream erfolgreich gestartet
-        error: "Fehler: %{error}"
-    startTwitchTranscoding:
-        trying: Trying to start the stream with transcoding
-        successNoTranscoding: Successfully started the stream without transcoding
-        success: Started stream with transcoding %{attemptsMessage}
-        attempts: ", took %{count} attempts"
-    stop:
-        success: Stream erfolgreich gestoppt
-        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
-        error: "Fehler: %{error}"
-    switch:
-        noParams: Keine Szene angegeben
-        success: Szene erfolgreich auf "%{scene}" gewechselt
-        error: Fehler kann nicht zur Szene "%{scene}" wechseln
-    source:
-        noParams: No source specified
-        success: Source "%{name}" successfully %{status}
-        error: Error toggling source "%{name}"
-        enabled: enabled
-        disabled: disabled
-    bitrate:
-        success: "%{name}: %{message}"
-        error: "Keine Verbindung :("
-    trigger:
-        success: Auslöser erfolgreich auf %{number} gesetzt
-        successDisabled: Auslöser erfolgreich deaktiviert
-        error: Fehler beim Bearbeiten des Auslösers, %{number} ist kein gültiger Wert
-        current: Aktueller Auslöser auf %{number} eingestellt
-        disabled: Aktueller Auslöser ist deaktiviert
-    sourceinfo:
-        noInfo: Keine Information
-        notFound: Fehler kein Server mit dem Namen %{name} gefunden
-    serverinfo:
-        noInfo: No server information available
-        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
-    rec:
-        started: Aufnahme gestartet
-        stopped: Aufnahme gestoppt
-        errorStatus: Fehler beim Abrufen des Aufnahmestatus
-        errorToggle: Fehler beim Umschalten der Aufnahme
-    fix:
-        try: Versuche den Fehler zu beheben
-        error: Fehler konnte nicht behoben werden
-    refresh:
-        try: Stream wird aktualisiert
-        error: Fehler beim aktualisieren des Streams
-        success: Stream wurde erfolgreich aktualisiert
-        noScene: No refresh scene set, using fix instead
-    alias:
-        success: Alias %{alias} hinzugefügt -> %{command}
-        removed: Alias %{alias} erfolgreich entfernt
-        errorCommand: Fehler Befehle %{command} ist nicht vorhanden
-        errorAlias: Fehler alias %{alias} ist nicht vorhanden
-        errorAlreadyUsed: "%{alias} wird bereits als Alias verwendet"
-        errorIncorrectArguments: Fehler falsche Argumente angegeben
-    sceneSwitch:
-        switch: Szene erfolgreich auf "%{scene}" gewechselt
-    offlineTimeout:
-        timeout: Offline timeout reached, stopping the stream
-    handleCommands:
-        public: Öffentliche Befehle %{condition}
-        mod: Mod Befehle %{condition}
-        notify: Automatische Wechsel Benachrichtigung %{condition}
-        autostop: Stream automatisch gestoppt %{condition}
-        enabled: ist aktiviert
-        disabled: ist deaktiviert
-    noalbs:
-        prefix: NOALBS Präfix aktualisiert auf %{prefix}
-        errorPrefix: NOALBS prefix kann nicht aktualisiert werden
-        switcherEnabled: Switcher erfolgreich aktiviert
-        switcherDisabled: Switcher erfolgreich deaktiviert
-        instantSwitch: Instant switch on recover %{condition}
-        langError: NOALBS Sprache kann nicht aktualisiert werden
-        langErrorInvalid: Fehler beim Bearbeiten der Sprache %{lang} ist kein gültiger Wert
-        langSuccess: NOALBS Sprache aktualisiert auf %{lang}
-        retryCount: Current retry set at %{count}
-        retryError: Error editing retry attempts %{count} is not a valid value
-        retrySuccess: Retry attempts set to %{count}
-    scene:
-        success: Zur Szene %{scene} wechseln
-        error: Keine %{scene}-Szene angegeben
+start:
+    success: Stream erfolgreich gestartet
+    error: "Fehler: %{error}"
+startTwitchTranscoding:
+    trying: Trying to start the stream with transcoding
+    successNoTranscoding: Successfully started the stream without transcoding
+    success: Started stream with transcoding %{attemptsMessage}
+    attempts: ", took %{count} attempts"
+stop:
+    success: Stream erfolgreich gestoppt
+    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    error: "Fehler: %{error}"
+switch:
+    noParams: Keine Szene angegeben
+    success: Szene erfolgreich auf "%{scene}" gewechselt
+    error: Fehler kann nicht zur Szene "%{scene}" wechseln
+source:
+    noParams: No source specified
+    success: Source "%{name}" successfully %{status}
+    error: Error toggling source "%{name}"
+    enabled: enabled
+    disabled: disabled
+bitrate:
+    success: "%{name}: %{message}"
+    error: "Keine Verbindung :("
+trigger:
+    success: Auslöser erfolgreich auf %{number} gesetzt
+    successDisabled: Auslöser erfolgreich deaktiviert
+    error: Fehler beim Bearbeiten des Auslösers, %{number} ist kein gültiger Wert
+    current: Aktueller Auslöser auf %{number} eingestellt
+    disabled: Aktueller Auslöser ist deaktiviert
+sourceinfo:
+    noInfo: Keine Information
+    notFound: Fehler kein Server mit dem Namen %{name} gefunden
+serverinfo:
+    noInfo: No server information available
+    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+rec:
+    started: Aufnahme gestartet
+    stopped: Aufnahme gestoppt
+    errorStatus: Fehler beim Abrufen des Aufnahmestatus
+    errorToggle: Fehler beim Umschalten der Aufnahme
+fix:
+    try: Versuche den Fehler zu beheben
+    error: Fehler konnte nicht behoben werden
+refresh:
+    try: Stream wird aktualisiert
+    error: Fehler beim aktualisieren des Streams
+    success: Stream wurde erfolgreich aktualisiert
+    noScene: No refresh scene set, using fix instead
+alias:
+    success: Alias %{alias} hinzugefügt -> %{command}
+    removed: Alias %{alias} erfolgreich entfernt
+    errorCommand: Fehler Befehle %{command} ist nicht vorhanden
+    errorAlias: Fehler alias %{alias} ist nicht vorhanden
+    errorAlreadyUsed: "%{alias} wird bereits als Alias verwendet"
+    errorIncorrectArguments: Fehler falsche Argumente angegeben
+sceneSwitch:
+    switch: Szene erfolgreich auf "%{scene}" gewechselt
+offlineTimeout:
+    timeout: Offline timeout reached, stopping the stream
+handleCommands:
+    public: Öffentliche Befehle %{condition}
+    mod: Mod Befehle %{condition}
+    notify: Automatische Wechsel Benachrichtigung %{condition}
+    autostop: Stream automatisch gestoppt %{condition}
+    enabled: ist aktiviert
+    disabled: ist deaktiviert
+noalbs:
+    prefix: NOALBS Präfix aktualisiert auf %{prefix}
+    errorPrefix: NOALBS prefix kann nicht aktualisiert werden
+    switcherEnabled: Switcher erfolgreich aktiviert
+    switcherDisabled: Switcher erfolgreich deaktiviert
+    instantSwitch: Instant switch on recover %{condition}
+    langError: NOALBS Sprache kann nicht aktualisiert werden
+    langErrorInvalid: Fehler beim Bearbeiten der Sprache %{lang} ist kein gültiger Wert
+    langSuccess: NOALBS Sprache aktualisiert auf %{lang}
+    retryCount: Current retry set at %{count}
+    retryError: Error editing retry attempts %{count} is not a valid value
+    retrySuccess: Retry attempts set to %{count}
+scene:
+    success: Zur Szene %{scene} wechseln
+    error: Keine %{scene}-Szene angegeben

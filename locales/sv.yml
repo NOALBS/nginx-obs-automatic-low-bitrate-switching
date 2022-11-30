@@ -1,82 +1,81 @@
-sv:
-    start:
-        success: Strömmen startades framgångsrikt
-        error: "Fel kan inte starta strömmen: %{error}"
-    startTwitchTranscoding:
-        trying: Försöker starta strömmen med omkodning
-        successNoTranscoding: Strömmen startades framgångsrikt utan omkodning
-        success: Startade ström med omkodning %{attemptsMessage}
-        attempts: ", took %{count} attempts"
-    stop:
-        success: Stoppade strömmen med framgång
-        raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
-        error: "Fel kan inte stoppa strömmen: %{error}"
-    switch:
-        noParams: Ingen scen specificerad
-        success: Scenen har bytt till "%{scene}"
-        error: Fel kan inte växla till scen "%{scene}"
-    source:
-        noParams: No source specified
-        success: Source "%{name}" successfully %{status}
-        error: Error toggling source "%{name}"
-        enabled: enabled
-        disabled: disabled
-    bitrate:
-        success: "%{name}: %{message}"
-        error: "Ingen anslutning"
-    trigger:
-        success: Utlösaren har ställts in till %{number}
-        successDisabled: Utlösaren har inaktiverats framgångsrikt
-        error: Fel i redigeringen av utlösaren %{number} är inte ett giltigt värde
-        current: Den nuvarande utlösaren är inställd på %{number}
-        disabled: Den aktuella utlösaren är inaktiverad
-    sourceinfo:
-        noInfo: Ingen information
-        notFound: "Fel ingen server hittades med namnet: %{name}"
-    serverinfo:
-        noInfo: No server information available
-        success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
-    rec:
-        started: Inspelning påbörjad
-        stopped: Inspelningen har stoppats
-        errorStatus: Fel i att hämta inspelningsstatus
-        errorToggle: Fel vid växling av inspelning
-    fix:
-        try: Försöker fixa strömmen
-        error: Fel vid fastställande av strömmen
-    refresh:
-        try: Refreshing the stream
-        error: Error refreshing the stream
-        success: Refreshing the stream completed
-        noScene: No refresh scene set, using fix instead
-    alias:
-        success: Tillägg av alias %{alias} -> %{command}
-        removed: Alias %{alias} borttaget
-        errorCommand: Kommando %{command} existerar inte
-        errorAlias: Alias %{alias} existerar inte
-        errorAlreadyUsed: "%{alias} används redan som alias"
-        errorIncorrectArguments: Felaktiga argument har angetts
-    sceneSwitch:
-        switch: Scenen byttes till "%{scene}"
-    offlineTimeout:
-        timeout: Offline timeout reached, stopping the stream
-    handleCommands:
-        notify: Automatisk anmälan om växling %{condition}
-        autostop: Automatiskt stopp för strömmen %{condition}
-        enabled: Är aktiverad
-        disabled: Är inaktiverat
-    noalbs:
-        prefix: NOALBS prefix ändrades till %{prefix}
-        errorPrefix: Kunde inte updatera NOALBS prefix
-        switcherEnabled: Växeln har aktiverats med framgång
-        switcherDisabled: Växeln har avaktiverats med framgång
-        instantSwitch: Byt växel direkt vid återhämtning %{condition}
-        langError: Kunde inte byta NOALBS språk
-        langErrorInvalid: Fel vid ändring av språk %{lang} är inte ett giltigt värde
-        langSuccess: NOALBS språk ändrat till %{lang}
-        retryCount: Nuvarande återförsök ställt till %{count}
-        retryError: Fel vid redigering av återförsök %{count} är inte ett giltigt värde
-        retrySuccess: Återförsök ställt till %{count}
-    scene:
-        success: Växla till %{scene} scen
-        error: Ingen %{scene} scenuppsättning
+start:
+    success: Strömmen startades framgångsrikt
+    error: "Fel kan inte starta strömmen: %{error}"
+startTwitchTranscoding:
+    trying: Försöker starta strömmen med omkodning
+    successNoTranscoding: Strömmen startades framgångsrikt utan omkodning
+    success: Startade ström med omkodning %{attemptsMessage}
+    attempts: ", took %{count} attempts"
+stop:
+    success: Stoppade strömmen med framgång
+    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    error: "Fel kan inte stoppa strömmen: %{error}"
+switch:
+    noParams: Ingen scen specificerad
+    success: Scenen har bytt till "%{scene}"
+    error: Fel kan inte växla till scen "%{scene}"
+source:
+    noParams: No source specified
+    success: Source "%{name}" successfully %{status}
+    error: Error toggling source "%{name}"
+    enabled: enabled
+    disabled: disabled
+bitrate:
+    success: "%{name}: %{message}"
+    error: "Ingen anslutning"
+trigger:
+    success: Utlösaren har ställts in till %{number}
+    successDisabled: Utlösaren har inaktiverats framgångsrikt
+    error: Fel i redigeringen av utlösaren %{number} är inte ett giltigt värde
+    current: Den nuvarande utlösaren är inställd på %{number}
+    disabled: Den aktuella utlösaren är inaktiverad
+sourceinfo:
+    noInfo: Ingen information
+    notFound: "Fel ingen server hittades med namnet: %{name}"
+serverinfo:
+    noInfo: No server information available
+    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+rec:
+    started: Inspelning påbörjad
+    stopped: Inspelningen har stoppats
+    errorStatus: Fel i att hämta inspelningsstatus
+    errorToggle: Fel vid växling av inspelning
+fix:
+    try: Försöker fixa strömmen
+    error: Fel vid fastställande av strömmen
+refresh:
+    try: Refreshing the stream
+    error: Error refreshing the stream
+    success: Refreshing the stream completed
+    noScene: No refresh scene set, using fix instead
+alias:
+    success: Tillägg av alias %{alias} -> %{command}
+    removed: Alias %{alias} borttaget
+    errorCommand: Kommando %{command} existerar inte
+    errorAlias: Alias %{alias} existerar inte
+    errorAlreadyUsed: "%{alias} används redan som alias"
+    errorIncorrectArguments: Felaktiga argument har angetts
+sceneSwitch:
+    switch: Scenen byttes till "%{scene}"
+offlineTimeout:
+    timeout: Offline timeout reached, stopping the stream
+handleCommands:
+    notify: Automatisk anmälan om växling %{condition}
+    autostop: Automatiskt stopp för strömmen %{condition}
+    enabled: Är aktiverad
+    disabled: Är inaktiverat
+noalbs:
+    prefix: NOALBS prefix ändrades till %{prefix}
+    errorPrefix: Kunde inte updatera NOALBS prefix
+    switcherEnabled: Växeln har aktiverats med framgång
+    switcherDisabled: Växeln har avaktiverats med framgång
+    instantSwitch: Byt växel direkt vid återhämtning %{condition}
+    langError: Kunde inte byta NOALBS språk
+    langErrorInvalid: Fel vid ändring av språk %{lang} är inte ett giltigt värde
+    langSuccess: NOALBS språk ändrat till %{lang}
+    retryCount: Nuvarande återförsök ställt till %{count}
+    retryError: Fel vid redigering av återförsök %{count} är inte ett giltigt värde
+    retrySuccess: Återförsök ställt till %{count}
+scene:
+    success: Växla till %{scene} scen
+    error: Ingen %{scene} scenuppsättning
