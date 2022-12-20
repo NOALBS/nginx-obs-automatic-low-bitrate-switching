@@ -6,11 +6,14 @@ Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the cu
 
 NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
 
-## NOALBS has a Discord Server finally, join here: <https://discord.gg/efWu5HWM2u>
+## NOALBS has a Discord, join here: <https://discord.gg/efWu5HWM2u>
+## NOALBS is on Twitter, follow here: <https://twitter.com/NOALBS>
 
-## Similar Solutions / Paid Services
+# Similar Solutions / Paid Services
 
-Don't feel like setting this all up by yourself? Check out these links for similar solutions/paid services:
+Don't feel like setting this all up by yourself? Contact me on discord @ [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) and I'll do everything for you for a fee or..
+
+Check out these links for similar solutions/paid services:
 
 - [BELABOX cloud - the only SRT/SRTLA service optimised for bonding](https://cloud.belabox.net)
 - [u³.gg - RTMP/SRT(LA) Endpoint Service Provider](https://u3.gg)
@@ -23,14 +26,14 @@ Don't feel like setting this all up by yourself? Check out these links for simil
 
 Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
 
-## Quick Start
+# Quick Start
 
 - Download the latest binary from [releases](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
 - Have [OBS-Studio](https://github.com/obsproject/obs-studio/) and [OBS-WebSocket](https://github.com/obsproject/obs-websocket/releases/latest) 5.0.0 or higher installed
 - [Configure NOALBS](#configure-noalbs)
 - Run the executable
 
-## Chat Commands
+# Chat Commands
 
 This script gives you the option to enable some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
 
@@ -73,7 +76,7 @@ You can also enable/disable certain features from chat, see below:
 |    Admins    | !noalbs (start/stop) | NOALBS start/stop switching scenes.                        | !noalbs stop    |
 |    Admins    | !noalbs instant      | toggle instant switching from offline scene.               | !noalbs instant |
 
-## Configure NOALBS
+# Configure NOALBS
 
 Open the `.env` file. If you have a custom Twitch account created for a bot fill in your Twitch Account bot username and oauth.
 
@@ -196,7 +199,7 @@ The `config.json` file holds all the user configurations.
 
 NOALBS supports OBS WebSocket v4 and v5. To still use v4 use type `ObsOld`.
 
-### Stream servers section
+## Stream servers section
 
 Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud) and [OBS Sources](#using-an-obs-source).
 You can have as many servers as you want to use in the config.
@@ -230,9 +233,9 @@ Example stream server object:
 - `overrideScenes`: Optional field to override the default scenes
 - `dependsOn`: Optional field explained [here](#depends-on)
 
-### Stream server objects
+## Stream server objects
 
-#### Using NGINX
+### Using NGINX
 
 ```JSON
   "streamServer": {
@@ -245,7 +248,7 @@ Example stream server object:
 
 ---
 
-#### Using an external Node-Media-Server
+### Using an external Node-Media-Server
 
 ```JSON
 "streamServer": {
@@ -264,7 +267,7 @@ Example stream server object:
 
 ---
 
-#### Using Nimble Streamer Server (with SRT protocol)
+### Using Nimble Streamer Server (with SRT protocol)
 
 Nimble must have [API access enabled](https://wmspanel.com/nimble/api) and be configured as a SRT receiver - see ["Set up receiving of SRT"](https://blog.wmspanel.com/2017/07/setup-srt-secure-reliable-transport-nimble-streamer.html) and have an outgoing stream ("Add outgoing stream" on same page)
 
@@ -288,7 +291,7 @@ You can change the high RTT trigger value inside config.json
 
 ---
 
-#### Using SLS (SRT-LIVE-SERVER)
+### Using SLS (SRT-LIVE-SERVER)
 
 > Big Thanks to [oozebrood](https://www.twitch.tv/oozebrood), [matthewwb2](https://www.twitch.tv/matthewwb2), and [kyle___d](https://www.twitch.tv/kyle___d) for all of the hard work they've put into getting SRT to the masses!
 If you're using either [Matt's modified version](https://gitlab.com/mattwb65/srt-live-server) or
@@ -319,11 +322,11 @@ So in actuality your 'publisher' is your default `StreamID`, like in the example
 > Switches on low bitrate or high RTT (high RTT seems to be a more accurate way of determining if the stream is bad with this)
 You can change the high RTT trigger value inside config.json:
 
-##### How do I publish to the SLS Server?
+#### How do I publish to the SLS Server?
 
 see [HERE](https://gitlab.com/mattwb65/srt-live-server#1test-with-ffmpeg)
 
-##### How do I pull the SRT feed into OBS?
+#### How do I pull the SRT feed into OBS?
 
 - Add Media Source
 - Un-check `Local File`
@@ -346,7 +349,7 @@ Remember this is just an example, your ports and streamid may differ.
 
 ---
 
-#### Using BELABOX cloud
+### Using BELABOX cloud
 
 ```JSON
   "streamServer": {
@@ -360,7 +363,7 @@ You should be able to find the details in your [BELABOX cloud](https://cloud.bel
 
 ---
 
-#### Using an OBS Source
+### Using an OBS Source
 
 ```JSON
   "streamServer": {
@@ -369,7 +372,7 @@ You should be able to find the details in your [BELABOX cloud](https://cloud.bel
   },
 ```
 
-### Depends on
+## Depends on
 
 When a `dependsOn` field is found, monitor the status of the given server. If that server goes offline the `backupScenes` will be used.
 
@@ -387,7 +390,7 @@ When a `dependsOn` field is found, monitor the status of the given server. If th
 - `name`: The exact name this stream server depends on
 - `backupScenes`: Scenes that will be used when the depended on server is offline
 
-## Building from source
+# Building from source
 
 Download and install:
 
@@ -400,17 +403,17 @@ Then:
 - `cd <repository-name>`
 - `cargo run` or `cargo run --release`
 
-## FAQ
+# FAQ
 
-### Need additional help?
+## Need additional help?
 
 You can always contact us on discord @ b3ck#3517 or 715209#0600 and we'll do our best to help out.
 
-### I want to keep using the old version
+## I want to keep using the old version
 
 You can find the old NOALBS version in the [master branch](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/tree/master).
 
-### NGINX Setup
+## NGINX Setup
 
 If you already have NGINX-RTMP server
 
@@ -424,7 +427,7 @@ Otherwise here is a Windows version of NGINX+RTMP Server
 
 ---
 
-### How to publish to your NGINX RTMP Server
+## How to publish to your NGINX RTMP Server
 
 Using the default config where the server is listening on port `1935` and the name of the application in NGINX is `publish`;
 
@@ -458,7 +461,7 @@ Either way, pay close attention to your app or device requirements, as you will 
 
 ---
 
-### How to pull RTMP stream into OBS
+## How to pull RTMP stream into OBS
 
 Update your OBS to v26+ and follow the steps below:
 
@@ -482,13 +485,13 @@ Update your OBS to v26+ and follow the steps below:
 
 ---
 
-### How to run with multiple users
+## How to run with multiple users
 
 In the `.env` file add the line `CONFIG_DIR=configs` where `configs` is the folder that holds all the config files. The name of the config is ignored so you can name it anything you want.
 
 ---
 
-### Help it won't change scenes
+## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
 (This is so that it wont change when you are on for example your 'intro' or 'locked-brb' scene)
