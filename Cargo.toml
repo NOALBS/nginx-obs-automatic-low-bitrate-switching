@@ -25,7 +25,7 @@ serde = "1.0"
 serde_json = "1.0"
 strsim = "0.10.0"
 thiserror = "1.0"
-tokio = { version = "1.10", features = ["rt", "rt-multi-thread", "macros", "signal", "time", "sync"] }
+tokio = { version = "1.23", features = ["rt", "rt-multi-thread", "macros", "signal", "time", "sync"] }
 tokio-stream = "0.1"
 tokio-tungstenite = { version = "0.18", features = [ "native-tls" ] }
 twitch-irc = "5.0"
