@@ -82,7 +82,7 @@ Open the `.env` file. If you have a custom Twitch account created for a bot fill
 
 Use <https://twitchapps.com/tmi> to get your oauth from Twitch.
 
-> We recommend using your main Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
+> We recommend using your Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
 
 The `config.json` file holds all the user configurations.
 
