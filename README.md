@@ -23,6 +23,7 @@ Check out these links for similar solutions/paid services:
 - [noRIP.io - Services to stabilize your stream](https://www.norip.io)
 - [IRL Media Solutions - OBS Cloud Servers For IRL Streaming](https://www.irlmediasolutions.com)
 - [IRLKit - Cloud OBS & SRT(LA)/RTMP Relays](https://www.irlkit.com)
+- [StreamAtom - Powered by the StreamAtom Team, Supported by you.](https://streamatom.com/irl?screen=RtmpServer)
 
 Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
 
