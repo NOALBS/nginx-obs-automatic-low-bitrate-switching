@@ -67,6 +67,7 @@ jobs:
             7z a "$folder.zip" "$folder"
             echo "ARCHIVE=$folder.zip" >> $GITHUB_ENV
           else
+            cp "launch.sh" "$folder/"
             cp "target/${{ matrix.target }}/release/noalbs" "$folder/"
             tar czf "$folder.tar.gz" "$folder"
             echo "ARCHIVE=$folder.tar.gz" >> $GITHUB_ENV
