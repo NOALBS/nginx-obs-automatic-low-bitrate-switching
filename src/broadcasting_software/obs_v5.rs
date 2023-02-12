@@ -144,65 +144,9 @@ impl Obsv5 {
 
         let mut sources: Vec<SourceItem> = Vec::new();
         let current_scene = client.scenes().current_program_scene().await?;
-        self.get_media_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false)
-            .await;
+        get_media_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false).await;
 
         Ok(sources)
-    }
-
-    #[async_recursion]
-    async fn get_media_sources_rec(
-        &self,
-        client: &Client,
-        scene: String,
-        visited: &mut Vec<String>,
-        sources: &mut Vec<SourceItem>,
-        group: bool,
-    ) {
-        let items = if !group {
-            client.scene_items().list(&scene).await.unwrap()
-        } else {
-            client.scene_items().list_group(&scene).await.unwrap()
-        };
-        let current_name = scene;
-
-        for item in items {
-            if let Some(ref input_kind) = item.input_kind {
-                if matches!(input_kind.as_ref(), "ffmpeg_source" | "vlc_source") {
-                    let status = match client.media_inputs().status(&item.source_name).await {
-                        Ok(s) => s,
-                        Err(_) => continue,
-                    };
-
-                    if matches!(
-                        status.state,
-                        MediaState::Playing | MediaState::Buffering | MediaState::Opening
-                    ) {
-                        sources.push(SourceItem {
-                            id: item.id,
-                            scene_name: current_name.to_owned(),
-                            source_name: item.source_name,
-                            source_kind: input_kind.to_owned(),
-                        });
-                    }
-                    continue;
-                }
-            }
-
-            if matches!(
-                item.source_type,
-                obwsv5::responses::scene_items::SourceType::Scene
-            ) && !visited.contains(&item.source_name)
-            {
-                visited.push(item.source_name.to_owned());
-
-                // Should always be present because of the type check
-                let group = item.is_group.unwrap();
-
-                self.get_media_sources_rec(client, item.source_name, visited, sources, group)
-                    .await;
-            }
-        }
     }
 
     async fn get_sources(&self) -> Result<Vec<SourceItem>, error::Error> {
@@ -214,49 +158,99 @@ impl Obsv5 {
 
         let mut sources: Vec<SourceItem> = Vec::new();
         let current_scene = client.scenes().current_program_scene().await?;
-        self.get_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false)
-            .await;
+        get_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false).await;
 
         Ok(sources)
     }
+}
 
-    #[async_recursion]
-    async fn get_sources_rec(
-        &self,
-        client: &Client,
-        scene: String,
-        visited: &mut Vec<String>,
-        sources: &mut Vec<SourceItem>,
-        group: bool,
-    ) {
-        let items = if !group {
-            client.scene_items().list(&scene).await.unwrap()
-        } else {
-            client.scene_items().list_group(&scene).await.unwrap()
-        };
-        let current_name = scene;
+#[async_recursion]
+async fn get_media_sources_rec(
+    client: &Client,
+    scene: String,
+    visited: &mut Vec<String>,
+    sources: &mut Vec<SourceItem>,
+    group: bool,
+) {
+    let items = if !group {
+        client.scene_items().list(&scene).await.unwrap()
+    } else {
+        client.scene_items().list_group(&scene).await.unwrap()
+    };
+    let current_name = scene;
 
-        for item in items {
-            sources.push(SourceItem {
-                id: item.id,
-                scene_name: current_name.to_owned(),
-                source_name: item.source_name.to_owned(),
-                source_kind: String::new(), // Doesn't matter
-            });
+    for item in items {
+        if let Some(ref input_kind) = item.input_kind {
+            if matches!(input_kind.as_ref(), "ffmpeg_source" | "vlc_source") {
+                let status = match client.media_inputs().status(&item.source_name).await {
+                    Ok(s) => s,
+                    Err(_) => continue,
+                };
 
-            if matches!(
-                item.source_type,
-                obwsv5::responses::scene_items::SourceType::Scene
-            ) && !visited.contains(&item.source_name)
-            {
-                visited.push(item.source_name.to_owned());
-
-                // Should always be present because of the type check
-                let group = item.is_group.unwrap();
-
-                self.get_sources_rec(client, item.source_name, visited, sources, group)
-                    .await;
+                if matches!(
+                    status.state,
+                    MediaState::Playing | MediaState::Buffering | MediaState::Opening
+                ) {
+                    sources.push(SourceItem {
+                        id: item.id,
+                        scene_name: current_name.to_owned(),
+                        source_name: item.source_name,
+                        source_kind: input_kind.to_owned(),
+                    });
+                }
+                continue;
             }
+        }
+
+        if matches!(
+            item.source_type,
+            obwsv5::responses::scene_items::SourceType::Scene
+        ) && !visited.contains(&item.source_name)
+        {
+            visited.push(item.source_name.to_owned());
+
+            // Should always be present because of the type check
+            let group = item.is_group.unwrap();
+
+            get_media_sources_rec(client, item.source_name, visited, sources, group).await;
+        }
+    }
+}
+
+#[async_recursion]
+async fn get_sources_rec(
+    client: &Client,
+    scene: String,
+    visited: &mut Vec<String>,
+    sources: &mut Vec<SourceItem>,
+    group: bool,
+) {
+    let items = if !group {
+        client.scene_items().list(&scene).await.unwrap()
+    } else {
+        client.scene_items().list_group(&scene).await.unwrap()
+    };
+    let current_name = scene;
+
+    for item in items {
+        sources.push(SourceItem {
+            id: item.id,
+            scene_name: current_name.to_owned(),
+            source_name: item.source_name.to_owned(),
+            source_kind: String::new(), // Doesn't matter
+        });
+
+        if matches!(
+            item.source_type,
+            obwsv5::responses::scene_items::SourceType::Scene
+        ) && !visited.contains(&item.source_name)
+        {
+            visited.push(item.source_name.to_owned());
+
+            // Should always be present because of the type check
+            let group = item.is_group.unwrap();
+
+            get_sources_rec(client, item.source_name, visited, sources, group).await;
         }
     }
 }

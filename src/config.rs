@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    io::{Seek, SeekFrom},
-};
+use std::{collections::HashMap, io::Seek};
 
 use serde::{Deserialize, Serialize};
 use tracing::{error, info};
@@ -173,7 +170,7 @@ impl ConfigLogic for File {
             Ok(c) => c,
             Err(e) => {
                 // Check if config v1
-                file.seek(SeekFrom::Start(0))?;
+                file.rewind()?;
                 let old: serde_json::Result<ConfigOld> = serde_json::from_reader(&file);
 
                 if let Ok(o) = old {

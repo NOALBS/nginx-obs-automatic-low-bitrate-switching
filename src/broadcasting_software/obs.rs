@@ -168,59 +168,9 @@ impl Obs {
             .ok_or(error::Error::UnableInitialConnection)?;
 
         let mut sources: Vec<SourceItem> = Vec::new();
-        self.get_media_sources_rec(client, None, &mut Vec::new(), &mut sources)
-            .await;
+        get_media_sources_rec(client, None, &mut Vec::new(), &mut sources).await;
 
         Ok(sources)
-    }
-
-    #[async_recursion]
-    async fn get_media_sources_rec(
-        &self,
-        client: &obws::Client,
-        scene: Option<String>,
-        visited: &mut Vec<String>,
-        sources: &mut Vec<SourceItem>,
-    ) {
-        let items = client
-            .scene_items()
-            .get_scene_item_list(scene.as_deref())
-            .await
-            .unwrap();
-        let current_name = items.scene_name.to_owned();
-
-        for item in items.scene_items {
-            if matches!(item.source_kind.as_str(), "ffmpeg_source" | "vlc_source") {
-                let state = match client
-                    .media_control()
-                    .get_media_state(&item.source_name)
-                    .await
-                {
-                    Ok(s) => s,
-                    Err(_) => continue,
-                };
-
-                if matches!(
-                    state,
-                    MediaState::Playing | MediaState::Buffering | MediaState::Opening
-                ) {
-                    sources.push(SourceItem {
-                        scene_name: current_name.to_owned(),
-                        source_name: item.source_name,
-                        source_kind: item.source_kind,
-                        id: item.item_id,
-                    });
-                }
-
-                continue;
-            }
-
-            if item.source_kind == "scene" && !visited.contains(&item.source_name) {
-                visited.push(item.source_name.to_owned());
-                self.get_media_sources_rec(client, Some(item.source_name), visited, sources)
-                    .await;
-            }
-        }
     }
 
     async fn get_sources(&self) -> Result<Vec<SourceItem>, error::Error> {
@@ -244,6 +194,53 @@ impl Obs {
             .collect::<Vec<SourceItem>>();
 
         Ok(scene_items)
+    }
+}
+
+#[async_recursion]
+async fn get_media_sources_rec(
+    client: &obws::Client,
+    scene: Option<String>,
+    visited: &mut Vec<String>,
+    sources: &mut Vec<SourceItem>,
+) {
+    let items = client
+        .scene_items()
+        .get_scene_item_list(scene.as_deref())
+        .await
+        .unwrap();
+    let current_name = items.scene_name.to_owned();
+
+    for item in items.scene_items {
+        if matches!(item.source_kind.as_str(), "ffmpeg_source" | "vlc_source") {
+            let state = match client
+                .media_control()
+                .get_media_state(&item.source_name)
+                .await
+            {
+                Ok(s) => s,
+                Err(_) => continue,
+            };
+
+            if matches!(
+                state,
+                MediaState::Playing | MediaState::Buffering | MediaState::Opening
+            ) {
+                sources.push(SourceItem {
+                    scene_name: current_name.to_owned(),
+                    source_name: item.source_name,
+                    source_kind: item.source_kind,
+                    id: item.item_id,
+                });
+            }
+
+            continue;
+        }
+
+        if item.source_kind == "scene" && !visited.contains(&item.source_name) {
+            visited.push(item.source_name.to_owned());
+            get_media_sources_rec(client, Some(item.source_name), visited, sources).await;
+        }
     }
 }
 

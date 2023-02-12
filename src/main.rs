@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
         chat_handler.add_chat_sender(ChatPlatform::Twitch, Arc::new(twitch));
     };
 
-    let _ = tokio::task::spawn(async move {
+    tokio::task::spawn(async move {
         chat_handler.handle_messages().await;
     });
 

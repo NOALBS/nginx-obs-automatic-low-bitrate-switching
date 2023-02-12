@@ -7,6 +7,7 @@ use argon2::{
     },
     Argon2,
 };
+use base64::Engine;
 use tokio::sync::mpsc;
 use tracing::error;
 
@@ -72,7 +73,7 @@ pub fn generate_token() -> String {
     let mut random_token = [0u8; 32];
     OsRng.fill_bytes(&mut random_token);
 
-    base64::encode(random_token)
+    base64::engine::general_purpose::STANDARD.encode(random_token)
 }
 
 pub fn hash(password: &[u8]) -> String {
