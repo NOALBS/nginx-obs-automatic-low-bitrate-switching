@@ -44,4 +44,4 @@ once_cell = "1.10"
 rust-i18n = "1.0"
 
 [target.x86_64-unknown-linux-musl.dependencies]
-openssl = { version = "=0.10.45", features = ["vendored"] }
+openssl = { version = "=0.10.48", features = ["vendored"] }
