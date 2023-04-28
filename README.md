@@ -19,7 +19,6 @@ Check out these links for similar solutions/paid services:
 - [u³.gg - RTMP/SRT(LA) Endpoint Service Provider](https://u3.gg)
 - [AntiScuff - Cloud-based OBS Hosting](https://www.antiscuff.com/)
 - [IRLToolkit - Step your stream up to the next level](https://irltoolkit.com/)
-- [Super Stream System by Psynaps](http://www.psynapticmedia.com/super-stream-system-by-psynaps/)
 - [noRIP.io - Services to stabilize your stream](https://www.norip.io)
 - [IRL Media Solutions - OBS Cloud Servers For IRL Streaming](https://www.irlmediasolutions.com)
 - [IRLKit - Cloud OBS & SRT(LA)/RTMP Relays](https://www.irlkit.com)
