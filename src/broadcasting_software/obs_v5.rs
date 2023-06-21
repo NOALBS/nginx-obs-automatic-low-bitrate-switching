@@ -526,6 +526,28 @@ impl BroadcastingSoftwareLogic for Obsv5 {
 
         Ok((source.source_name.to_owned(), enabled))
     }
+
+    async fn set_collection_and_profile(
+        &self,
+        source: &config::CollectionPair,
+    ) -> Result<(), error::Error> {
+        let connection = self.connection.lock().await;
+
+        let client = connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        client
+            .scene_collections()
+            .set_current(&source.collection)
+            .await?;
+
+        if !client.streaming().status().await?.active {
+            client.profiles().set_current(&source.profile).await?;
+        }
+
+        Ok(())
+    }
 }
 
 pub struct InnerConnection {
@@ -638,6 +660,7 @@ impl InnerConnection {
                 host,
                 password,
                 port,
+                ..
             } = &self.connection_info;
 
             match Client::connect(host, *port, password.as_ref()).await {

@@ -81,3 +81,9 @@ noalbs:
 scene:
     success: Cambiando a escena %{scene}
     error: La escena %{scene} no existe
+collection:
+    noParams: No collection specified
+    notFound: "Error no collection found with the name: %{collection}"
+    success: Collection successfully switched to "%{collection}"
+    error: Error can't switch to collection "%{collection}"
+    note: "Note: the profile will only be changed when not streaming"

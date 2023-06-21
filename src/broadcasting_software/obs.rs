@@ -586,6 +586,13 @@ impl BroadcastingSoftwareLogic for Obs {
 
         Ok((source.source_name.to_owned(), render))
     }
+
+    async fn set_collection_and_profile(
+        &self,
+        _source: &config::CollectionPair,
+    ) -> Result<(), error::Error> {
+        Err(error::Error::UnableInitialConnection)
+    }
 }
 
 /// The real connection to OBS, automatically keeps trying to connect.

@@ -24,6 +24,11 @@ pub trait BroadcastingSoftwareLogic: Send + Sync {
 
     async fn toggle_source(&self, source: &str) -> Result<(String, bool), Error>;
 
+    async fn set_collection_and_profile(
+        &self,
+        source: &crate::config::CollectionPair,
+    ) -> Result<(), Error>;
+
     async fn info(
         &self,
         state: &sync::RwLockReadGuard<state::State>,

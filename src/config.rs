@@ -112,6 +112,19 @@ pub struct ObsConfig {
     pub host: String,
     pub password: Option<String>,
     pub port: u16,
+
+    // Configurable profile and collection pairs
+    pub collections: Option<HashMap<String, CollectionPair>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CollectionPair {
+    /// OBS profile name
+    pub profile: String,
+
+    /// OBS collection name
+    pub collection: String,
 }
 
 pub trait ConfigLogic: Send + Sync {
@@ -316,6 +329,7 @@ impl From<ConfigOld> for Config {
             host: full_host.next().unwrap().to_owned(),
             password: Some(o.obs.password),
             port: full_host.next().unwrap().parse().unwrap(),
+            collections: Some(HashMap::new()),
         });
 
         let mut config = Config {

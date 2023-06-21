@@ -535,6 +535,7 @@ impl DispatchCommand {
             chat::Command::StopOnRaid(target_info) => {
                 self.stop_on_raid(target_info.to_owned()).await;
             }
+            chat::Command::Collection => self.collection(params.next()).await,
         };
     }
 
@@ -1334,6 +1335,75 @@ impl DispatchCommand {
 
     async fn stop_on_raid(&self, target_info: chat::RaidedInfo) {
         self.stop(Some(target_info)).await;
+    }
+
+    async fn collection(&self, name: Option<&str>) {
+        let name = match name {
+            Some(name) => name.to_lowercase(),
+            None => {
+                self.send(t!("collection.noParams", locale = &self.lang,))
+                    .await;
+                return;
+            }
+        };
+
+        let state = self.user.state.read().await;
+        let collections = match &state.config.software {
+            config::SoftwareConnection::ObsOld(o) => &o.collections,
+            config::SoftwareConnection::Obs(o) => &o.collections,
+        };
+
+        let collections = match collections {
+            Some(c) => c,
+            None => {
+                self.send(t!(
+                    "collection.error",
+                    locale = &self.lang,
+                    collection = name
+                ))
+                .await;
+                return;
+            }
+        };
+
+        let collection = match collections.get(&name) {
+            Some(c) => c,
+            None => {
+                self.send(t!(
+                    "collection.notFound",
+                    locale = &self.lang,
+                    collection = name
+                ))
+                .await;
+                return;
+            }
+        };
+
+        let bsc = match &state.broadcasting_software.connection {
+            Some(b) => b,
+            None => return,
+        };
+
+        if (bsc.set_collection_and_profile(collection).await).is_err() {
+            self.send(t!(
+                "collection.error",
+                locale = &self.lang,
+                collection = name
+            ))
+            .await;
+            return;
+        };
+
+        self.send(t!(
+            "collection.success",
+            locale = &self.lang,
+            collection = name
+        ))
+        .await;
+
+        if state.broadcasting_software.is_streaming {
+            self.send(t!("collection.note", locale = &self.lang,)).await;
+        }
     }
 }
 

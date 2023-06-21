@@ -81,3 +81,9 @@ noalbs:
 scene:
     success: Переход на %{scene} сцену
     error: "%{scene} не установлена"
+collection:
+    noParams: No collection specified
+    notFound: "Error no collection found with the name: %{collection}"
+    success: Collection successfully switched to "%{collection}"
+    error: Error can't switch to collection "%{collection}"
+    note: "Note: the profile will only be changed when not streaming"

@@ -7,6 +7,7 @@ Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the cu
 NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
 
 ## NOALBS has a Discord, join here: <https://discord.gg/efWu5HWM2u>
+
 ## NOALBS is on Twitter, follow here: <https://twitter.com/NOALBS>
 
 # Similar Solutions / Paid Services
@@ -44,6 +45,7 @@ This script gives you the option to enable some simple chat commands to help you
 |    Admins    | !start                   | on-demand command to start streaming in OBS.                                                            | !start             |
 |    Admins    | !stop                    | on-demand command to stop streaming in OBS.                                                             | !stop              |
 |    Admins    | !record                  | on-demand command to toggle recording in OBS.                                                           | !record            |
+|    Admins    | !collection (name)       | changes the scene collection and profile.                                                               | !collection twitch |
 |    Admins    | !alias (alias) (command) | add an alias for a command.                                                                             | !alias ss switch   |
 |    Admins    | !alias rem (alias)       | removes an alias for a command.                                                                         | !alias rem ss      |
 |    Admins    | !switch (scene)          | switches to the provided SCENE ([fuzzy match](https://wikipedia.org/wiki/Approximate_string_matching)). | !switch INTRO      |
@@ -130,7 +132,17 @@ The `config.json` file holds all the user configurations.
     "type": "Obs",                                  // NOALBS supports OBS WebSocket v4 and v5. To still use v4 use type ObsOld.
     "host": "localhost",                            // Host of your OBS, most commonly used is; localhost.
     "password": "example",                          // Password to the OBS Websockets.
-    "port": 4455                                    // Port to the OBS Websockets.
+    "port": 4455,                                    // Port to the OBS Websockets.
+    "collections": {
+      "twitch": {
+        "profile": "twitch_profile",
+        "collection": "twitch_scenes"
+      },
+      "kick": {
+        "profile": "kick_profile",
+        "collection": "kick_scenes"
+      }
+    }
   },
   "chat": {
     "platform": "Twitch",                           // Twitch is the only current platform supported as of right now.
@@ -191,13 +203,25 @@ The `config.json` file holds all the user configurations.
   "type": "Obs",
   "host": "localhost",
   "password": "password",
-  "port": 4455
+  "port": 4455,
+  "collections": {
+    "twitch": {
+      "profile": "twitch_profile",
+      "collection": "twitch_scenes"
+    },
+    "kick": {
+      "profile": "kick_profile",
+      "collection": "kick_scenes"
+    }
+  }
 }
 ```
 
 - `type`: Replace this with the software you're using.
 
 NOALBS supports OBS WebSocket v4 and v5. To still use v4 use type `ObsOld`.
+
+- `collections`: Optional configurable scene collections and profiles to be used with the `!collection` command.
 
 ## Stream servers section
 
