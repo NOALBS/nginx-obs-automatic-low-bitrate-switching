@@ -92,7 +92,17 @@
     "type": "Obs",
     "host": "localhost",
     "password": "password",
-    "port": 4444
+    "port": 4455,
+    "collections": {
+      "twitch": {
+        "profile": "twitch",
+        "collection": "twitch_scenes"
+      },
+      "kick": {
+        "profile": "kick",
+        "collection": "kick_scenes"
+      }
+    }
   },
   "chat": {
     "platform": "Twitch",
