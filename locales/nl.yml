@@ -8,18 +8,18 @@ startTwitchTranscoding:
     attempts: ", %{count} pogingen"
 stop:
     success: Stream is succesvol gestopt
-    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    raid: De stream is gestopt en overvallen %{display_channel} volg deze link https://twitch.tv/%{channel}
     error: "Fout, kan de stream niet stoppen: %{error}"
 switch:
     noParams: Geen scène opgegeven
     success: Scène succesvol overgeschakeld naar "%{scene}"
     error: Fout, kan niet overschakelen naar scène "%{scene}"
 source:
-    noParams: No source specified
-    success: Source "%{name}" successfully %{status}
-    error: Error toggling source "%{name}"
-    enabled: enabled
-    disabled: disabled
+    noParams: Geen bron opgegeven
+    success: Bron "%{name}" succesvol %{status}
+    error: Fout bij schakelen tussen bron "%{name}"
+    enabled: ingeschakeld
+    disabled: uitgeschakeld
 bitrate:
     success: "%{name}: %{message}"
     error: "Geen verbinding :("
@@ -82,8 +82,8 @@ scene:
     success: Overschakelen naar %{scene} scène
     error: Geen %{scene} scène ingesteld
 collection:
-    noParams: No collection specified
-    notFound: "Error no collection found with the name: %{collection}"
-    success: Collection successfully switched to "%{collection}"
-    error: Error can't switch to collection "%{collection}"
-    note: "Note: the profile will only be changed when not streaming"
+    noParams: Geen verzameling opgegeven
+    notFound: "Fout, geen verzameling gevonden met de naam: %{collection}"
+    success: Verzameling succesvol geschakeld naar "%{collection}"
+    error: Fout, kan niet overschakelen naar verzameling "%{collection}"
+    note: "Opmerking: het profiel wordt alleen gewijzigd als er niet wordt gestreamd"
