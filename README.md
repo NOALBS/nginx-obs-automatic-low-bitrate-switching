@@ -1,31 +1,38 @@
 # NOALBS
 
-Simple app to automatically switch scenes in OBS Studio/OBS.Live based on the current bitrate fetched from the server stats.
+A simple executable for all Operating Systems (Windows, Mac & Linux) to automatically switch scenes in OBS Studio/OBS.Live; based on the current bitrate fetched from your ingest server stats.  NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely from your ingest server (RTMP, SRT Etc..).
 
 ---
+### Connect with Us:
+| <a href="https://discord.gg/efWu5HWM2u"><img src="https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/assets/1740542/8e96e359-373e-441a-b653-4c613d6dc521" alt="NOALBS DISCORD" width="50" height="auto"></a> | <a href="https://twitter.com/NOALBS"><img src="https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/assets/1740542/7b0b20d7-5dd7-4666-a3f0-089faa517fa3" alt="NOALBS TWITTER" width="50" height="auto"></a> |
+|---|---|
+|[Discord](https://discord.gg/efWu5HWM2u)|[Twitter](https://twitter.com/NOALBS)|
 
-NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely.
-
-## NOALBS has a Discord, join here: <https://discord.gg/efWu5HWM2u>
-
-## NOALBS is on Twitter, follow here: <https://twitter.com/NOALBS>
-
+---
 # Similar Solutions / Paid Services
 
-Don't feel like setting this all up by yourself? Contact me on discord @ [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) and I'll do everything for you for a fee or..
+Don't feel like setting this all up by yourself?
+- Message me [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord and I'll do everything for you for a fee 😄👍
 
-Check out these links for similar solutions/paid services:
+  or..
 
-- [BELABOX cloud - the only SRT/SRTLA service optimised for bonding with a BELABOX DIY / BELABOX BEE](https://cloud.belabox.net)
-- [u³.gg - RTMP/SRT(LA) Endpoint Service Provider](https://u3.gg)
-- [AntiScuff - Cloud-based OBS Hosting](https://www.antiscuff.com/)
-- [IRLToolkit - Step your stream up to the next level](https://irltoolkit.com/)
-- [noRIP.io - Services to stabilize your stream](https://www.norip.io)
-- [IRL Media Solutions - OBS Cloud Servers For IRL Streaming](https://www.irlmediasolutions.com)
-- [IRLKit - Cloud OBS & SRT(LA)/RTMP Relays](https://www.irlkit.com)
-- [StreamAtom - Powered by the StreamAtom Team, Supported by you.](https://streamatom.com/irl?screen=RtmpServer)
+  
+- Check out these links for similar solutions/paid services:
 
-Do you offer a similar solution or paid service? Want your link here? Message [b3ck#3517](https://discordapp.com/channels/@me/96991451006660608) on Discord
+| Service Name | Details/Slogan |
+|---|---|
+| [BELABOX](https://cloud.belabox.net) | The only SRT/SRTLA service optimized for bonding with a [BELABOX DIY](https://b3ck.com/b3cks-belabox) / [BELABOX BEE](https://shop.belabox.net/product/belabox-bee) |
+| [u³.gg](https://u3.gg) | RTMP/SRT(LA) Endpoint Service Provider |
+| [AntiScuff](https://www.antiscuff.com/) | Cloud OBS Hosting |
+| [IRLToolkit](https://irltoolkit.com/) | Step your stream up to the next level! |
+| [noRIP.io](https://www.norip.io) | Services to stabilize your stream |
+| [IRLKit](https://www.irlkit.com) | Cloud OBS & SRT(LA)/RTMP Relays |
+| [StreamAtom](https://streamatom.com/irl?screen=RtmpServer) | Powered by the StreamAtom Team, Supported by you. |
+| [IRLtools](https://irltools.com/) | IRL Accessories & Guides / Cloud Solutions Coming Soon.. |
+
+Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord
+
+---
 
 # Quick Start
 
