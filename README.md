@@ -31,7 +31,7 @@ Don't feel like setting this all up by yourself?
 | [IRLtools](https://irltools.com?ref=NOALBS) | IRL Accessories & Guides / Cloud Solutions Coming Soon.. |
 
 Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord.
-- Also if your service is already listed above and want me to add any type of tracking to the URL so you know where your traffic is coming from send me a DM on Discord.
+- Also if your service is already listed above and you would like me to add any type of tracking to the URL so you know where your traffic is coming from send me a DM on Discord.
 
 ---
 
