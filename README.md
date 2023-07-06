@@ -23,14 +23,15 @@ Don't feel like setting this all up by yourself?
 |---|---|
 | [BELABOX](https://cloud.belabox.net) | The only SRT/SRTLA service optimized for bonding with a [BELABOX DIY](https://b3ck.com/b3cks-belabox) / [BELABOX BEE](https://shop.belabox.net/product/belabox-bee) |
 | [u³.gg](https://u3.gg?ref=NOALBS) | RTMP/SRT(LA) Endpoint Service Provider |
-| [AntiScuff](https://www.antiscuff.com/) | Cloud OBS Hosting |
+| [AntiScuff](https://antiscuff.com/?utm_source=noalbs&utm_campaign=referral&utm_medium=landing) | Cloud OBS Hosting |
 | [IRLToolkit](https://irltoolkit.com/) | Step your stream up to the next level! |
 | [noRIP.io](https://www.norip.io) | Services to stabilize your stream |
 | [IRLKit](https://www.irlkit.com) | Cloud OBS & SRT(LA)/RTMP Relays |
 | [StreamAtom](https://streamatom.com/irl?screen=RtmpServer) | Powered by the StreamAtom Team, Supported by you. |
 | [IRLtools](https://irltools.com?ref=NOALBS) | IRL Accessories & Guides / Cloud Solutions Coming Soon.. |
 
-Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord
+Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord.
+- Also if your service is already listed above and want me to add any type of tracking to the URL so you know where your traffic is coming from send me a DM on Discord.
 
 ---
 
