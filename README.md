@@ -22,7 +22,7 @@ Don't feel like setting this all up by yourself?
 | Service Name | Details/Slogan |
 |---|---|
 | [BELABOX](https://cloud.belabox.net) | The only SRT/SRTLA service optimized for bonding with a [BELABOX DIY](https://b3ck.com/b3cks-belabox) / [BELABOX BEE](https://shop.belabox.net/product/belabox-bee) |
-| [u³.gg](https://u3.gg?ref=NOALBS) | RTMP/SRT(LA) Endpoint Service Provider |
+| [IRLHosting]([https://u3.gg?ref=NOALBS](https://irlhosting.com/?ref=noalbs)) | Cloud hosting and endpoints |
 | [AntiScuff](https://antiscuff.com/?utm_source=noalbs&utm_campaign=referral&utm_medium=landing) | Cloud OBS Hosting |
 | [IRLToolkit](https://irltoolkit.com/) | Step your stream up to the next level! |
 | [noRIP.io](https://www.norip.io) | Services to stabilize your stream |
