@@ -8,18 +8,18 @@ startTwitchTranscoding:
     attempts: ", brukte %{count} forsøk"
 stop:
     success: Strøm avsluttet!
-    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    raid: Strømmen har stoppet og raidet %{display_channel}, bli med hit https://twitch.tv/%{channel}
     error: "Feil kan ikke stoppe strømmen: %{error}"
 switch:
     noParams: Ingen scene valgt
     success: Scene er byttet til "%{scene}"
     error: "Feil: {scene}"
 source:
-    noParams: No source specified
-    success: Source "%{name}" successfully %{status}
-    error: Error toggling source "%{name}"
-    enabled: enabled
-    disabled: disabled
+    noParams: Ingen kilde valgt
+    success: Kilde "%{name}" har blitt %{status}
+    error: Feil under veksling av kilde "%{name}"
+    enabled: aktivert
+    disabled: deaktivert
 bitrate:
     success: "%{name}: %{message}"
     error: "Gjeldende bitrate: OFFLINE"
@@ -82,8 +82,8 @@ scene:
     success: Bytter til %{scene}-scene
     error: Ingen %{scene}-scene valgt
 collection:
-    noParams: No collection specified
-    notFound: "Error no collection found with the name: %{collection}"
-    success: Collection successfully switched to "%{collection}"
-    error: Error can't switch to collection "%{collection}"
-    note: "Note: the profile will only be changed when not streaming"
+    noParams: Ingen kolleksjon valgt
+    notFound: "Feil, fant ingen kolleksjon med navnet %{collection}"
+    success: Kolleksjonen ble bytte til "%{collection}"
+    error: Feil, kan ikke bytte til kolleksjon "%{collection}"
+    note: "Merk: profilen endres kun når du ikke strømmer"
