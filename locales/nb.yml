@@ -84,6 +84,6 @@ scene:
 collection:
     noParams: Ingen kolleksjon valgt
     notFound: "Feil, fant ingen kolleksjon med navnet %{collection}"
-    success: Kolleksjonen ble bytte til "%{collection}"
+    success: Kolleksjonen ble byttet til "%{collection}"
     error: Feil, kan ikke bytte til kolleksjon "%{collection}"
     note: "Merk: profilen endres kun når du ikke strømmer"
