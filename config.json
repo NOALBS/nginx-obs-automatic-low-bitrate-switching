@@ -6,21 +6,33 @@
   },
   "switcher": {
     "bitrateSwitcherEnabled": true,
-    "onlySwitchWhenStreaming": true,
+    "onlySwitchWhenStreaming": false,
     "instantlySwitchOnRecover": true,
     "autoSwitchNotification": true,
     "retryAttempts": 5,
     "triggers": {
-      "low": 800,
-      "rtt": 2500,
-      "offline": null
+      "low": 450,
+      "rtt": 1500,
+      "offline": 400
     },
     "switchingScenes": {
-      "normal": "live",
-      "low": "low",
-      "offline": "offline"
+      "normal": "LIVE",
+      "low": "LOW",
+      "offline": "BRB"
     },
     "streamServers": [
+      {
+        "streamServer": {
+          "type": "Belabox",
+          "statsUrl": "http://use.srt.belabox.net:8080/XXXXXXXXXX(STREAMID)XXXXXXXXXX",
+          "publisher": "XXXXXXXXXX(STREAMID)XXXXXXXXXX"
+        },
+        "name": "BELABOX cloud",
+        "priority": 0,
+        "overrideScenes": null,
+        "dependsOn": null,
+        "enabled": true
+      },
       {
         "streamServer": {
           "type": "NodeMediaServer",
@@ -50,9 +62,9 @@
         "dependsOn": {
           "name": "nginx",
           "backupScenes": {
-            "normal": "Scene 3",
+            "normal": "Scene 2",
             "low": "low",
-            "offline": "Scene 2"
+            "offline": "Scene 3"
           }
         },
         "enabled": true
@@ -107,40 +119,33 @@
   "chat": {
     "platform": "Twitch",
     "username": "715209",
-    "admins": [
-      "b3ck"
-    ],
+    "admins": ["b3ck"],
+    "language": "EN",
     "prefix": "!",
-    "enablePublicCommands": false,
+    "enablePublicCommands": true,
     "enableModCommands": true,
     "enableAutoStopStreamOnHostOrRaid": true,
     "announceRaidOnAutoStop": true,
     "commands": {
       "Fix": {
-        "permission": null,
-        "alias": [
-          "f"
-        ]
+        "permission": "Mod",
+        "alias": ["f"]
       },
       "Switch": {
         "permission": "Mod",
-        "alias": [
-          "ss"
-        ]
+        "alias": ["ss"]
       },
       "Bitrate": {
         "permission": null,
-        "alias": [
-          "b"
-        ]
+        "alias": ["b"]
       }
     }
   },
   "optionalScenes": {
-    "starting": null,
-    "ending": null,
-    "privacy": "privacy",
-    "refresh": null
+    "starting": "STARTING",
+    "ending": "ENDING",
+    "privacy": "PRIVACY",
+    "refresh": "REFRESH"
   },
   "optionalOptions": {
     "twitchTranscodingCheck": false,
@@ -148,6 +153,5 @@
     "twitchTranscodingDelaySeconds": 15,
     "offlineTimeout": null,
     "recordWhileStreaming": false
-  },
-  "language": "en"
+  }
 }
