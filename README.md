@@ -159,6 +159,7 @@ The `config.json` file holds all the user configurations.
       "username2",
       "username3"
     ],
+    "language": "EN",                               // Language variants: `DE`, `DK`, `EN`, `ES`, `FR`, `IT`, `NB`, `NL`, `PL`, `PTBR`, `RU`, `SV`, `TR`, `ZHTW`
     "prefix": "!",                                  // Prefix you want to use in chat to send commands to NOALBS from chat.
     "enablePublicCommands": false,                  // Enable or Disable public commands to anyone can use !bitrate in chat.
     "enableModCommands": true,                      // Enable or Disable mod only commands.
@@ -196,8 +197,7 @@ The `config.json` file holds all the user configurations.
     "twitchTranscodingDelaySeconds": 15,            // How long you want to wait to check inbetween checks.
     "offlineTimeout": null,                         // OBS will stop streaming when you you've been in your offline scene for this amount of time.
     "recordWhileStreaming": false                   // Automatically record when you start streaming.
-  },
-  "language": "en"                                  // Language you would like to use for NOALBS in chat.
+  }
 }
 ```
 
@@ -420,6 +420,33 @@ When a `dependsOn` field is found, monitor the status of the given server. If th
 
 - `name`: The exact name this stream server depends on
 - `backupScenes`: Scenes that will be used when the depended on server is offline
+
+# Languages
+
+To change the language that you see in chat responses, locate or add the `"language": "EN",` line above your `"prefix": "!",` parameter under the `chat` section in the NOALBS `config.json` file. The language variant must be in **UPPERCASE** and should be one of the following:
+
+- `DE`: German
+- `DK`: Danish
+- `EN`: English
+- `ES`: Spanish
+- `FR`: French
+- `IT`: Italian
+- `NB`: Norwegian Bokmål
+- `NL`: Dutch
+- `PL`: Polish
+- `PTBR`: Portuguese (Brazil)
+- `RU`: Russian
+- `SV`: Swedish
+- `TR`: Turkish
+- `ZHTW`: Traditional Chinese (Taiwan)
+
+Example excerpt from the NOALBS `config.json` file:
+```json
+"language": "EN",
+"prefix": "!",
+"enablePublicCommands": true,
+"enableModCommands": true,
+```
 
 # Building from source
 
