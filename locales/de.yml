@@ -85,5 +85,5 @@ collection:
     noParams: Keine Szenen-Sammlung angegeben
     notFound: "Fehler: Es wurde keine Szenen-Sammlung mit dem Namen %{collection} gefunden."
     success: Sammlung erfolgreich auf "%{collection}" umgestellt
-    error: Fehler: Wechsel zur Szenen-Sammlung „%{collection}“ nicht möglich
+    error: "Fehler: Wechsel zur Szenen-Sammlung „%{collection}“ nicht möglich"
     note: "Hinweis: Das Stream-Profil wird nur geändert, wenn nicht gestreamt wird"
