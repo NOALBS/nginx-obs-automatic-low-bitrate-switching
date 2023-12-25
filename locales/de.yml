@@ -8,7 +8,7 @@ startTwitchTranscoding:
     attempts: ", hat %{count} Versuche gebraucht"
 stop:
     success: Stream erfolgreich gestoppt
-    raid: Der Stream wurde gestoppt und hat %{display_channel} geraidet. Bitte den Link https://twitch.tv/%{channel} folgen
+    raid: Der Stream wurde gestoppt und es wurde %{display_channel} geraidet. Bitte den Link https://twitch.tv/%{channel} folgen
     error: "Fehler: %{error}"
 switch:
     noParams: Keine Szene angegeben
