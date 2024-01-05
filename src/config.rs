@@ -167,8 +167,10 @@ impl Default for Chat {
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct CommandInfo {
     pub permission: Option<chat::Permission>,
+    pub user_permissions: Option<Vec<String>>,
     pub alias: Option<Vec<String>>,
 }
 
@@ -219,6 +221,14 @@ impl ConfigLogic for File {
 
             for admin in &mut chat.admins {
                 admin.make_ascii_lowercase();
+            }
+
+            if let Some(commands) = &mut chat.commands {
+                commands
+                    .values_mut()
+                    .filter_map(|c| c.user_permissions.as_mut())
+                    .flatten()
+                    .for_each(|u| u.make_ascii_lowercase());
             }
         }
 

@@ -8,7 +8,7 @@ use tokio::sync::mpsc;
 use tokio::time;
 use tracing::{debug, error, info};
 
-use crate::chat::{self, HandleMessage};
+use crate::chat::{self, HandleMessage, Permission};
 use crate::{config, error, events, switcher, user_manager, Noalbs};
 
 pub struct ChatHandler {
@@ -42,13 +42,11 @@ impl ChatHandler {
         let mut default = HashMap::new();
 
         use chat::Command;
-        use chat::Permission;
 
         default.insert(
             Command::Switch,
             config::CommandInfo {
-                permission: None,
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -56,7 +54,7 @@ impl ChatHandler {
             Command::Bitrate,
             config::CommandInfo {
                 permission: Some(Permission::Public),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -64,7 +62,7 @@ impl ChatHandler {
             Command::Fix,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -72,7 +70,7 @@ impl ChatHandler {
             Command::ServerInfo,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -80,7 +78,7 @@ impl ChatHandler {
             Command::Otrigger,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -88,7 +86,7 @@ impl ChatHandler {
             Command::Refresh,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -96,7 +94,7 @@ impl ChatHandler {
             Command::Rtrigger,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -104,7 +102,7 @@ impl ChatHandler {
             Command::Sourceinfo,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -112,7 +110,7 @@ impl ChatHandler {
             Command::Trigger,
             config::CommandInfo {
                 permission: Some(Permission::Mod),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -120,7 +118,7 @@ impl ChatHandler {
             Command::Version,
             config::CommandInfo {
                 permission: Some(Permission::Public),
-                alias: None,
+                ..Default::default()
             },
         );
 
@@ -243,7 +241,7 @@ impl ChatHandler {
         &self,
         user: &Noalbs,
         msg: &chat::ChatMessage,
-    ) -> Option<(chat::Command, chat::Permission)> {
+    ) -> Option<(chat::Command, chat::CommandPermissions)> {
         let state = user.state.read().await;
         let chat = state.config.chat.as_ref()?;
         let prefix = &chat.prefix;
@@ -274,14 +272,26 @@ impl ChatHandler {
         &self,
         user: &Noalbs,
         msg: &chat::ChatMessage,
-        permission: &chat::Permission,
+        permission: &chat::CommandPermissions,
     ) -> Option<bool> {
         let state = user.state.read().await;
         let chat = state.config.chat.as_ref()?;
+
+        let chat::CommandPermissions {
+            permission,
+            user_permissions,
+        } = permission;
+
         let user_permission = &msg.permission;
 
         if *user_permission == chat::Permission::Admin || chat.admins.contains(&msg.sender) {
             return Some(true);
+        }
+
+        if let Some(user_permissions) = user_permissions {
+            if user_permissions.contains(&msg.sender) {
+                return Some(true);
+            }
         }
 
         if *user_permission == chat::Permission::Mod
@@ -292,12 +302,14 @@ impl ChatHandler {
             return Some(false);
         }
 
-        if *user_permission == chat::Permission::Mod
-            && *permission == chat::Permission::Mod
-            && !chat.enable_mod_commands
-        {
-            debug!("Mod commands disabled");
-            return Some(false);
+        if let Some(permission) = permission {
+            if *user_permission == chat::Permission::Mod
+                && *permission == chat::Permission::Mod
+                && !chat.enable_mod_commands
+            {
+                debug!("Mod commands disabled");
+                return Some(false);
+            }
         }
 
         if *user_permission == chat::Permission::Public && !chat.enable_public_commands {
@@ -306,7 +318,11 @@ impl ChatHandler {
         }
 
         debug!("Not an admin checking permission");
-        Some(permission_is_allowed(permission, user_permission))
+        if let Some(permission) = permission {
+            return Some(permission_is_allowed(permission, user_permission));
+        }
+
+        Some(false)
     }
 
     pub async fn handle_raid(
@@ -407,28 +423,33 @@ fn get_permission(
     command: &chat::Command,
     user_commands: &Option<HashMap<chat::Command, config::CommandInfo>>,
     default_commands: &HashMap<chat::Command, config::CommandInfo>,
-) -> chat::Permission {
-    if let Some(user_commands) = user_commands {
-        if let Some(p) = try_get_permission(command, user_commands) {
-            return p;
-        }
-    }
-
-    if let Some(p) = try_get_permission(command, default_commands) {
-        return p;
-    }
-
-    chat::Permission::Admin
+) -> chat::CommandPermissions {
+    user_commands
+        .as_ref()
+        .and_then(|uc| try_get_permission(command, uc))
+        .map(|mut p| {
+            if p.permission.is_none() {
+                p.permission =
+                    try_get_permission(command, default_commands).and_then(|d| d.permission);
+            }
+            p
+        })
+        .or_else(|| try_get_permission(command, default_commands))
+        .unwrap_or(chat::CommandPermissions {
+            permission: Some(chat::Permission::Admin),
+            user_permissions: None,
+        })
 }
 
 fn try_get_permission(
     command: &chat::Command,
     commands: &HashMap<chat::Command, config::CommandInfo>,
-) -> Option<chat::Permission> {
+) -> Option<chat::CommandPermissions> {
     if let Some(command) = commands.get(command) {
-        if let Some(permission) = &command.permission {
-            return Some(permission.to_owned());
-        }
+        return Some(chat::CommandPermissions {
+            permission: command.permission.to_owned(),
+            user_permissions: command.user_permissions.to_owned(),
+        });
     }
 
     None

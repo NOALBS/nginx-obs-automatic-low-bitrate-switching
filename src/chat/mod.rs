@@ -100,6 +100,12 @@ pub enum Permission {
     Public,
 }
 
+#[derive(Debug)]
+pub struct CommandPermissions {
+    permission: Option<Permission>,
+    user_permissions: Option<Vec<String>>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ChatPlatform {
     Twitch,

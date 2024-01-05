@@ -164,8 +164,8 @@ impl Noalbs {
 
         let commands = chat.commands.get_or_insert(HashMap::new());
         let command = commands.entry(command).or_insert(config::CommandInfo {
-            permission: None,
             alias: Some(Vec::new()),
+            ..Default::default()
         });
 
         if command.alias.is_none() {
