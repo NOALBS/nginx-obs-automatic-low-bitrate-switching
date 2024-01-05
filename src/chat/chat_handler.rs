@@ -8,7 +8,7 @@ use tokio::sync::mpsc;
 use tokio::time;
 use tracing::{debug, error, info};
 
-use crate::chat::{self, HandleMessage, Permission};
+use crate::chat::{self, HandleMessage, OptionalScene, Permission};
 use crate::{config, error, events, switcher, user_manager, Noalbs};
 
 pub struct ChatHandler {
@@ -542,9 +542,18 @@ impl DispatchCommand {
                     .await
             }
             chat::Command::Version => self.version().await,
-            chat::Command::PrivacyScene => self.privacy_scene().await,
-            chat::Command::StartingScene => self.starting_scene().await,
-            chat::Command::EndingScene => self.ending_scene().await,
+            chat::Command::PrivacyScene => {
+                self.switch_optional_scene(chat::OptionalScene::Privacy)
+                    .await
+            }
+            chat::Command::StartingScene => {
+                self.switch_optional_scene(chat::OptionalScene::Starting)
+                    .await
+            }
+            chat::Command::EndingScene => {
+                self.switch_optional_scene(chat::OptionalScene::Ending)
+                    .await
+            }
             chat::Command::LiveScene => self.live_scene().await,
             chat::Command::ServerInfo => self.server_info().await,
             chat::Command::Mod => self.enable_mod(params.next()).await,
@@ -1112,39 +1121,21 @@ impl DispatchCommand {
         )
     }
 
-    // TODO: Refactor these functions
-    async fn privacy_scene(&self) {
+    async fn switch_optional_scene(&self, scene_name: chat::OptionalScene) {
         let state = self.user.state.read().await;
-        if let Some(scene) = &state.config.optional_scenes.privacy {
-            self.send(t!("scene.success", locale = &self.lang, scene = "privacy"))
-                .await;
-            self.switch(Some(scene)).await;
-        } else {
-            self.send(t!("scene.error", locale = &self.lang, scene = "privacy"))
-                .await;
-        }
-    }
+        let optional_scenes = &state.config.optional_scenes;
+        let scene = match scene_name {
+            OptionalScene::Privacy => &optional_scenes.privacy,
+            OptionalScene::Starting => &optional_scenes.starting,
+            OptionalScene::Ending => &optional_scenes.ending,
+        };
 
-    async fn starting_scene(&self) {
-        let state = self.user.state.read().await;
-        if let Some(scene) = &state.config.optional_scenes.starting {
-            self.send(t!("scene.success", locale = &self.lang, scene = "starting"))
+        if let Some(scene) = scene {
+            self.send(t!("scene.success", locale = &self.lang, scene = scene_name))
                 .await;
             self.switch(Some(scene)).await;
         } else {
-            self.send(t!("scene.error", locale = &self.lang, scene = "starting"))
-                .await;
-        }
-    }
-
-    async fn ending_scene(&self) {
-        let state = self.user.state.read().await;
-        if let Some(scene) = &state.config.optional_scenes.ending {
-            self.send(t!("scene.success", locale = &self.lang, scene = "ending"))
-                .await;
-            self.switch(Some(scene)).await;
-        } else {
-            self.send(t!("scene.error", locale = &self.lang, scene = "ending"))
+            self.send(t!("scene.error", locale = &self.lang, scene = scene_name))
                 .await;
         }
     }

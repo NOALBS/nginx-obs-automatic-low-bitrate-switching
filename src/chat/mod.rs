@@ -1,3 +1,4 @@
+use core::fmt;
 use std::fmt::Display;
 
 use async_trait::async_trait;
@@ -217,4 +218,21 @@ pub struct AutomaticSwitchingScene {
     pub channel: String,
     pub scene: String,
     pub switch_type: switcher::SwitchType,
+}
+
+#[derive(Debug)]
+enum OptionalScene {
+    Privacy,
+    Starting,
+    Ending,
+}
+
+impl fmt::Display for OptionalScene {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            OptionalScene::Privacy => write!(f, "privacy"),
+            OptionalScene::Starting => write!(f, "starting"),
+            OptionalScene::Ending => write!(f, "ending"),
+        }
+    }
 }
