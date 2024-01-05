@@ -129,14 +129,17 @@
     "commands": {
       "Fix": {
         "permission": "Mod",
+        "userPermissions": ["715209"],
         "alias": ["f"]
       },
       "Switch": {
         "permission": "Mod",
+        "userPermissions": null,
         "alias": ["ss"]
       },
       "Bitrate": {
         "permission": null,
+        "userPermissions": null,
         "alias": ["b"]
       }
     }
@@ -152,6 +155,8 @@
     "twitchTranscodingRetries": 5,
     "twitchTranscodingDelaySeconds": 15,
     "offlineTimeout": null,
-    "recordWhileStreaming": false
+    "recordWhileStreaming": false,
+    "switchToStartingSceneOnStreamStart": false,
+    "switchFromStartingSceneToLiveScene": false
   }
 }
