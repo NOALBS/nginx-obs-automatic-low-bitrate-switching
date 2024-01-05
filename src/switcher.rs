@@ -253,15 +253,32 @@ impl Switcher {
         );
 
         let state = &self.state.read().await;
+        let current_scene = &state.broadcasting_software.current_scene;
 
-        if state.broadcasting_software.current_scene == switch_scene {
+        if current_scene == switch_scene {
             return Ok(());
         }
 
-        if !state
-            .switcher_state
-            .switchable_scenes
-            .contains(&state.broadcasting_software.current_scene)
+        let skip = state
+            .config
+            .optional_scenes
+            .starting
+            .as_ref()
+            .map_or(false, |starting_scene| {
+                let switch_to_live = state
+                    .config
+                    .optional_options
+                    .switch_from_starting_scene_to_live_scene;
+                current_scene == starting_scene
+                    && switch_to_live
+                    && (switch_type == SwitchType::Offline)
+            });
+
+        if skip
+            || !state
+                .switcher_state
+                .switchable_scenes
+                .contains(&state.broadcasting_software.current_scene)
         {
             return Ok(());
         }

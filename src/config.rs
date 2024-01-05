@@ -268,6 +268,9 @@ pub struct OptionalOptions {
 
     /// Switch to the starting scene when the stream starts
     pub switch_to_starting_scene_on_stream_start: bool,
+
+    /// Switch from the starting scene to the live scene when the stream starts
+    pub switch_from_starting_scene_to_live_scene: bool,
 }
 
 impl Default for OptionalOptions {
@@ -279,6 +282,7 @@ impl Default for OptionalOptions {
             offline_timeout: None,
             record_while_streaming: false,
             switch_to_starting_scene_on_stream_start: false,
+            switch_from_starting_scene_to_live_scene: false,
         }
     }
 }

@@ -36,6 +36,16 @@ impl State {
                 all_scenes.insert(scenes.offline.to_owned());
             }
         }
+
+        if let Some(starting_scene) = &self.config.optional_scenes.starting {
+            if self
+                .config
+                .optional_options
+                .switch_from_starting_scene_to_live_scene
+            {
+                all_scenes.insert(starting_scene.to_owned());
+            }
+        }
     }
 }
 
