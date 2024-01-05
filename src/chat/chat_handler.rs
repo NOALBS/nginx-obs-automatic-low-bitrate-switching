@@ -664,12 +664,13 @@ impl DispatchCommand {
     }
 
     async fn start(&self) {
-        let (twitch_transcoding, record) = {
+        let (twitch_transcoding, record, starting) = {
             let state = self.user.state.read().await;
             let options = &state.config.optional_options;
             (
                 options.twitch_transcoding_check,
                 options.record_while_streaming,
+                options.switch_to_starting_scene_on_stream_start,
             )
         };
 
@@ -679,6 +680,10 @@ impl DispatchCommand {
             } else {
                 self.start_normal().await
             };
+
+        if success && starting {
+            self.switch_optional_scene(OptionalScene::Starting).await;
+        }
 
         if success && record {
             self.record().await;

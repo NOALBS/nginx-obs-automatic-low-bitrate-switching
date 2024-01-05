@@ -265,6 +265,9 @@ pub struct OptionalOptions {
 
     /// Automatically start recording while streaming
     pub record_while_streaming: bool,
+
+    /// Switch to the starting scene when the stream starts
+    pub switch_to_starting_scene_on_stream_start: bool,
 }
 
 impl Default for OptionalOptions {
@@ -275,6 +278,7 @@ impl Default for OptionalOptions {
             twitch_transcoding_delay_seconds: 15,
             offline_timeout: None,
             record_while_streaming: false,
+            switch_to_starting_scene_on_stream_start: false,
         }
     }
 }
