@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::switcher;
 
 pub mod belabox;
+pub mod mediamtx;
 pub mod nginx;
 pub mod nimble;
 pub mod nms;
@@ -13,6 +14,7 @@ pub mod obs;
 pub mod sls;
 
 pub use belabox::Belabox;
+pub use mediamtx::Mediamtx;
 pub use nginx::Nginx;
 pub use nimble::Nimble;
 pub use nms::NodeMediaServer;

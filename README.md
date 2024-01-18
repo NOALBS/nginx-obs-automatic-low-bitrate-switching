@@ -235,7 +235,7 @@ NOALBS supports OBS WebSocket v4 and v5. To still use v4 use type `ObsOld`.
 
 ## Stream servers section
 
-Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud) and [OBS Sources](#using-an-obs-source).
+Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud), [MediaMTX](#using-mediamtx) and [OBS Sources](#using-an-obs-source).
 You can have as many servers as you want to use in the config.
 
 Example stream server object:
@@ -261,7 +261,7 @@ Example stream server object:
 ```
 
 - `streamServer`: Replace the entire `streamServer` section with the one of [these](#stream-server-objects).
-- `type`: Nginx, NodeMediaServer, Nimble, SrtLiveServer, or Belabox
+- `type`: Nginx, NodeMediaServer, Nimble, SrtLiveServer, Belabox, or Mediamtx
 - `name`: A unique name to distinguish the server
 - `priority`: Decides which stream server to monitor when multiple are online. 0 is consired the highest.
 - `overrideScenes`: Optional field to override the default scenes
@@ -394,6 +394,21 @@ Remember this is just an example, your ports and streamid may differ.
 ```
 
 You should be able to find the details in your [BELABOX cloud](https://cloud.belabox.net) account.
+
+---
+
+### Using MediaMTX
+
+```JSON
+  "streamServer": {
+    "type": "Mediamtx",
+    "statsUrl": "http://localhost:9997/v3/paths/get/{name}"
+  },
+```
+
+- `statsUrl`: The API stats page. Replace `{name}` with the name of your stream.
+
+For more details, refer to the [MediaMTX documentation](https://github.com/bluenviron/mediamtx#table-of-contents).
 
 ---
 

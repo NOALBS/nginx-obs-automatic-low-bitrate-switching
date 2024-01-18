@@ -52,6 +52,17 @@
       },
       {
         "streamServer": {
+          "type": "Mediamtx",
+          "statsUrl": "http://localhost:9997/v3/paths/get/mystream"
+        },
+        "name": "Mediamtx",
+        "priority": 0,
+        "overrideScenes": null,
+        "dependsOn": null,
+        "enabled": true
+      },
+      {
+        "streamServer": {
           "type": "SrtLiveServer",
           "statsUrl": "http://127.0.0.1:8181/stats",
           "publisher": "publish/live/feed1"
