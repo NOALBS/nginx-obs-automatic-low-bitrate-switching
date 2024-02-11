@@ -79,3 +79,12 @@ pub struct DependsOn {
 fn default_server_enabled() -> bool {
     true
 }
+
+static APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
+
+fn default_reqwest_client() -> reqwest::Client {
+    reqwest::Client::builder()
+        .user_agent(APP_USER_AGENT)
+        .build()
+        .expect("Failed to create reqwest client")
+}

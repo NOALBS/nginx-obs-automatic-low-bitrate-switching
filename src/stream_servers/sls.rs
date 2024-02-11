@@ -3,7 +3,7 @@ use log::{error, trace};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use super::{Bsl, StreamServersCommands, SwitchLogic};
+use super::{default_reqwest_client, Bsl, StreamServersCommands, SwitchLogic};
 use crate::switcher::{SwitchType, Triggers};
 
 #[derive(Deserialize, Debug)]
@@ -31,7 +31,7 @@ pub struct SrtLiveServer {
     pub publisher: String,
 
     /// Client to make HTTP requests with
-    #[serde(skip)]
+    #[serde(skip, default = "default_reqwest_client")]
     pub client: reqwest::Client,
 }
 
