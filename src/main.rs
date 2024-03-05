@@ -17,13 +17,18 @@ async fn main() -> Result<()> {
         env::set_var("RUST_LOG", "noalbs=info");
     }
 
+    let (non_blocking_appender, _guard) = tracing_appender::non_blocking(appender());
     if cfg!(windows) {
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
             .with_ansi(false)
+            .with_writer(non_blocking_appender)
             .init();
     } else {
-        tracing_subscriber::fmt::init();
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+            .with_writer(non_blocking_appender)
+            .init();
     }
 
     check_env_file();
@@ -156,4 +161,18 @@ fn check_env_file() {
         );
         warn!("https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/tree/v2#readme");
     };
+}
+
+fn appender() -> Box<dyn std::io::Write + Send + 'static> {
+    if let Ok(log_dir) = env::var("LOG_DIR") {
+        let file_name_prefix = if let Ok(f) = env::var("LOG_FILE_NAME") {
+            f
+        } else {
+            "noalbs.log".to_string()
+        };
+
+        Box::new(tracing_appender::rolling::daily(log_dir, file_name_prefix))
+    } else {
+        Box::new(std::io::stdout())
+    }
 }

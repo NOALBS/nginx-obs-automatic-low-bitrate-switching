@@ -567,6 +567,12 @@ In the `.env` file add the line `CONFIG_DIR=configs` where `configs` is the fold
 
 ---
 
+## How to log to a file instead
+
+In the `.env` file add the line `LOG_DIR=logs` and `LOG_FILE_NAME=noalbs.log` where `LOG_DIR` is the folder that holds all the log files and `LOG_FILE_NAME` the prefix used for the file name. A new log file will be generated daily.
+
+---
+
 ## Help it won't change scenes
 
 It will only change scenes when OBS is set on a scene that's in the config.  
