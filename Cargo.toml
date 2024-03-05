@@ -1,6 +1,6 @@
 [package]
 name = "noalbs"
-version = "2.9.0"
+version = "2.9.1"
 authors = ["Brian Spit <brian@715209.net>"]
 edition = "2021"
 
@@ -37,6 +37,7 @@ log = "0.4"
 tracing = "0.1"
 tracing-futures = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "ansi"] }
+tracing-appender = "0.2"
 
 warp = "0.3"
 
