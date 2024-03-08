@@ -11,6 +11,7 @@ pub mod nginx;
 pub mod nimble;
 pub mod nms;
 pub mod obs;
+pub mod rist;
 pub mod sls;
 
 pub use belabox::Belabox;
@@ -19,6 +20,7 @@ pub use nginx::Nginx;
 pub use nimble::Nimble;
 pub use nms::NodeMediaServer;
 pub use obs::Obs;
+pub use rist::Rist;
 pub use sls::SrtLiveServer;
 
 #[async_trait]

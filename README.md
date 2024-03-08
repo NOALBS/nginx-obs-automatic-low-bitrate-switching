@@ -412,6 +412,19 @@ For more details, refer to the [MediaMTX documentation](https://github.com/bluen
 
 ---
 
+### Using RIST
+
+```JSON
+  "streamServer": {
+    "type": "Rist",
+    "statsUrl": "http://172.233.66.67:8681/stats"
+  },
+```
+
+- `statsUrl`: URL to RIST stats page (ex; <http://localhost:8681/stats> )
+
+---
+
 ### Using an OBS Source
 
 ```JSON
