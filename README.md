@@ -417,7 +417,7 @@ For more details, refer to the [MediaMTX documentation](https://github.com/bluen
 ```JSON
   "streamServer": {
     "type": "Rist",
-    "statsUrl": "http://172.233.66.67:8681/stats"
+    "statsUrl": "http://localhost:8681/stats"
   },
 ```
 
