@@ -94,6 +94,23 @@
       },
       {
         "streamServer": {
+          "type": "Xiu",
+          "statsUrl": "http://localhost:8000/api/query_stream",
+          "application": "publish",
+          "key": "live"
+        },
+        "name": "xiu",
+        "priority": 0,
+        "overrideScenes": {
+          "normal": "normal",
+          "low": "low",
+          "offline": "offline"
+        },
+        "dependsOn": null,
+        "enabled": true
+      },
+      {
+        "streamServer": {
           "type": "Nginx",
           "statsUrl": "http://localhost/stats",
           "application": "publish",

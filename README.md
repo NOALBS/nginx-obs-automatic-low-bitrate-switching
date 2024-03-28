@@ -425,6 +425,23 @@ For more details, refer to the [MediaMTX documentation](https://github.com/bluen
 
 ---
 
+### Using Xiu
+
+```JSON
+  "streamServer": {
+    "type": "Xiu",
+    "statsUrl": " http://localhost:8000/api/query_stream",
+    "application": "live",
+    "key": "source",
+  },
+```
+
+- `statsUrl`: URL to stats page (ex; <http://localhost:8000/api/query_stream> )
+
+For more details, refer to the [Xiu documentation](https://www.rustxiu.com/docs/httpapi/http-api/).
+
+---
+
 ### Using an OBS Source
 
 ```JSON
