@@ -13,6 +13,7 @@ pub mod nms;
 pub mod obs;
 pub mod rist;
 pub mod sls;
+pub mod xiu;
 
 pub use belabox::Belabox;
 pub use mediamtx::Mediamtx;
@@ -22,6 +23,7 @@ pub use nms::NodeMediaServer;
 pub use obs::Obs;
 pub use rist::Rist;
 pub use sls::SrtLiveServer;
+pub use xiu::Xiu;
 
 #[async_trait]
 #[typetag::serde(tag = "type")]
