@@ -192,7 +192,7 @@ impl StreamServersCommands for Xiu {
 
         let video_bitrate = stats.video.as_ref().unwrap().bitrate;
         super::Bitrate {
-            message: Some(format!("{} Kbps", video_bitrate)),
+            message: Some(format!("{}", video_bitrate)),
         }
     }
 
