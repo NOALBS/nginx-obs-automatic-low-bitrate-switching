@@ -12,7 +12,6 @@ pub struct XiuStreamInfo {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
 pub struct XiuPublisher {
     pub id: String,
     pub identifier: XiuIdentifier,
@@ -216,5 +215,38 @@ impl StreamServersCommands for Xiu {
 impl Bsl for Xiu {
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn no_stream() {
+        let s = r#"{"error_code":0,"desp":"ok","data":[]}"#;
+        let parsed: XiuResponse = serde_json::from_str(s).unwrap();
+        println!("{:#?}", parsed);
+
+        assert!(
+            parsed.data.is_empty(),
+            "There should be no data in the response"
+        );
+    }
+
+    #[test]
+    fn stream() {
+        let s = r#"{"error_code":0,"desp":"succ","data":[{"publisher":{"audio":{"bitrate(kbits/s)":128,"channels":2,"profile":"LC","samplerate":44100,"sound_format":"AAC"},"id":"17105458011883","identifier":{"rtmp":{"app_name":"live","stream_name":"source"}},"recv_bitrate(kbits/s)":1948,"remote_address":"127.0.0.1:55764","start_time":"2024-03-16T07:36:41.109177+08:00","video":{"bitrate(kbits/s)":1948,"codec":"H264","frame_rate":20,"gop":60,"height":1280,"level":"3.0","profile":"Main","width":720}},"subscriber_count":2,"subscribers":{"17105458497472":{"id":"17105458497472","remote_address":"127.0.0.1:56450","send_bitrate(kbits/s)":2076,"start_time":"2024-03-16T07:37:29.034025+08:00","sub_type":"PlayerRtmp","total_send_bytes(kbits/s)":74392348},"17105458720121":{"id":"17105458720121","remote_address":"127.0.0.1:56583","send_bitrate(kbits/s)":2076,"start_time":"2024-03-16T07:37:52.999917+08:00","sub_type":"PlayerHttpFlv","total_send_bytes(kbits/s)":69300006}},"total_recv_bytes":91712283,"total_send_bytes":154540637}]}"#;
+        let parsed: XiuResponse = serde_json::from_str(s).unwrap();
+        assert!(
+            parsed.data.len() == 1,
+            "There should be one stream in the response"
+        );
+
+        let stream = &parsed.data[0];
+        assert_eq!(stream.subscriber_count, 2, "Subscriber count should be 2");
+
+        let bitrate = stream.publisher.recv_bitrate;
+        assert_eq!(bitrate, 1948, "Bitrate should be 1948");
     }
 }
