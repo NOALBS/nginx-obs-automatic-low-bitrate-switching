@@ -27,6 +27,7 @@ impl ChatHandler {
     ) -> Self {
         let mut timeouts = HashMap::new();
         timeouts.insert(chat::ChatPlatform::Twitch, Vec::new());
+        timeouts.insert(chat::ChatPlatform::Kick, Vec::new());
 
         Self {
             chat_handler_rx,
