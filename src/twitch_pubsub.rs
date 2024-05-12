@@ -399,6 +399,7 @@ async fn handle_messages(
                         let target = chat::RaidedInfo {
                             target: raid.target_login,
                             display: raid.target_display_name,
+                            platform: chat::ChatPlatform::Twitch,
                         };
 
                         chat_handler_tx

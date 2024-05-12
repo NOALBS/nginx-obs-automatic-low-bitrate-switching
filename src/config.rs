@@ -135,7 +135,7 @@ pub trait ConfigLogic: Send + Sync {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct Chat {
-    pub platform: chat::ChatPlatform,
+    pub platform: ConfigChatPlatform,
     pub username: String,
     pub admins: Vec<String>,
     pub language: chat::ChatLanguage,
@@ -152,7 +152,7 @@ pub struct Chat {
 impl Default for Chat {
     fn default() -> Self {
         Self {
-            platform: chat::ChatPlatform::Twitch,
+            platform: ConfigChatPlatform::Twitch,
             username: "715209".to_string(),
             admins: vec![],
             language: chat::ChatLanguage::EN,
@@ -162,6 +162,29 @@ impl Default for Chat {
             enable_auto_stop_stream_on_host_or_raid: true,
             announce_raid_on_auto_stop: true,
             commands: None,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ConfigChatPlatform {
+    Twitch,
+    Kick(KickConfig),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct KickConfig {
+    pub channel_id: Option<usize>,
+    pub chatroom_id: Option<usize>,
+    pub use_irlproxy: Option<bool>,
+}
+
+impl ConfigChatPlatform {
+    pub fn kind(&self) -> chat::ChatPlatform {
+        match self {
+            ConfigChatPlatform::Twitch => chat::ChatPlatform::Twitch,
+            ConfigChatPlatform::Kick(_) => chat::ChatPlatform::Kick,
         }
     }
 }
@@ -374,7 +397,7 @@ impl From<ConfigOld> for Config {
             },
             software,
             chat: Some(Chat {
-                platform: chat::ChatPlatform::Twitch,
+                platform: ConfigChatPlatform::Twitch,
                 username: o.twitch_chat.channel,
                 admins: o.twitch_chat.admin_users,
                 prefix: o.twitch_chat.prefix,

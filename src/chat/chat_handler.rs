@@ -819,10 +819,16 @@ impl DispatchCommand {
         let stop = self.stop_bsc().await;
 
         let success_msg = if let Some(info) = raid {
+            let url = match info.platform {
+                chat::ChatPlatform::Twitch => "https://twitch.tv/",
+                chat::ChatPlatform::Kick => "https://kick.com/",
+            };
+            let channel = format!("{url}{}", &info.target);
+
             t!(
                 "stop.raid",
                 locale = &self.lang,
-                channel = &info.target,
+                channel = &channel,
                 display_channel = &info.display
             )
         } else {

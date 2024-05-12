@@ -7,9 +7,11 @@ use serde::{Deserialize, Serialize};
 use crate::{error, switcher};
 
 pub mod chat_handler;
+pub mod kick;
 pub mod twitch;
 
 pub use chat_handler::ChatHandler;
+pub use kick::Kick;
 pub use twitch::Twitch;
 
 #[async_trait]
@@ -110,6 +112,7 @@ pub struct CommandPermissions {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ChatPlatform {
     Twitch,
+    Kick,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -210,6 +213,7 @@ pub enum InternalUpdate {
 pub struct RaidedInfo {
     pub target: String,
     pub display: String,
+    pub platform: ChatPlatform,
 }
 
 #[derive(Debug)]

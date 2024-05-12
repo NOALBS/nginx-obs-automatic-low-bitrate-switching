@@ -166,7 +166,7 @@ impl Switcher {
                         if let Some(chat) = &state.config.chat {
                             let message =
                                 chat::HandleMessage::InternalChatUpdate(chat::InternalChatUpdate {
-                                    platform: chat.platform.to_owned(),
+                                    platform: chat.platform.kind(),
                                     channel: chat.username.to_owned(),
                                     kind: chat::InternalUpdate::OfflineTimeout,
                                 });
@@ -304,7 +304,7 @@ impl Switcher {
             if let Some(chat) = &state.config.chat {
                 let message =
                     chat::HandleMessage::AutomaticSwitchingScene(chat::AutomaticSwitchingScene {
-                        platform: chat.platform.to_owned(),
+                        platform: chat.platform.kind(),
                         channel: chat.username.to_owned(),
                         scene: switch_scene.to_owned(),
                         switch_type,

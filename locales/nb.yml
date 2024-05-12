@@ -8,7 +8,7 @@ startTwitchTranscoding:
     attempts: ", brukte %{count} forsøk"
 stop:
     success: Strøm avsluttet!
-    raid: Strømmen har stoppet og raidet %{display_channel}, bli med hit https://twitch.tv/%{channel}
+    raid: Strømmen har stoppet og raidet %{display_channel}, bli med hit %{channel}
     error: "Feil kan ikke stoppe strømmen: %{error}"
 switch:
     noParams: Ingen scene valgt

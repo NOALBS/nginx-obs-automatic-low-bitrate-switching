@@ -8,7 +8,7 @@ startTwitchTranscoding:
     attempts: ", потребовалось %{count} попыток"
 stop:
     success: Успешная остановка трансляции
-    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    raid: The stream has stopped and raided %{display_channel} please follow this link %{channel}
     error: "Ошибка: %{error}"
 switch:
     noParams: "Ошибка: сцена не указана"

@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use tokio::sync::RwLock;
 
-use crate::{chat, Noalbs};
+use crate::{chat, config, Noalbs};
 
 type User = Arc<RwLock<HashMap<String, Arc<Noalbs>>>>;
 
@@ -33,7 +33,7 @@ impl UserManager {
     }
 
     /// Returns the platform and username
-    pub async fn get_all_chat(&self) -> Vec<(chat::ChatPlatform, String)> {
+    pub async fn get_all_chat(&self) -> Vec<(config::ConfigChatPlatform, String)> {
         let mut all_chat = Vec::new();
 
         let lock = self.users.read().await;
@@ -59,7 +59,7 @@ impl UserManager {
             let state = &value.state.read().await;
 
             if let Some(chat) = &state.config.chat {
-                if chat.username == username && &chat.platform == platform {
+                if chat.username == username && &chat.platform.kind() == platform {
                     return Some(value.clone());
                 }
             }

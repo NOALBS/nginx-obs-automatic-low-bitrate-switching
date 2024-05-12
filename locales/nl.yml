@@ -8,7 +8,7 @@ startTwitchTranscoding:
     attempts: ", %{count} pogingen"
 stop:
     success: Stream is succesvol gestopt
-    raid: De stream is gestopt en overvallen %{display_channel} volg deze link https://twitch.tv/%{channel}
+    raid: De stream is gestopt en overvallen %{display_channel} volg deze link %{channel}
     error: "Fout, kan de stream niet stoppen: %{error}"
 switch:
     noParams: Geen scène opgegeven

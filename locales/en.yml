@@ -8,7 +8,7 @@ startTwitchTranscoding:
     attempts: ", took %{count} attempts"
 stop:
     success: Successfully stopped the stream
-    raid: The stream has stopped and raided %{display_channel} please follow this link https://twitch.tv/%{channel}
+    raid: The stream has stopped and raided %{display_channel} please follow this link %{channel}
     error: "Error can't stop the stream: %{error}"
 switch:
     noParams: No scene specified

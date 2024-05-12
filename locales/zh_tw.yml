@@ -10,7 +10,7 @@ startTwitchTranscoding:
     attempts: ", 獲取 %{count} 次嘗試"
 stop:
     success: 成功停止實況
-    raid: 實況成功停止 目前正揪團給 %{display_channel} 請大家追隨一下 https://twitch.tv/%{channel}
+    raid: 實況成功停止 目前正揪團給 %{display_channel} 請大家追隨一下 %{channel}
     error: 錯誤 %{error}
 switch:
     noParams: 沒有指定場景
