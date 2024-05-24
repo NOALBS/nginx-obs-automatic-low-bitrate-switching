@@ -68,17 +68,26 @@ async fn main() -> Result<()> {
         chat_handler.add_chat_sender(ChatPlatform::Twitch, Arc::new(twitch));
     };
 
-    let kick = noalbs::chat::Kick::new(chat_tx.clone());
-    for (platform, username) in user_manager
+    if user_manager
         .get_all_chat()
         .await
         .iter()
         .filter(|(platform, _)| platform.kind() == ChatPlatform::Kick)
+        .count()
+        > 0
     {
-        kick.join_channel(platform.clone(), username.to_lowercase())
-            .await;
+        let kick = noalbs::chat::Kick::new(chat_tx.clone());
+        for (platform, username) in user_manager
+            .get_all_chat()
+            .await
+            .iter()
+            .filter(|(platform, _)| platform.kind() == ChatPlatform::Kick)
+        {
+            kick.join_channel(platform.clone(), username.to_lowercase())
+                .await;
+        }
+        chat_handler.add_chat_sender(ChatPlatform::Kick, Arc::new(kick));
     }
-    chat_handler.add_chat_sender(ChatPlatform::Kick, Arc::new(kick));
 
     tokio::task::spawn(async move {
         chat_handler.handle_messages().await;
