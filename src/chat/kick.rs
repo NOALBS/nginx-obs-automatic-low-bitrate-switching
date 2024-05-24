@@ -178,7 +178,12 @@ impl Inner {
                             }
                         }
                     }
-                    msg = self.connection.select_next_some() => {
+                    msg = self.connection.next() => {
+                        let Some(msg) = msg else {
+                            tracing::error!("WS stream got None, reconnecting");
+                            break;
+                        };
+
                         activity_timeout.reset();
 
                         match msg {
