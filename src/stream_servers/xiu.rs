@@ -186,7 +186,7 @@ impl StreamServersCommands for Xiu {
             None => return super::Bitrate { message: None },
         };
 
-        if !stats.video.is_some() {
+        if stats.video.is_none() {
             return super::Bitrate { message: None };
         }
 
@@ -199,9 +199,7 @@ impl StreamServersCommands for Xiu {
     async fn source_info(&self) -> Option<String> {
         let stats = self.get_stats().await?;
 
-        if !stats.video.is_some() {
-            return None;
-        }
+        stats.video.as_ref()?;
 
         let video_info = stats.video.as_ref().unwrap();
         Some(format!(

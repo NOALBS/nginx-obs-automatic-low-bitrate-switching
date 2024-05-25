@@ -44,8 +44,12 @@ impl Noalbs {
         };
 
         state.set_all_switchable_scenes();
-        state.broadcasting_software.prev_scene =
-            state.config.switcher.switching_scenes.normal.to_owned();
+        state
+            .config
+            .switcher
+            .switching_scenes
+            .normal
+            .clone_into(&mut state.broadcasting_software.prev_scene);
 
         let state = Arc::new(RwLock::new(state));
 

@@ -113,7 +113,7 @@ impl Switcher {
         } else {
             debug!("Got different type, switching to that");
 
-            *prev_switch_type = current_switch_type.to_owned();
+            *prev_switch_type = current_switch_type;
             *same_type = 0;
             *same_type_seconds = 0;
         }
@@ -213,7 +213,7 @@ impl Switcher {
 
             // Set the previous scene when switch_type is normal or low
             if let SwitchType::Normal | SwitchType::Low = current_switch_type {
-                state.broadcasting_software.prev_scene = scene.to_owned();
+                scene.clone_into(&mut state.broadcasting_software.prev_scene);
             };
 
             if current_switch_type != SwitchType::Offline {
