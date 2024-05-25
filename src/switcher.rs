@@ -161,7 +161,9 @@ impl Switcher {
                         return Ok(());
                     }
 
-                    if state.config.optional_options.record_while_streaming {
+                    if state.config.optional_options.record_while_streaming
+                        && bsc.is_recording().await?
+                    {
                         if let Err(error) = bsc.toggle_recording().await {
                             error!("Offline timeout error {:?}", error);
                             return Ok(());
