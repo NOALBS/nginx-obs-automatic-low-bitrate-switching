@@ -150,16 +150,22 @@ impl Switcher {
             // TODO: Refactor the timeout code
             if let Some(min) = &state.config.optional_options.offline_timeout {
                 if *same_type_seconds >= (min * 60) {
-                    if let Err(error) = state
+                    let bsc = state
                         .broadcasting_software
                         .connection
                         .as_ref()
-                        .ok_or(error::Error::NoSoftwareSet)?
-                        .stop_streaming()
-                        .await
-                    {
+                        .ok_or(error::Error::NoSoftwareSet)?;
+
+                    if let Err(error) = bsc.stop_streaming().await {
                         error!("Offline timeout error {:?}", error);
                         return Ok(());
+                    }
+
+                    if state.config.optional_options.record_while_streaming {
+                        if let Err(error) = bsc.toggle_recording().await {
+                            error!("Offline timeout error {:?}", error);
+                            return Ok(());
+                        }
                     }
 
                     if state.broadcasting_software.is_streaming {
