@@ -27,7 +27,7 @@ pub struct WsClient {
     token: Option<String>,
 
     /// Channel used for sending to the websocket
-    tx_chan: mpsc::UnboundedSender<String>,
+    _tx_chan: mpsc::UnboundedSender<String>,
 
     /// When authenticated will point to the user data
     user: Option<Arc<Noalbs>>,
@@ -37,7 +37,7 @@ impl WsClient {
     pub fn new(tx_chan: mpsc::UnboundedSender<String>) -> Self {
         Self {
             token: None,
-            tx_chan,
+            _tx_chan: tx_chan,
             user: None,
         }
     }

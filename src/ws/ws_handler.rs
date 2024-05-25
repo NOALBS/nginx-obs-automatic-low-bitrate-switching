@@ -42,7 +42,7 @@ impl WsHandler {
 
         let client = WsClient {
             token: None,
-            tx_chan: tx,
+            _tx_chan: tx,
             user: None,
         };
 
@@ -224,7 +224,7 @@ impl WsHandler {
 
     async fn logout(&self, ws_message: &WsMessage) {
         let mut lock = self.clients.write().await;
-        let mut client = lock.get_mut(&ws_message.internal_token).unwrap();
+        let client = lock.get_mut(&ws_message.internal_token).unwrap();
 
         client
             .user
