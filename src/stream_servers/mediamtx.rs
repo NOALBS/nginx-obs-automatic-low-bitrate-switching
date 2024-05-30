@@ -77,6 +77,11 @@ impl Mediamtx {
         };
 
         let mut cache = self.cache.lock().unwrap();
+
+        if stream.bytes_received == cache.prev_bytes_received {
+            return None;
+        }
+
         let elapsed = cache.timestamp.elapsed();
         if elapsed >= std::time::Duration::from_secs(1) {
             if stream.bytes_received > cache.prev_bytes_received {
