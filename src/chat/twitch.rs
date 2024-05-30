@@ -76,15 +76,17 @@ impl Twitch {
                     }
                 }
                 message::ServerMessage::Privmsg(msg) => {
-                    let mut permission = chat::Permission::Public;
-
-                    if msg.badges.iter().any(|e| e.name == "moderator") {
-                        permission = chat::Permission::Mod;
-                    }
-
-                    if msg.badges.iter().any(|e| e.name == "broadcaster") {
-                        permission = chat::Permission::Admin;
-                    }
+                    let permission =
+                        msg.badges
+                            .iter()
+                            .fold(chat::Permission::Public, |acc, badge| {
+                                match badge.name.as_str() {
+                                    "vip" => chat::Permission::Vip,
+                                    "moderator" => chat::Permission::Mod,
+                                    "broadcaster" => chat::Permission::Admin,
+                                    _ => acc,
+                                }
+                            });
 
                     chat_handler_tx
                         .send(HandleMessage::ChatMessage(chat::ChatMessage {

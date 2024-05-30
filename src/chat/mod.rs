@@ -101,6 +101,7 @@ pub enum Permission {
     Admin,
     Mod,
     Public,
+    Vip,
 }
 
 #[derive(Debug)]

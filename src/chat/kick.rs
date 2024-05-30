@@ -239,27 +239,15 @@ impl Inner {
                     return Ok(());
                 }
 
-                let mut permission = chat::Permission::Public;
-
-                if msg
-                    .sender
-                    .identity
-                    .badges
-                    .iter()
-                    .any(|e| e.kind == "moderator")
-                {
-                    permission = chat::Permission::Mod;
-                }
-
-                if msg
-                    .sender
-                    .identity
-                    .badges
-                    .iter()
-                    .any(|b| b.kind == "broadcaster")
-                {
-                    permission = chat::Permission::Admin;
-                }
+                let permission = msg.sender.identity.badges.iter().fold(
+                    chat::Permission::Public,
+                    |acc, badge| match badge.kind.as_str() {
+                        "vip" => chat::Permission::Vip,
+                        "moderator" => chat::Permission::Mod,
+                        "broadcaster" => chat::Permission::Admin,
+                        _ => acc,
+                    },
+                );
 
                 let Some(channel) = self.chatroom_id_to_username(msg.chatroom_id).await else {
                     tracing::error!("Chatroom id not found for {}", msg.chatroom_id);
