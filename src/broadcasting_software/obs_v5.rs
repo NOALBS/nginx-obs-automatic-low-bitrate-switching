@@ -4,7 +4,10 @@ use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::StreamExt;
 use obwsv5::{
-    events::Event, requests::scene_items::SetEnabled, responses::media_inputs::MediaState, Client,
+    events::Event,
+    requests::{inputs, scene_items::SetEnabled},
+    responses::media_inputs::MediaState,
+    Client,
 };
 use tokio::sync::{self, mpsc, Mutex};
 use tracing::{error, info, warn, Instrument};
@@ -349,22 +352,11 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             }
 
             client
-                .scene_items()
-                .set_enabled(SetEnabled {
-                    scene: &media.scene_name,
-                    item_id: media.id,
-                    enabled: false,
-                })
-                .await?;
-
-            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-
-            client
-                .scene_items()
-                .set_enabled(SetEnabled {
-                    scene: &media.scene_name,
-                    item_id: media.id,
-                    enabled: true,
+                .inputs()
+                .set_settings(inputs::SetSettings {
+                    input: &media.source_name,
+                    settings: &serde_json::json!({}),
+                    overlay: None,
                 })
                 .await?;
         }
