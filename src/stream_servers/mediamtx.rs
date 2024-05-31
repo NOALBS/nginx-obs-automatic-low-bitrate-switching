@@ -101,11 +101,19 @@ pub struct Stats {
     pub srt: Option<SrtStats>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Auth {
+    username: String,
+    password: String,
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Mediamtx {
     /// URL to MediaMTX stats page (ex; http://localhost:9997/v3/paths/get/mystream )
     pub stats_url: String,
+
+    pub auth: Option<Auth>,
 
     /// Client to make HTTP requests with
     #[serde(skip, default = "default_reqwest_client")]
@@ -138,7 +146,13 @@ impl Default for Cache {
 
 impl Mediamtx {
     pub async fn get_stats(&self) -> Option<Stats> {
-        let res = match self.client.get(&self.stats_url).send().await {
+        let mut request = self.client.get(&self.stats_url);
+
+        if let Some(auth) = &self.auth {
+            request = request.basic_auth(&auth.username, Some(&auth.password));
+        }
+
+        let res = match request.send().await {
             Ok(res) => res,
             Err(_) => {
                 error!("Stats page ({}) is unreachable", self.stats_url);
@@ -197,7 +211,13 @@ impl Mediamtx {
         let stats_url: Vec<&str> = self.stats_url.split("/v3").collect();
         let stats_url = format!("{}/v3/srtconns/get/{id}", stats_url.first()?);
 
-        let res = match self.client.get(stats_url.clone()).send().await {
+        let mut request = self.client.get(stats_url.clone());
+
+        if let Some(auth) = &self.auth {
+            request = request.basic_auth(&auth.username, Some(&auth.password));
+        }
+
+        let res = match request.send().await {
             Ok(res) => res,
             Err(_) => {
                 error!("Stats page ({}) is unreachable", stats_url);

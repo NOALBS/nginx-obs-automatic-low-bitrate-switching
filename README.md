@@ -402,11 +402,16 @@ You should be able to find the details in your [BELABOX cloud](https://cloud.bel
 ```JSON
   "streamServer": {
     "type": "Mediamtx",
-    "statsUrl": "http://localhost:9997/v3/paths/get/{name}"
+    "statsUrl": "http://localhost:9997/v3/paths/get/{name}",
+    "auth": {
+      "username": "user",
+      "password": "pass"
+    }
   },
 ```
 
 - `statsUrl`: The API stats page. Replace `{name}` with the name of your stream.
+- `auth`: Optional field
 
 For more details, refer to the [MediaMTX documentation](https://github.com/bluenviron/mediamtx#table-of-contents).
 
