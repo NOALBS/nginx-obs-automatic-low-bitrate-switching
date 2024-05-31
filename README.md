@@ -166,7 +166,7 @@ The `config.json` file holds all the user configurations.
     "enableAutoStopStreamOnHostOrRaid": true,       // Enable or Disable auto stop stream in OBS when raiding or hosting.
     "commands": {                                   // Command Options to override defaults to be used in chat.
       "Fix": {                                      // Full Command Name
-        "permission": null,                         // null = Administrators/Default, Public = Public, Mod = Moderators, Admin = Administrators
+        "permission": null,                         // null = Administrators/Default, Public = Public, Vip = VIP, Mod = Moderators, Admin = Administrators
         "userPermissions": ["715209"],              // Allow users to perform this command skipping permission check.
         "alias": [
           "f"                                       // Alias to be used in chat, so for this example, !f would replace !fix
