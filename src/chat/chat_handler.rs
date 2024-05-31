@@ -559,7 +559,7 @@ impl DispatchCommand {
             chat::Command::ServerInfo => self.server_info().await,
             chat::Command::Mod => self.enable_mod(params.next()).await,
             chat::Command::Public => self.enable_public(params.next()).await,
-            chat::Command::Sourceinfo => self.source_info(params.next()).await,
+            chat::Command::Sourceinfo => self.source_info(params).await,
             chat::Command::Source => self.source(params.next()).await,
             chat::Command::Unknown(_) => {}
 
@@ -1162,13 +1162,17 @@ impl DispatchCommand {
         self.switch(Some(scene)).await;
     }
 
-    async fn source_info(&self, server_name: Option<&str>) {
+    async fn source_info<'a, I>(&self, server_name: I)
+    where
+        I: IntoIterator<Item = &'a str>,
+    {
+        let name = server_name.into_iter().collect::<Vec<_>>().join(" ");
         let state = &self.user.state.read().await;
         let stream_servers = &state.config.switcher.stream_servers;
 
         let no_info = t!("sourceinfo.noInfo", locale = &self.lang);
 
-        if let Some(name) = server_name {
+        if !name.is_empty() {
             let server = match stream_servers.iter().find(|s| s.name == name) {
                 Some(s) => s,
                 None => {
