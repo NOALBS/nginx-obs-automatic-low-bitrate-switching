@@ -5,7 +5,11 @@ use async_trait::async_trait;
 use futures_util::StreamExt;
 use obwsv5::{
     events::Event,
-    requests::{inputs, scene_items::SetEnabled},
+    requests::{
+        inputs::{self, InputId},
+        scene_items::SetEnabled,
+        scenes::SceneId,
+    },
     responses::media_inputs::MediaState,
     Client,
 };
@@ -68,7 +72,8 @@ impl Obsv5 {
     async fn event_handler(mut events: mpsc::Receiver<Event>, user_state: noalbs::UserState) {
         while let Some(event) = events.recv().await {
             match event {
-                Event::CurrentProgramSceneChanged { name } => {
+                Event::CurrentProgramSceneChanged { id } => {
+                    let name = id.name;
                     let mut l = user_state.write().await;
 
                     let switchable = &l.switcher_state.switchable_scenes;
@@ -146,7 +151,7 @@ impl Obsv5 {
             .ok_or(error::Error::UnableInitialConnection)?;
 
         let mut sources: Vec<SourceItem> = Vec::new();
-        let current_scene = client.scenes().current_program_scene().await?;
+        let current_scene = client.scenes().current_program_scene().await?.id.name;
         get_media_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false).await;
 
         Ok(sources)
@@ -160,7 +165,7 @@ impl Obsv5 {
             .ok_or(error::Error::UnableInitialConnection)?;
 
         let mut sources: Vec<SourceItem> = Vec::new();
-        let current_scene = client.scenes().current_program_scene().await?;
+        let current_scene = client.scenes().current_program_scene().await?.id.name;
         get_sources_rec(client, current_scene, &mut Vec::new(), &mut sources, false).await;
 
         Ok(sources)
@@ -176,16 +181,28 @@ async fn get_media_sources_rec(
     group: bool,
 ) {
     let items = if !group {
-        client.scene_items().list(&scene).await.unwrap()
+        client
+            .scene_items()
+            .list(SceneId::Name(&scene))
+            .await
+            .unwrap()
     } else {
-        client.scene_items().list_group(&scene).await.unwrap()
+        client
+            .scene_items()
+            .list_group(SceneId::Name(&scene))
+            .await
+            .unwrap()
     };
     let current_name = scene;
 
     for item in items {
         if let Some(ref input_kind) = item.input_kind {
             if matches!(input_kind.as_ref(), "ffmpeg_source" | "vlc_source") {
-                let status = match client.media_inputs().status(&item.source_name).await {
+                let status = match client
+                    .media_inputs()
+                    .status(InputId::Name(&item.source_name))
+                    .await
+                {
                     Ok(s) => s,
                     Err(_) => continue,
                 };
@@ -229,9 +246,17 @@ async fn get_sources_rec(
     group: bool,
 ) {
     let items = if !group {
-        client.scene_items().list(&scene).await.unwrap()
+        client
+            .scene_items()
+            .list(SceneId::Name(&scene))
+            .await
+            .unwrap()
     } else {
-        client.scene_items().list_group(&scene).await.unwrap()
+        client
+            .scene_items()
+            .list_group(SceneId::Name(&scene))
+            .await
+            .unwrap()
     };
     let current_name = scene;
 
@@ -285,7 +310,10 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             .as_ref()
             .ok_or(error::Error::UnableInitialConnection)?;
 
-        client.scenes().set_current_program_scene(&scene).await?;
+        client
+            .scenes()
+            .set_current_program_scene(SceneId::Name(&scene))
+            .await?;
         Ok(scene)
     }
 
@@ -323,7 +351,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                 "ffmpeg_source" => {
                     let source = client
                         .inputs()
-                        .settings::<FfmpegSource>(&media.source_name)
+                        .settings::<FfmpegSource>(InputId::Name(&media.source_name))
                         .await?;
 
                     if let Some(input) = source.settings.input {
@@ -334,7 +362,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                 }
                 "vlc_source" => client
                     .inputs()
-                    .settings::<VlcSource>(&media.source_name)
+                    .settings::<VlcSource>(InputId::Name(&media.source_name))
                     .await?
                     .settings
                     .playlist
@@ -354,7 +382,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             client
                 .inputs()
                 .set_settings(inputs::SetSettings {
-                    input: &media.source_name,
+                    input: InputId::Name(&media.source_name),
                     settings: &serde_json::json!({}),
                     overlay: None,
                 })
@@ -417,7 +445,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             .as_ref()
             .ok_or(error::Error::UnableInitialConnection)?;
 
-        Ok(client.scenes().current_program_scene().await?)
+        Ok(client.scenes().current_program_scene().await?.id.name)
     }
 
     async fn info(
@@ -504,13 +532,13 @@ impl BroadcastingSoftwareLogic for Obsv5 {
 
         let enabled = !client
             .scene_items()
-            .enabled(&source.scene_name, source.id)
+            .enabled(SceneId::Name(&source.scene_name), source.id)
             .await?;
 
         client
             .scene_items()
             .set_enabled(SetEnabled {
-                scene: &source.scene_name,
+                scene: SceneId::Name(&source.scene_name),
                 item_id: source.id,
                 enabled,
             })
@@ -567,7 +595,7 @@ impl InnerConnection {
                 let bs = &mut state.broadcasting_software;
 
                 if let Ok(s) = client.scenes().current_program_scene().await {
-                    bs.current_scene = s;
+                    bs.current_scene = s.id.name;
                 }
 
                 if let Ok(s) = client.streaming().status().await {
