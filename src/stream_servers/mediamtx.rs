@@ -9,15 +9,102 @@ use crate::switcher::{SwitchType, Triggers};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Stats {
+pub struct StreamStats {
     pub name: String,
+    pub source: Source,
     pub bytes_received: u64,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct SrtStats {
+    pub id: String,
+    pub created: String,
+    pub remote_addr: String,
+    pub state: String,
+    pub path: String,
+    pub query: String,
+    pub packets_sent: u64,
+    pub packets_received: u64,
+    pub packets_sent_unique: u64,
+    pub packets_received_unique: u64,
+    pub packets_send_loss: u64,
+    pub packets_received_loss: u64,
+    pub packets_retrans: u64,
+    pub packets_received_retrans: u64,
+    #[serde(rename = "packetsSentACK")]
+    pub packets_sent_ack: u64,
+    #[serde(rename = "packetsReceivedACK")]
+    pub packets_received_ack: u64,
+    #[serde(rename = "packetsSentNAK")]
+    pub packets_sent_nak: u64,
+    #[serde(rename = "packetsReceivedNAK")]
+    pub packets_received_nak: u64,
+    #[serde(rename = "packetsSentKM")]
+    pub packets_sent_km: u64,
+    #[serde(rename = "packetsReceivedKM")]
+    pub packets_received_km: u64,
+    pub us_snd_duration: u64,
+    pub packets_send_drop: u64,
+    pub packets_received_drop: u64,
+    pub packets_received_undecrypt: u64,
+    pub bytes_sent: u64,
+    pub bytes_received: u64,
+    pub bytes_sent_unique: u64,
+    pub bytes_received_unique: u64,
+    pub bytes_received_loss: u64,
+    pub bytes_retrans: u64,
+    pub bytes_received_retrans: u64,
+    pub bytes_send_drop: u64,
+    pub bytes_received_drop: u64,
+    pub bytes_received_undecrypt: u64,
+    pub us_packets_send_period: f64,
+    pub packets_flow_window: u64,
+    pub packets_flight_size: u64,
+    #[serde(rename = "msRTT")]
+    pub ms_rtt: f64,
+    pub mbps_send_rate: f64,
+    pub mbps_receive_rate: f64,
+    pub mbps_link_capacity: f64,
+    pub bytes_avail_send_buf: u64,
+    pub bytes_avail_receive_buf: u64,
+    #[serde(rename = "mbpsMaxBW")]
+    pub mbps_max_bw: f64,
+    #[serde(rename = "byteMSS")]
+    pub byte_mss: u64,
+    pub packets_send_buf: u64,
+    pub bytes_send_buf: u64,
+    pub ms_send_buf: u64,
+    pub ms_send_tsb_pd_delay: u64,
+    pub packets_receive_buf: u64,
+    pub bytes_receive_buf: u64,
+    pub ms_receive_buf: u64,
+    pub ms_receive_tsb_pd_delay: u64,
+    pub packets_reorder_tolerance: u64,
+    pub packets_received_avg_belated_time: u64,
+    pub packets_send_loss_rate: f64,
+    pub packets_received_loss_rate: f64,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Source {
+    #[serde(rename = "type")]
+    pub kind: String,
+    pub id: String,
+}
+
+#[derive(Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Stats {
+    pub bitrate: u32,
+    pub srt: Option<SrtStats>,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Mediamtx {
-    /// URL to SLS stats page (ex; http://127.0.0.1:8181/stats )
+    /// URL to MediaMTX stats page (ex; http://localhost:9997/v3/paths/get/mystream )
     pub stats_url: String,
 
     /// Client to make HTTP requests with
@@ -50,7 +137,7 @@ impl Default for Cache {
 }
 
 impl Mediamtx {
-    pub async fn get_stats(&self) -> Option<u32> {
+    pub async fn get_stats(&self) -> Option<Stats> {
         let res = match self.client.get(&self.stats_url).send().await {
             Ok(res) => res,
             Err(_) => {
@@ -68,13 +155,19 @@ impl Mediamtx {
             return None;
         }
 
-        let stream = match res.json::<Stats>().await {
+        let stream = match res.json::<StreamStats>().await {
             Ok(stats) => stats,
             Err(e) => {
                 error!("Error parsing stats ({}) {}", self.stats_url, e);
                 return None;
             }
         };
+
+        let mut stats = Stats::default();
+
+        if stream.source.kind == "srtConn" {
+            stats.srt = self.get_srt_stats(&stream.source.id).await;
+        }
 
         let mut cache = self.cache.lock().unwrap();
 
@@ -96,7 +189,35 @@ impl Mediamtx {
         }
 
         trace!("{:#?}", stream);
-        Some(cache.bitrate)
+        stats.bitrate = cache.bitrate;
+        Some(stats)
+    }
+
+    pub async fn get_srt_stats(&self, id: &str) -> Option<SrtStats> {
+        let stats_url: Vec<&str> = self.stats_url.split("/v3").collect();
+        let stats_url = format!("{}/v3/srtconns/get/{id}", stats_url.first()?);
+
+        let res = match self.client.get(stats_url.clone()).send().await {
+            Ok(res) => res,
+            Err(_) => {
+                error!("Stats page ({}) is unreachable", stats_url);
+                return None;
+            }
+        };
+
+        if res.status() == reqwest::StatusCode::INTERNAL_SERVER_ERROR {
+            return None;
+        }
+
+        if res.status() != reqwest::StatusCode::OK {
+            error!("Error accessing SRT stats page ({})", stats_url);
+            return None;
+        }
+
+        let stats = res.json::<SrtStats>().await.ok()?;
+
+        trace!("{:#?}", stats);
+        Some(stats)
     }
 }
 
@@ -104,24 +225,41 @@ impl Mediamtx {
 #[typetag::serde]
 impl SwitchLogic for Mediamtx {
     async fn switch(&self, triggers: &Triggers) -> SwitchType {
-        let bitrate = match self.get_stats().await {
-            Some(b) => b,
-            None => return SwitchType::Offline,
+        let Some(stats) = self.get_stats().await else {
+            return SwitchType::Offline;
         };
 
+        let ms_rtt = stats.srt.map(|s| s.ms_rtt);
+
         if let Some(offline) = triggers.offline {
-            if bitrate > 0 && bitrate <= offline {
+            if stats.bitrate > 0 && stats.bitrate <= offline {
                 return SwitchType::Offline;
             }
         }
 
-        if bitrate == 0 {
+        if let Some(rtt_offline) = triggers.rtt_offline {
+            if let Some(ms_rtt) = ms_rtt {
+                if ms_rtt >= rtt_offline.into() {
+                    return SwitchType::Offline;
+                }
+            }
+        }
+
+        if stats.bitrate == 0 {
             return SwitchType::Previous;
         }
 
         if let Some(low) = triggers.low {
-            if bitrate <= low {
+            if stats.bitrate <= low {
                 return SwitchType::Low;
+            }
+        }
+
+        if let Some(rtt) = triggers.rtt {
+            if let Some(ms_rtt) = ms_rtt {
+                if ms_rtt >= rtt.into() {
+                    return SwitchType::Low;
+                }
             }
         }
 
@@ -133,19 +271,46 @@ impl SwitchLogic for Mediamtx {
 #[typetag::serde]
 impl StreamServersCommands for Mediamtx {
     async fn bitrate(&self) -> super::Bitrate {
-        let bitrate = match self.get_stats().await {
-            Some(stats) => stats,
-            None => return super::Bitrate { message: None },
+        let Some(stats) = self.get_stats().await else {
+            return super::Bitrate { message: None };
         };
 
+        let mut message = format!("{}", stats.bitrate);
+
+        if let Some(srt) = stats.srt {
+            message += &format!(", {} ms", srt.ms_rtt.round());
+        }
+
         super::Bitrate {
-            message: Some(format!("{}", bitrate)),
+            message: Some(message),
         }
     }
 
     async fn source_info(&self) -> Option<String> {
-        let bitrate = self.get_stats().await?;
-        Some(format!("{} Kbps", bitrate))
+        let stats = self.get_stats().await?;
+        let bitrate = stats.bitrate;
+
+        let mut info = format!("{} Kbps", bitrate);
+
+        if let Some(srt) = stats.srt {
+            let rtt = format!(", {} ms", srt.ms_rtt.round());
+
+            let mbps = format!("Receiving rate {:.2} Mbps", srt.mbps_receive_rate);
+
+            let pkt = format!(
+                "dropped {}, loss {}, retrans {}",
+                srt.packets_received_drop, srt.packets_received_loss, srt.packets_received_retrans
+            );
+
+            let latency = format!(
+                "Latency send {} ms receive {} ms",
+                srt.ms_send_tsb_pd_delay, srt.ms_receive_tsb_pd_delay
+            );
+
+            info += &format!("{} | {} | {} | {}", rtt, mbps, pkt, latency);
+        }
+
+        Some(info)
     }
 }
 
