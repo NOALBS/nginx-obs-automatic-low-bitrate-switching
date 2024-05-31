@@ -1190,7 +1190,7 @@ impl DispatchCommand {
 
         let mut msg = Vec::new();
 
-        for s in stream_servers {
+        for s in stream_servers.iter().filter(|ss| ss.enabled) {
             let info = s.stream_server.source_info().await;
 
             if let Some(info) = info {
