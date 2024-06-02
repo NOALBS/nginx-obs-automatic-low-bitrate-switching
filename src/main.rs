@@ -147,8 +147,8 @@ where
 }
 
 async fn print_if_new_version() -> Result<(), noalbs::error::Error> {
-    let url = "https://api.github.com/repos/715209/nginx-obs-automatic-low-bitrate-switching/releases/latest";
-    let dlu = "https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases/latest";
+    let url = "https://api.github.com/repos/NOALBS/nginx-obs-automatic-low-bitrate-switching/releases/latest";
+    let dlu = "https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/releases/latest";
     let client = reqwest::Client::new();
     let res = client
         .get(url)
@@ -180,7 +180,7 @@ fn check_env_file() {
         warn!(
             "Hint: rename env.example to .env and edit it with your login information - see README"
         );
-        warn!("https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/tree/v2#readme");
+        warn!("https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/tree/v2#readme");
     };
 }
 
