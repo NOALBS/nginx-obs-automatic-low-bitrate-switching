@@ -177,9 +177,7 @@ struct GithubApi {
 fn check_env_file() {
     if env::var("TWITCH_BOT_USERNAME").is_err() {
         warn!("Couldn't load chat credentials from .env - continuing without connecting to chat.");
-        warn!(
-            "Hint: rename env.example to .env and edit it with your login information - see README"
-        );
+        warn!("Hint: edit .env it with your login information - see README");
         warn!("https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/tree/v2#readme");
     };
 }
