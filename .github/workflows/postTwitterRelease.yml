@@ -2,6 +2,8 @@ name: tweet-release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+
 jobs:
   tweet:
     runs-on: ubuntu-latest
