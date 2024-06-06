@@ -1,4 +1,4 @@
-name: tweet-release
+name: tweet-release-test
 on:
   release:
     types: [published]
