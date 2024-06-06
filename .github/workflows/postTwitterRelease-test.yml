@@ -21,8 +21,8 @@ jobs:
       - name: Extract release notes
         id: extract_release_notes
         run: |
-          RELEASE_BODY=${{ env.RELEASE_BODY }}
-          TRUNCATED_BODY=$(echo $RELEASE_BODY | cut -c 1-200) # Adjust 200 as needed
+          RELEASE_BODY="${{ env.RELEASE_BODY }}"
+          TRUNCATED_BODY=$(echo "$RELEASE_BODY" | cut -c 1-200) # Adjust 200 as needed
           echo "TRUNCATED_BODY=$TRUNCATED_BODY" >> $GITHUB_ENV
 
       - uses: ethomson/send-tweet-action@v1
