@@ -20,7 +20,7 @@ jobs:
         with:
           message: |
             ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} has been released. Check out the release notes: ${{ env.RELEASE_URL }} - Notes: ${{ env.RELEASE_BODY }}
-          consumer-key: ${{ secrets.TWITTER_CONSUMER_KEY }}
-          consumer-secret: ${{ secrets.TWITTER_CONSUMER_SECRET }}
+          consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+          consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
           access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
