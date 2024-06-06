@@ -25,7 +25,7 @@ jobs:
           TRUNCATED_BODY=$(echo $RELEASE_BODY | cut -c 1-200) # Adjust 200 as needed
           echo "TRUNCATED_BODY=$TRUNCATED_BODY" >> $GITHUB_ENV
 
-      - uses: ethomson/send-tweet-action@v2
+      - uses: ethomson/send-tweet-action@v1
         with:
           status: "New ${{ github.event.repository.name }} release ${{ env.RELEASE_TAG }} at ${{ env.RELEASE_URL }}: ${{ env.TRUNCATED_BODY }}"
           consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
