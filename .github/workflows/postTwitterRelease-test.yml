@@ -9,27 +9,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up the Git repository
-        uses: actions/checkout@v2
-
-      - name: Fetch latest release details
-        id: get_release
+        uses: actions/checkout@v3
+        
+      - name: Set dummy data
+        if: github.event_name == 'workflow_dispatch'
         run: |
-          LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
-          echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
-          echo "RELEASE_TAG=$(echo $LATEST_RELEASE | jq -r .tag_name)" >> $GITHUB_ENV
-          echo "RELEASE_URL=$(echo $LATEST_RELEASE | jq -r .html_url)" >> $GITHUB_ENV
-          echo "RELEASE_BODY=$(echo $LATEST_RELEASE | jq -r .body)" >> $GITHUB_ENV
+          echo "RELEASE_TAG=v1.0.0" >> $GITHUB_ENV
+          echo "RELEASE_URL=https://github.com/owner/repo/releases/tag/v1.0.0" >> $GITHUB_ENV
+          echo "RELEASE_BODY=Dummy release notes for testing purposes." >> $GITHUB_ENV
 
       - name: Extract release notes
         id: extract_release_notes
         run: |
-          TRUNCATED_BODY=$(echo "${{ env.RELEASE_BODY }}" | cut -c 1-200) # Adjust 200 as needed
-          echo "::set-output name=body::$TRUNCATED_BODY"
+          RELEASE_BODY=${{ env.RELEASE_BODY }}
+          TRUNCATED_BODY=$(echo $RELEASE_BODY | cut -c 1-200) # Adjust 200 as needed
+          echo "TRUNCATED_BODY=$TRUNCATED_BODY" >> $GITHUB_ENV
 
-      - uses: ethomson/send-tweet-action@v1
+      - uses: ethomson/send-tweet-action@v2
         with:
-          status: "New ${{ github.event.repository.name }} release ${{ env.RELEASE_TAG }} at ${{ env.RELEASE_URL }}: ${{ steps.extract_release_notes.outputs.body }}"
+          status: "New ${{ github.event.repository.name }} release ${{ env.RELEASE_TAG }} at ${{ env.RELEASE_URL }}: ${{ env.TRUNCATED_BODY }}"
           consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
           consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
           access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}"
+          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
