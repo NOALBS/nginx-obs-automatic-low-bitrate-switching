@@ -17,7 +17,7 @@ jobs:
         uses: noweh/post-tweet-v2-action@v1.0
         with:
           message: |
-            📢 New Release: ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} has been released. 🚀
+            📢 New Release: NOALBS ${{ github.event.release.tag_name }} has been released. 🚀
             📝 Release Notes: ${{ github.event.release.html_url }}
             - Notes: ${{ github.event.release.body }}
           consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
