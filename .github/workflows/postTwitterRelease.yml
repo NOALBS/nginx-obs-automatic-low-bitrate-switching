@@ -1,28 +1,25 @@
 name: tweet-release
+
 on:
   release:
     types: [published]
-  workflow_dispatch:
 
 jobs:
   tweet:
     runs-on: ubuntu-latest
-    steps:
-      - name: Set up the Git repository
-        uses: actions/checkout@v2
-        
-      - name: Extract release notes
-        id: extract_release_notes
-        run: |
-          RELEASE_BODY=$(echo "${{ github.event.release.body }}" | jq -Rs .)
-          TRUNCATED_BODY=$(echo $RELEASE_BODY | cut -c 1-200) # Adjust 200 as needed
-          echo "::set-output name=body::$TRUNCATED_BODY"
 
-      - uses: ethomson/send-tweet-action@v1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Send Tweet
+        uses: noweh/post-tweet-v2-action@v1.0
         with:
-          status: "New ${{ github.event.repository.name }} release ${{ github.event.release.tag_name }} at ${{ github.event.release.html_url }}: ${{ steps.extract_release_notes.outputs.body }}"
+          message: |
+            📢 New Release: ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} has been released. 🚀
+            📝 Release Notes: ${{ github.event.release.html_url }}
+            - Notes: ${{ github.event.release.body }}
           consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
           consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
           access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}"
-
+          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
