@@ -1,6 +1,21 @@
-# NOALBS
+# NOALBS ![GitHub stars](https://img.shields.io/github/stars/NOALBS/nginx-obs-automatic-low-bitrate-switching) ![GitHub forks](https://img.shields.io/github/forks/NOALBS/nginx-obs-automatic-low-bitrate-switching)
 
 A simple executable for all Operating Systems (Windows, Mac & Linux) to automatically switch scenes in OBS Studio/OBS.Live; based on the current bitrate fetched from your ingest server stats.  NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely from your ingest server (RTMP, SRT Etc..).
+
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/NOALBS/nginx-obs-automatic-low-bitrate-switching/latest)
+![GitHub last commit](https://img.shields.io/github/last-commit/NOALBS/nginx-obs-automatic-low-bitrate-switching)
+![Build Status](https://img.shields.io/github/actions/workflow/status/NOALBS/nginx-obs-automatic-low-bitrate-switching/release.yml)
+![Latest Release](https://img.shields.io/github/v/release/NOALBS/nginx-obs-automatic-low-bitrate-switching)
+![GitHub repo size](https://img.shields.io/github/repo-size/NOALBS/nginx-obs-automatic-low-bitrate-switching)
+[![Contributors](https://img.shields.io/github/contributors/NOALBS/nginx-obs-automatic-low-bitrate-switching.svg?style=flat)](https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/graphs/contributors)
+![License](https://img.shields.io/github/license/NOALBS/nginx-obs-automatic-low-bitrate-switching)
+[![Github All Releases](https://img.shields.io/github/downloads/NOALBS/nginx-obs-automatic-low-bitrate-switching/total.svg?style=flat)](https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/releases/latest)
+
+![GitHub language count](https://img.shields.io/github/languages/count/NOALBS/nginx-obs-automatic-low-bitrate-switching)
+![GitHub top language](https://img.shields.io/github/languages/top/NOALBS/nginx-obs-automatic-low-bitrate-switching)
+
+![GitHub Sponsors](https://img.shields.io/github/sponsors/715209?logo=GitHub%20Sponsors&label=715209's%20sponsors%3A&color=%23DB61A2&link=%23)
+![GitHub Sponsors](https://img.shields.io/github/sponsors/b3ck?logo=GitHub%20Sponsors&label=b3ck's%20sponsors%3A&color=%23DB61A2&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fb3ck)
 
 ---
 ### Connect with Us:
@@ -34,6 +49,46 @@ Do you offer a similar solution or paid service? Want your link here? Message [@
 
 ---
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Chat Commands](#chat-commands)
+- [Configure NOALBS](#configure-noalbs)
+- [EXAMPLE CONFIG.JSON](#example-configjson-do-not-copy-pasta)
+
+<details>
+  <summary>More In-Depth Explanations of each section</summary>
+  <ul>
+    <li><a href="#software-section">Software section</a></li>
+    <li><a href="#chat-section">Chat section</a></li>
+    <li><a href="#stream-servers-section">Stream servers section</a></li>
+    <li><a href="#stream-server-objects">Stream server objects</a></li>
+    <li><a href="#using-nginx">Using NGINX</a></li>
+    <li><a href="#using-an-external-node-media-server">Using an external Node-Media-Server</a></li>
+    <li><a href="#using-nimble-streamer-server-with-srt-protocol">Using Nimble Streamer Server (with SRT protocol)</a></li>
+    <li><a href="#using-sls-srt-live-server">Using SLS (SRT-LIVE-SERVER)</a></li>
+    <details>
+      <summary>How do I publish to the SLS Server?</summary>
+      <ul>
+        <li><a href="#how-do-i-publish-to-the-sls-server">How do I publish to the SLS Server?</a></li>
+        <li><a href="#how-do-i-pull-the-srt-feed-into-obs">How do I pull the SRT feed into OBS?</a></li>
+      </ul>
+    </details>
+    <li><a href="#using-belabox-cloud">Using BELABOX cloud</a></li>
+    <li><a href="#using-mediamtx">Using MediaMTX</a></li>
+    <li><a href="#using-rist">Using RIST</a></li>
+    <li><a href="#using-xiu">Using Xiu</a></li>
+    <li><a href="#using-an-obs-source">Using an OBS Source</a></li>
+  </ul>
+</details>
+
+- [Depends on](#depends-on)
+- [Languages](#languages)
+- [Building from source](#building-from-source)
+- [FAQ](#faq)
+
+---
+
 # Quick Start
 
 - Download the latest binary from [releases](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
@@ -42,11 +97,16 @@ Do you offer a similar solution or paid service? Want your link here? Message [@
 - Run the executable
 
 # Chat Commands
-
+<details>
+<summary>Click to view the chat commands section</summary>
+  
 This script gives you the option to enable some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
 
 > Please note: Admins are all the users in the `admins` array in `chat` config section, MODs are all of your MODs, and Public is anyone in your chat.
 
+<details>
+<summary>Click to view all chat commands</summary>
+  
 | Default Role | Command                  | Description                                                                                             | Example            |
 | :----------: | ------------------------ | :------------------------------------------------------------------------------------------------------ | :----------------- |
 |    Admins    | !start                   | on-demand command to start streaming in OBS.                                                            | !start             |
@@ -85,7 +145,13 @@ You can also enable/disable certain features from chat, see below:
 |    Admins    | !noalbs (start/stop) | NOALBS start/stop switching scenes.                        | !noalbs stop    |
 |    Admins    | !noalbs instant      | toggle instant switching from offline scene.               | !noalbs instant |
 
+</details>
+
+</details>
+
 # Configure NOALBS
+<details>
+<summary>Click to view how to configure NOALBS</summary>
 
 Open the `.env` file. If you have a custom Twitch account created for a bot fill in your Twitch Account bot username and oauth.
 
@@ -96,6 +162,9 @@ Use <https://twitchapps.com/tmi> to get your oauth from Twitch.
 The `config.json` file holds all the user configurations.
 
 ## EXAMPLE CONFIG.JSON (DO NOT COPY PASTA)
+
+<details>
+<summary>Click to view example config.json</summary>
 
 ```json
 {
@@ -152,7 +221,7 @@ The `config.json` file holds all the user configurations.
     }
   },
   "chat": {
-    "platform": "Twitch",                           // Twitch is the only current platform supported as of right now.
+    "platform": "Twitch",                           // Twitch and Kick are currently supported but NOALBS will only respond in chat when using Twitch.
     "username": "example",                          // Username of your main Twitch Account.
     "admins": [                                     // List of admins in the form of an array, the last name in the array doesn't need a comma.
       "username1",
@@ -204,9 +273,15 @@ The `config.json` file holds all the user configurations.
 }
 ```
 
-## More In-Depth Explanations of each section below
+</details>
 
-### Software section
+</details>
+
+# More In-Depth Explanations of each section below
+
+## Software section
+<details>
+<summary>Click to view the software section</summary>
 
 ```json
 "software": {
@@ -233,7 +308,56 @@ NOALBS supports OBS WebSocket v4 and v5. To still use v4 use type `ObsOld`.
 
 - `collections`: Optional configurable scene collections and profiles to be used with the `!collection` command.
 
+</details>
+
+## Chat section
+
+<details>
+<summary>Click to view the chat section</summary>
+  
+NOALBS supports integration with both Twitch and Kick as chat platforms. Below are examples and instructions on how to set up each platform.
+
+> The current state of NOALBS cannot be configured to use both Twitch
+> and Kick at the same time.
+
+### Example for Kick
+
+When configuring NOALBS to use Kick, you need to specify the `channelId` and `chatroomId`. You can obtain these IDs by visiting [this link](https://b3ck.com/kick/info/).
+
+```json
+"chat": {
+  "platform": {
+    "Kick": {
+      "channelId": 177817,
+      "chatroomId": 177815
+    }
+  },
+  "admins": ["username1", "username2", "username3", "username4"]
+}
+```
+
+ - PLEASE NOTE: NOALBS Can read Kick chat but cannot respond back in chat since Kick has not released a Public API.. but I heard it's going to be released in 3 weeks, so fingers crossed 😆🤞
+
+### Example for Twitch
+
+When configuring NOALBS to use Twitch, you need to specify the `username` of the Twitch account.
+
+```json
+"chat": {
+  "platform": "Twitch",
+  "username": "username0",
+  "admins": ["username1", "username2", "username3", "username4"]
+}
+```
+
+Make sure to replace the placeholders with your actual Kick channel and chatroom IDs or your Twitch username. I've included examples of the 'Admin Users Array' for reference. Please note that the structure varies slightly between Twitch and Kick. Be sure to follow the correct structure to ensure NOALBS runs properly.
+
+</details>
+
 ## Stream servers section
+
+<details>
+<summary>Click to view the servers section</summary>
 
 Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud), [MediaMTX](#using-mediamtx) and [OBS Sources](#using-an-obs-source).
 You can have as many servers as you want to use in the config.
@@ -267,7 +391,12 @@ Example stream server object:
 - `overrideScenes`: Optional field to override the default scenes
 - `dependsOn`: Optional field explained [here](#depends-on)
 
+</details>
+
 ## Stream server objects
+
+<details>
+<summary>Click to view the stream server objects</summary>
 
 ### Using NGINX
 
@@ -456,8 +585,12 @@ For more details, refer to the [Xiu documentation](https://www.rustxiu.com/docs/
   },
 ```
 
-## Depends on
+</details>
 
+## Depends on
+<details>
+<summary>Click to view the dependsOn section</summary>
+  
 When a `dependsOn` field is found, monitor the status of the given server. If that server goes offline the `backupScenes` will be used.
 
 ```JSON
@@ -474,7 +607,11 @@ When a `dependsOn` field is found, monitor the status of the given server. If th
 - `name`: The exact name this stream server depends on
 - `backupScenes`: Scenes that will be used when the depended on server is offline
 
+</details>
+
 # Languages
+<details>
+<summary>Click to view the languages section</summary>
 
 To change the language that you see in chat responses, locate or add the `"language": "EN",` line above your `"prefix": "!",` parameter under the `chat` section in the NOALBS `config.json` file. The language variant must be in **UPPERCASE** and should be one of the following:
 
@@ -501,8 +638,12 @@ Example excerpt from the NOALBS `config.json` file:
 "enableModCommands": true,
 ```
 
-# Building from source
+</details>
 
+# Building from source
+<details>
+<summary>Click to view the building from souce section</summary>
+  
 Download and install:
 
 - [Git](http://git-scm.com/)
@@ -514,11 +655,15 @@ Then:
 - `cd <repository-name>`
 - `cargo run` or `cargo run --release`
 
+</details>
+
 # FAQ
+<details>
+<summary>Click to view the FAQ section</summary>
 
 ## Need additional help?
 
-You can always contact us on discord @ b3ck#3517 or 715209#0600 and we'll do our best to help out.
+You can always contact us on discord @b3ck or @715209 and we'll do our best to help out.
 
 ## I want to keep using the old version
 
@@ -612,3 +757,5 @@ In the `.env` file add the line `LOG_DIR=logs` and `LOG_FILE_NAME=noalbs.log` wh
 
 It will only change scenes when OBS is set on a scene that's in the config.  
 (This is so that it wont change when you are on for example your 'intro' or 'locked-brb' scene)
+
+</details>
