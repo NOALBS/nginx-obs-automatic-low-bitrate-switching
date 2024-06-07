@@ -1,0 +1,32 @@
+name: tweet-latest-release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tweet:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get latest release
+        id: latest_release
+        run: |
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
+          echo "RELEASE_TAG=$(echo $LATEST_RELEASE | jq -r .tag_name)" >> $GITHUB_ENV
+          echo "RELEASE_URL=$(echo $LATEST_RELEASE | jq -r .html_url)" >> $GITHUB_ENV
+          echo "RELEASE_BODY=$(echo $LATEST_RELEASE | jq -r .body)" >> $GITHUB_ENV
+
+      - name: Send Tweet
+        uses: noweh/post-tweet-v2-action@v1.0
+        with:
+          message: |
+            📢 New Release: NOALBS ${{ env.RELEASE_TAG }} has been released. 🚀
+            📝 Release Notes: ${{ env.RELEASE_URL }}
+            - Notes: ${{ env.RELEASE_BODY }}
+          consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+          consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
+          access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
