@@ -460,8 +460,12 @@ fn permission_is_allowed(
     permission: &chat::Permission,
     user_permission: &chat::Permission,
 ) -> bool {
-    permission == &chat::Permission::Public
-        || (permission == &chat::Permission::Mod && user_permission == &chat::Permission::Mod)
+    matches!(
+        (permission, user_permission),
+        (&Permission::Public, _)
+            | (&Permission::Mod, &Permission::Mod)
+            | (&Permission::Vip, &Permission::Mod | &Permission::Vip)
+    )
 }
 
 fn try_get_command_from_alias(
