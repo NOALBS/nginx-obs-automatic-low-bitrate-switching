@@ -17,7 +17,8 @@ jobs:
           LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
           echo "RELEASE_TAG=$(echo $LATEST_RELEASE | jq -r .tag_name)" >> $GITHUB_ENV
           echo "RELEASE_URL=$(echo $LATEST_RELEASE | jq -r .html_url)" >> $GITHUB_ENV
-          echo "RELEASE_BODY=$(echo $LATEST_RELEASE | jq -r .body)" >> $GITHUB_ENV
+          RELEASE_BODY=$(echo $LATEST_RELEASE | jq -r .body | tr -d '\n' | tr -d '\r')
+          echo "RELEASE_BODY=$RELEASE_BODY" >> $GITHUB_ENV
 
       - name: Send Tweet
         uses: noweh/post-tweet-v2-action@v1.0
