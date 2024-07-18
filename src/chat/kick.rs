@@ -15,7 +15,7 @@ use crate::{
     config, error, ChatSender,
 };
 
-const KICK_CHAT_WS: &str = "wss://ws-us2.pusher.com/app/eb1d5f283081a78b932c?protocol=7&client=js&version=7.6.0&flash=false";
+const KICK_CHAT_WS: &str = "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=7.6.0&flash=false";
 
 pub struct Kick {
     _req_client: reqwest::Client,
