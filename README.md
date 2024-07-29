@@ -18,6 +18,9 @@ A simple executable for all Operating Systems (Windows, Mac & Linux) to automati
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/b3ck?logo=GitHub%20Sponsors&label=b3ck's%20sponsors%3A&color=%23DB61A2&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fb3ck)
 
 ---
+# Try out the new [NOALBS Cloud Alpha](https://noalbs.com/signin) today!
+---
+
 ### Connect with Us:
 | <a href="https://discord.gg/efWu5HWM2u"><img src="https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/assets/1740542/8e96e359-373e-441a-b653-4c613d6dc521" alt="NOALBS DISCORD" width="50" height="auto"></a> | <a href="https://twitter.com/NOALBS"><img src="https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/assets/1740542/7b0b20d7-5dd7-4666-a3f0-089faa517fa3" alt="NOALBS TWITTER" width="50" height="auto"></a> |
 |---|---|
