@@ -1,44 +1,44 @@
 start:
-    success: Успешный запуск трансляции
+    success: Трансляция запущена
     error: "Ошибка: %{error}"
 startTwitchTranscoding:
-    trying: Пытаюсь запустить трансляцию с транскодом
-    successNoTranscoding: Трансляция успешно запущена без транскода
+    trying: Пытаюсь запустить трансляцию с транскодированием
+    successNoTranscoding: Трансляция запущена без транскодирования
     success: Началась трансляция с транскодированием %{attemptsMessage}
     attempts: ", потребовалось %{count} попыток"
 stop:
-    success: Успешная остановка трансляции
-    raid: The stream has stopped and raided %{display_channel} please follow this link %{channel}
+    success: Трансляция остановлена
+    raid: "Стрим завершился после рейда на канал %{display_channel}, перейти: %{channel}"
     error: "Ошибка: %{error}"
 switch:
     noParams: "Ошибка: сцена не указана"
-    success: Успешное переключение сцены на "%{scene}"
-    error: Ошибка не удается переключиться на другую сцену "%{scene}"
+    success: Сцена переключена на "%{scene}"
+    error: "Ошибка: не удалось переключиться на сцену \"%{scene}\""
 source:
-    noParams: No source specified
-    success: Source "%{name}" successfully %{status}
-    error: Error toggling source "%{name}"
-    enabled: enabled
-    disabled: disabled
+    noParams: "Ошибка: источник не указан"
+    success: Источник "%{name}" %{status}
+    error: Ошибка переключения источника "%{name}"
+    enabled: включен
+    disabled: выключен
 bitrate:
     success: "%{name}: %{message}"
-    error: "Текущий битрейт: Не в сети"
+    error: "Нет связи :("
 trigger:
     success: Успешная установка триггера на %{number}
-    successDisabled: Триггер успешно отключен
-    error: "Ошибка: редактирование триггера на %{number} не является допустимым значением"
+    successDisabled: Триггер отключен
+    error: "Ошибка: изменение триггера на %{number} — задано неверное значение"
     current: Текущий триггер установлен на %{number}
     disabled: Текущий триггер отключен
 sourceinfo:
-    noInfo: Нет информации
-    notFound: "Ошибка: сервер с таким именем не найден: %{name}"
+    noInfo: Нет информации об источнике
+    notFound: "Ошибка: сервер с именем \"%{name}\" не найден"
 serverinfo:
-    noInfo: No server information available
-    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+    noInfo: Нет информации о сервере
+    success: "Сцена: %{scene}, битрейт: %{bitrate} Kbps, FPS: %{fps}, отключен по причине: сеть: %{network}, задержка рендера: %{rendering}, задержка кодирования: %{encoding}"
 rec:
-    started: Успешное начало записи
-    stopped: Успешная остановка записи
-    errorStatus: Не удалось получить статус записи
+    started: Запись начата
+    stopped: Запись остановлена
+    errorStatus: Не удалось получить состояние записи
     errorToggle: Ошибка включения записи
 fix:
     try: Попытка исправить трансляцию
@@ -47,18 +47,18 @@ refresh:
     try: Инициировано обновление трансляции
     error: Ошибка обновления трансляции
     success: Успешное обновление трансляции
-    noScene: No refresh scene set, using fix instead
+    noScene: Сцена для обновления трансляции не установлена, попробуй fix
 alias:
     success: Добавлен псевдоним %{alias} -> %{command}
     removed: Удален псевдоним %{alias}
-    errorCommand: "Ошибка: %{command} не существует"
-    errorAlias: Псевдоним %{alias} не существует
-    errorAlreadyUsed: "%{alias} уже используется как псевдоним"
-    errorIncorrectArguments: Ошибка неверные аргументы даны
+    errorCommand: "Ошибка: команда %{command} не существует"
+    errorAlias: "Ошибка: псевдоним %{alias} не существует"
+    errorAlreadyUsed: "Ошибка: %{alias} уже используется как псевдоним"
+    errorIncorrectArguments: "Ошибка: аргументы заданы неверно"
 sceneSwitch:
-    switch: Сцена переключена на "%{scene}"
+    switch: Переключение сцены на "%{scene}"
 offlineTimeout:
-    timeout: Offline timeout reached, stopping the stream
+    timeout: Достигнут лимит времени ожидания, остановка стрима
 handleCommands:
     public: Публичные команды %{condition}
     mod: Команды модераторов %{condition}
@@ -67,23 +67,23 @@ handleCommands:
     enabled: включены
     disabled: выключены
 noalbs:
-    prefix: Префикс NOALBS обновлен до %{prefix}
-    errorPrefix: Не удается обновить префикс NOALBS
-    switcherEnabled: Успешно включен свитчер
-    switcherDisabled: Успешно отключен свитчер
-    instantSwitch: Мгновенное включение восстановления %{condition}
-    langError: Не могу обновить язык NOALBS
-    langErrorInvalid: Ошибка при редактировании языка %{lang} не является правильним тип данны
-    langSuccess: NOALBS язык обновлен на %{lang} языка
-    retryCount: Текущая попытка установлена на %{count} попыток
-    retryError: ошибка в редактирования повторных попыток  %{count} не является правильним тип данны
-    retrySuccess: Количество повторных попыток установлено на %{count} попыток
+    prefix: Префикс NOALBS изменён на %{prefix}
+    errorPrefix: Не удается изменить префикс NOALBS
+    switcherEnabled: Переключатель сцен включен
+    switcherDisabled: Переключатель сцен выключен
+    instantSwitch: Мгновенное переключение при восстановлении %{condition}
+    langError: Не могу изменить язык NOALBS
+    langErrorInvalid: "Ошибка при изменении языка %{lang}: задано неверное значение"
+    langSuccess: NOALBS язык изменён на %{lang}
+    retryCount: "Количество попыток переподключения: %{count}"
+    retryError: "Невозможно изменить количество попыток переподключения на %{count}: задано неверное значение"
+    retrySuccess: Количество попыток переподключения установлено на %{count}
 scene:
-    success: Переход на %{scene} сцену
-    error: "%{scene} не установлена"
+    success: Сцена переключена на "%{scene}"
+    error: Ошибка переключения на сцену "%{scene}"
 collection:
-    noParams: No collection specified
-    notFound: "Error no collection found with the name: %{collection}"
-    success: Collection successfully switched to "%{collection}"
-    error: Error can't switch to collection "%{collection}"
-    note: "Note: the profile will only be changed when not streaming"
+    noParams: Коллекция сцен не указана
+    notFound: "Ошибка: нет коллекции сцен с названием \"%{collection}\""
+    success: Коллекция сцен переключена на "%{collection}"
+    error: Ошибка переключения на коллекцию сцен "%{collection}"
+    note: "Напоминание: профиль будет переключен только если стрим остановлен"
