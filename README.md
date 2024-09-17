@@ -30,7 +30,7 @@ A simple executable for all Operating Systems (Windows, Mac & Linux) to automati
 # Similar Solutions / Paid Services
 
 Don't feel like setting this all up by yourself?
-- Message me [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord and I'll do everything for you for a fee 😄👍
+- Message me [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord and I'll do everything for you for <ins>a</ins> fee (not for free) 😄👍
 
   or..
 
@@ -45,7 +45,8 @@ Don't feel like setting this all up by yourself?
 | [IRLToolkit](https://irltoolkit.com/) | Step your stream up to the next level! |
 | [noRIP.io](https://www.norip.io) | Services to stabilize your stream |
 | [StreamAtom](https://streamatom.com/irl?screen=RtmpServer) | Powered by the StreamAtom Team, Supported by you. |
-| [IRLtools](https://irltools.com?ref=NOALBS) | IRL Accessories & Guides / Cloud Solutions Coming Soon.. |
+| [IRLtools](https://irltools.com?ref=NOALBS) | IRL Accessories & Guides |
+| [IRLServer](https://irlserver.com) | Simplify and Stabilize your IRL-stream. |
 
 Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord.
 - Also if your service is already listed above and you would like me to add any type of tracking to the URL so you know where your traffic is coming from send me a DM on Discord.
