@@ -1,32 +1,32 @@
 start:
     success: Stream iniciada
     error: "Erro ao iniciar a stream: %{error}"
-startTwitchTranscoding:
+    startTwitchTranscoding:
     trying: Tentando iniciar a stream com transcoding
     successNoTranscoding: Stream iniciada sem transcoding
     success: Stream iniciada com transcoding %{attemptsMessage}
     attempts: ", após %{count} tentativas"
 stop:
     success: Stream parada
-    raid: The stream has stopped and raided %{display_channel} please follow this link %{channel}
+    raid: A stream foi parada e raidamos %{display_channel} siga para o link %{channel}
     error: "Não foi possível parar a stream: %{error}"
 switch:
     noParams: Nenhuma cena especificada
     success: Cena trocada para "%{scene}"
     error: Não foi possível trocar a cena para "%{scene}"
 source:
-    noParams: No source specified
-    success: Source "%{name}" successfully %{status}
-    error: Error toggling source "%{name}"
-    enabled: enabled
-    disabled: disabled
+    noParams: Nenhuma fonte especificada
+    success: Fonte "%{name}" sucesso %{status}
+    error: Erro ao alternar a fonte "%{name}"
+    enabled: habilitado
+    disabled: desabilitado
 bitrate:
     success: "%{name}: %{message}"
     error: "Sem conexão :("
 trigger:
     success: "Trigger escolhido: %{number}"
     successDisabled: Trigger desabilitada
-    error: Não foi possível editar a trigger %{number}, não é um valor válido
+    error: Não foi possível editar o trigger %{number}, não é um valor válido
     current: "Trigger atual: %{number}"
     disabled: Trigger atual desabilitada
 sourceinfo:
@@ -34,11 +34,11 @@ sourceinfo:
     notFound: "Nenhum servidor encontrado: %{name}"
 serverinfo:
     noInfo: Nenhuma informação do servidor disponível
-    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, caiu devido a network: %{network}, lag de renderização: %{rendering}, lag de encoding: %{encoding}"
+    success: "cena: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, caiu devido a network: %{network}, lag de renderização: %{rendering}, lag de encoding: %{encoding}"
 rec:
     started: Gravação iniciada
     stopped: Gravação parada
-    errorStatus: Erro ao pegar o status de gravação
+    errorStatus: Erro ao obter o status de gravação
     errorToggle: Erro ao alternar a gravação
 fix:
     try: Tentando fixar a stream
@@ -54,7 +54,7 @@ alias:
     errorCommand: Comando %{command} não existe
     errorAlias: Atalho %{alias} não existe
     errorAlreadyUsed: "%{alias} já é um atalho"
-    errorIncorrectArguments: Erro nos argumentos passados
+    errorIncorrectArguments: Erro nos argumentos enviados
 sceneSwitch:
     switch: Cena mudada para "%{scene}"
 offlineTimeout:
@@ -62,19 +62,19 @@ offlineTimeout:
 handleCommands:
     public: Comandos públicos %{condition}
     mod: Comandos de Mod %{condition}
-    notify: Notificação de switch automático %{condition}
+    notify: Notificação de mudança automática de cena %{condition}
     autostop: Parada automática da stream %{condition}
     enabled: habilitado
     disabled: desabilitado
 noalbs:
     prefix: NOALBS prefixo atualizado para %{prefix}
-    errorPrefix: Não pode atualizar o prefixo NOALBS
+    errorPrefix: Não foi possível atualizar o prefixo NOALBS
     switcherEnabled: Troca de cena habilitada com sucesso
     switcherDisabled: Troca de cena desabilitada com sucesso
-    instantSwitch: Troca de cena instantanea em recuperação %{condition}
-    langError: Não pode atualizar a linguagem do NOALBS
+    instantSwitch: Troca de cena instantânea em recuperação %{condition}
+    langError: Não foi possível atualizar a linguagem do NOALBS
     langErrorInvalid: Erro ao editar a linguagem %{lang}, não é um valor valido
-    langSuccess: NOALBS lingua atualizada para %{lang}
+    langSuccess: A linguagem do NOALBS foi atualizada para %{lang}
     retryCount: "Tentativa atual: %{count}"
     retryError: Erro ao editar as tentativas %{count}, não é um valor valido
     retrySuccess: "Tentativa escolhida: %{count}"
@@ -82,8 +82,8 @@ scene:
     success: Trocando para cena "%{scene}"
     error: A cena %{scene} não pode ser escolhida
 collection:
-    noParams: No collection specified
-    notFound: "Error no collection found with the name: %{collection}"
-    success: Collection successfully switched to "%{collection}"
-    error: Error can't switch to collection "%{collection}"
-    note: "Note: the profile will only be changed when not streaming"
+    noParams: Nenhuma coleção foi especificada
+    notFound: "Ocorreu um erro, nenhuma coleção com o nome %{collection} foi encontrada"
+    success: Coleção trocada com sucesso para "%{collection}"
+    error: Não foi possível mudar para a coleção "%{collection}"
+    note: "Nota: O perfil será alterado quando não estiver transmitindo"
