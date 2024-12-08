@@ -135,7 +135,7 @@ impl Obsv5 {
         let mut all_scenes = Vec::new();
 
         for scene in scenes.scenes {
-            all_scenes.push(scene.name);
+            all_scenes.push(scene.id.name);
         }
 
         Ok(all_scenes)
