@@ -108,6 +108,9 @@ impl Obs {
                     render_missed_frames,
                     output_total_frames,
                     output_skipped_frames,
+                    cpu_usage,
+                    memory_usage,
+                    free_disk_space,
                     ..
                 } => {
                     let ss = state::StreamStatus {
@@ -119,6 +122,9 @@ impl Obs {
                         num_total_frames,
                         render_total_frames,
                         output_total_frames,
+                        cpu_usage,
+                        memory_usage,
+                        available_disk_space: free_disk_space,
                     };
 
                     let mut l = state.write().await;

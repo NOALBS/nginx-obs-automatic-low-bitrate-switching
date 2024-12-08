@@ -34,7 +34,7 @@ sourceinfo:
     notFound: "Fout geen server gevonden met de naam: %{name}"
 serverinfo:
     noInfo: Geen serverinformatie beschikbaar
-    success: "Scène: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, gedaald als gevolg van: netwerk: %{network}, weergavevertraging: %{rendering}, coderingsvertraging: %{encoding}"
+    success: "Scène: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, gedaald als gevolg van: netwerk: %{network}, weergavevertraging: %{rendering}, coderingsvertraging: %{encoding}, CPU: %{cpu}, geheugen: %{memory}, vrije schijfruimte: %{disk}"
 rec:
     started: Opname gestart
     stopped: Opname gestopt

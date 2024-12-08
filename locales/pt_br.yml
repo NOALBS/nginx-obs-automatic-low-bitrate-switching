@@ -34,7 +34,7 @@ sourceinfo:
     notFound: "Nenhum servidor encontrado: %{name}"
 serverinfo:
     noInfo: Nenhuma informação do servidor disponível
-    success: "cena: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, caiu devido a network: %{network}, lag de renderização: %{rendering}, lag de encoding: %{encoding}"
+    success: "cena: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, caiu devido a network: %{network}, lag de renderização: %{rendering}, lag de encoding: %{encoding}, CPU: %{cpu}, memória: %{memory}, espaço livre em disco: %{disk}"
 rec:
     started: Gravação iniciada
     stopped: Gravação parada

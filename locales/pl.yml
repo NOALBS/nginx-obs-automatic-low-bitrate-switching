@@ -33,8 +33,8 @@ sourceinfo:
     noInfo: Brak informacji
     notFound: "Błąd nie znaleziono serwera o tej nazwie: %{name}"
 serverinfo:
-    noInfo: No server information available
-    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+    noInfo: Brak informacji o serwerze
+    success: "scena: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, spadki z powodu: sieć: %{network}, opóźnienie renderowania: %{rendering}, opóźnienie kodowania: %{encoding}, CPU: %{cpu}, pamięć: %{memory}, wolne miejsce na dysku: %{disk}"
 rec:
     started: Nagranie rozpoczęte
     stopped: Nagranie zakończone

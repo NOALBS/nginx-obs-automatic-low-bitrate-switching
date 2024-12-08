@@ -1265,24 +1265,16 @@ impl DispatchCommand {
     async fn server_info(&self) {
         let state = self.user.state.read().await;
 
-        if state.broadcasting_software.initial_stream_status.is_none() {
+        let Some(bsc) = &state.broadcasting_software.connection else {
             self.send(t!("serverinfo.noInfo", locale = &self.lang))
                 .await;
             return;
         };
 
-        let bsc = match &state.broadcasting_software.connection {
-            Some(b) => b,
-            None => return,
-        };
-
-        let ss = match bsc.info(&state).await {
-            Ok(ss) => ss,
-            Err(_) => {
-                self.send(t!("serverinfo.noInfo", locale = &self.lang))
-                    .await;
-                return;
-            }
+        let Ok(ss) = bsc.info(&state).await else {
+            self.send(t!("serverinfo.noInfo", locale = &self.lang))
+                .await;
+            return;
         };
 
         let network = format!(
@@ -1303,6 +1295,10 @@ impl DispatchCommand {
             (ss.output_skipped_frames as f64 / ss.output_total_frames as f64) * 100.0,
         );
 
+        let cpu = format!("{:.1}%", ss.cpu_usage);
+        let memory = format!("{:.1} MB", ss.memory_usage);
+        let disk = format!("{:.1} GB", ss.available_disk_space / 1024.0);
+
         let scene = &state.broadcasting_software.current_scene;
 
         let msg = t!(
@@ -1313,7 +1309,10 @@ impl DispatchCommand {
             network = &network,
             rendering = &rendering,
             encoding = &encoding,
-            scene = scene
+            scene = scene,
+            cpu = &cpu,
+            memory = &memory,
+            disk = &disk
         );
 
         self.send(msg).await;

@@ -30,11 +30,11 @@ trigger:
     current: Nuværende trigger er sat til %{number}
     disabled: Current trigger is disabled
 sourceinfo:
-    noInfo: No information
-    notFound: "Error no server found with the name: %{name}"
+    noInfo: Ingen information
+    notFound: "Fejl ingen server fundet med navnet: %{name}"
 serverinfo:
-    noInfo: No server information available
-    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+    noInfo: Ingen serverinformation tilgængelig
+    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, tabt på grund af: netværk: %{network}, rendering forsinkelse: %{rendering}, encoding forsinkelse: %{encoding}, CPU: %{cpu}, hukommelse: %{memory}, ledig diskplads: %{disk}"
 rec:
     started: Optagelse startet!
     stopped: Optagelse stoppet!

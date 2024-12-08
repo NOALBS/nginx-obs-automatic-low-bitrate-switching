@@ -34,7 +34,7 @@ sourceinfo:
     notFound: Fehler kein Server mit dem Namen %{name} gefunden
 serverinfo:
     noInfo: Keine Serverinformationen verfügbar
-    success: "Szene: %{scene}, Bitrate: %{bitrate} Kbps, fps: %{fps}, Framedrop wegen: Netzwerk: %{network}, Renderverzögerung: %{rendering}, Codierungsverzögerung: %{encoding}"
+    success: "Szene: %{scene}, Bitrate: %{bitrate} Kbps, fps: %{fps}, Framedrop wegen: Netzwerk: %{network}, Renderverzögerung: %{rendering}, Codierungsverzögerung: %{encoding}, CPU: %{cpu}, Speicher: %{memory}, freier Speicherplatz: %{disk}"
 rec:
     started: Aufnahme gestartet
     stopped: Aufnahme gestoppt

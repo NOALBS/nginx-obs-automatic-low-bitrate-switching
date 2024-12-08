@@ -33,8 +33,8 @@ sourceinfo:
     noInfo: Ingen information
     notFound: "Fel ingen server hittades med namnet: %{name}"
 serverinfo:
-    noInfo: No server information available
-    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+    noInfo: Ingen serverinformation tillgänglig
+    success: "scen: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, tappade på grund av: nätverk: %{network}, renderingslagg: %{rendering}, kodningslagg: %{encoding}, CPU: %{cpu}, minne: %{memory}, ledigt diskutrymme: %{disk}, upplösning: %{resolution}"
 rec:
     started: Inspelning påbörjad
     stopped: Inspelningen har stoppats

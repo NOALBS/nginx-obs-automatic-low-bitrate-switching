@@ -155,6 +155,9 @@ pub struct StreamStatus {
     pub render_missed_frames: u64,
     pub output_total_frames: u64,
     pub output_skipped_frames: u64,
+    pub cpu_usage: f64,
+    pub memory_usage: f64,
+    pub available_disk_space: f64,
 }
 
 impl StreamStatus {
@@ -168,6 +171,9 @@ impl StreamStatus {
             render_missed_frames: self.render_missed_frames - old.render_missed_frames,
             output_total_frames: self.output_total_frames - old.output_total_frames,
             output_skipped_frames: self.output_skipped_frames - old.output_skipped_frames,
+            cpu_usage: self.cpu_usage,
+            memory_usage: self.memory_usage,
+            available_disk_space: self.available_disk_space,
         }
     }
 }

@@ -34,7 +34,7 @@ sourceinfo:
     notFound: "Erreur aucun serveur trouvé avec le nom: %{name}"
 serverinfo:
     noInfo: Aucun serveur disponible
-    success: "scene: %{scene}, bitrate: %{bitrate} Kbps, fps: %{fps}, dropped due to: network: %{network}, rendering lag: %{rendering}, encoding lag: %{encoding}"
+    success: "scène: %{scene}, débit: %{bitrate} Kbps, fps: %{fps}, pertes dues à: réseau : %{network}, décalage de rendu: %{rendering}, décalage d'encodage: %{encoding}, CPU: %{cpu}, mémoire: %{memory}, espace disque libre: %{disk}"
 rec:
     started: Enregistrement démarré
     stopped: Enregistrement stoppé

@@ -490,6 +490,9 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             output_skipped_frames: stats.output_skipped_frames as u64,
             render_missed_frames: stats.render_skipped_frames as u64,
             render_total_frames: stats.render_total_frames as u64,
+            cpu_usage: stats.cpu_usage,
+            memory_usage: stats.memory_usage,
+            available_disk_space: stats.available_disk_space,
         };
 
         if state.broadcasting_software.initial_stream_status.is_some() {
