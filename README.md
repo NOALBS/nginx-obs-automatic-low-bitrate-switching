@@ -30,7 +30,7 @@ A simple executable for all Operating Systems (Windows, Mac & Linux) to automati
 # Similar Solutions / Paid Services
 
 Don't feel like setting this all up by yourself?
-- Message me [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord and I'll do everything for you for <ins>a</ins> fee (not for free) 😄👍
+- Message me [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord and I'll do everything for you for <ins>a</ins> fee (not for free), make sure to send a message request and message me with what you need as I delete friend requests (pointing at you graphic artists) 😄👍
 
   or..
 
