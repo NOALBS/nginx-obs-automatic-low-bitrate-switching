@@ -1,6 +1,6 @@
 # NOALBS ![GitHub stars](https://img.shields.io/github/stars/NOALBS/nginx-obs-automatic-low-bitrate-switching) ![GitHub forks](https://img.shields.io/github/forks/NOALBS/nginx-obs-automatic-low-bitrate-switching)
 
-A simple executable for all Operating Systems (Windows, Mac & Linux) to automatically switch scenes in OBS Studio/OBS.Live; based on the current bitrate fetched from your ingest server stats.  NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely from your ingest server (RTMP, SRT Etc..).
+A simple executable for all Operating Systems (Windows, Mac & Linux) to automatically switch scenes in OBS Studio/OBS.Live; based on the current bitrate fetched from your ingest server stats.  NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely from your ingest server (RTMP, SRT, SRTLA, RIST Etc..).
 
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/NOALBS/nginx-obs-automatic-low-bitrate-switching/latest)
 ![GitHub last commit](https://img.shields.io/github/last-commit/NOALBS/nginx-obs-automatic-low-bitrate-switching)
@@ -18,13 +18,14 @@ A simple executable for all Operating Systems (Windows, Mac & Linux) to automati
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/b3ck?logo=GitHub%20Sponsors&label=b3ck's%20sponsors%3A&color=%23DB61A2&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fb3ck)
 
 ---
-# Try out the new [NOALBS Cloud Alpha](https://noalbs.com/signin) today!
+# Try out the new [NOALBS Cloud Alpha](https://noalbs.com/signin) (Twitch Only) today!
 ---
 
+
 ### Connect with Us:
-| <a href="https://discord.gg/efWu5HWM2u"><img src="https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/assets/1740542/8e96e359-373e-441a-b653-4c613d6dc521" alt="NOALBS DISCORD" width="50" height="auto"></a> | <a href="https://twitter.com/NOALBS"><img src="https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/assets/1740542/7b0b20d7-5dd7-4666-a3f0-089faa517fa3" alt="NOALBS TWITTER" width="50" height="auto"></a> |
+| <a href="https://discord.gg/efWu5HWM2u"><img src="https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/assets/1740542/8e96e359-373e-441a-b653-4c613d6dc521" alt="NOALBS DISCORD" width="50" height="auto"></a> | <a href="https://x.com/NOALBS"><img src="https://b3ck.com/uploadz/uploads/twitter-to-x-to-twitter.gif" alt="NOALBS X" width="50" height="auto"></a> |
 |---|---|
-|[Discord](https://discord.gg/efWu5HWM2u)|[Twitter](https://twitter.com/NOALBS)|
+|[Discord](https://discord.gg/efWu5HWM2u)|[X/Twitter](https://x.com/NOALBS)|
 
 ---
 # Similar Solutions / Paid Services
@@ -160,11 +161,48 @@ You can also enable/disable certain features from chat, see below:
 <details>
 <summary>Click to view how to configure NOALBS</summary>
 
+Before editing any type of configuration file I highly recommend using a code editor rather than using notepad, just trust me on this..
+
+Your 🧠 brain and 👀 eyes will thank me later.
+> [https://code.visualstudio.com/download](https://code.visualstudio.com/download) Once installed proceed with the following instructions using VS Code to open the files.
+
 Open the `.env` file. If you have a custom Twitch account created for a bot fill in your Twitch Account bot username and oauth.
+> We recommend using your Twitch BOT account for this. However, if you don't have a dedicated bot account, you can use your main Twitch account instead.
 
-Use <https://twitchapps.com/tmi> to get your oauth from Twitch.
+> Regardless of which account you choose, ensure that the browser you are using is logged into the correct Twitch account that you want NOALBS to use for responding in your chat.
 
-> We recommend using your Twitch BOT account for this, but if you do not have a Twitch Bot account just use your Main Twitch Account.
+Go to: [twitchtokengenerator.com](https://twitchtokengenerator.com/) to get your oauth from Twitch.
+
+- Choose 'Bot Chat Token':
+
+![image](https://github.com/user-attachments/assets/3833bed4-ebea-4e05-8329-f2ee58b14b3f)
+
+- Login and Verify you are using the correct Twitch account:
+
+![image](https://github.com/user-attachments/assets/0cc5a76f-51e7-4c3f-ae2e-1344f46e44c4)
+
+- Prove that you are human:
+
+![image](https://github.com/user-attachments/assets/90653e30-965c-4357-8c73-a0e308c7b0e5)
+
+- Grab the "ACCESS TOKEN" from the page:
+
+![image](https://github.com/user-attachments/assets/a97bd083-21e3-4a15-bdac-d40f3eebcd41)
+
+- Edit your `.env` file:
+```env
+TWITCH_BOT_USERNAME=(YOUR TWITCH NAME)
+TWITCH_BOT_OAUTH=oauth:(ACCESS TOKEN FROM SITE)
+```
+Example (USING FAKE ACCESS TOKEN - DO NOT USE):
+```env
+TWITCH_BOT_USERNAME=b3ck
+TWITCH_BOT_OAUTH=oauth:xg7zkmq92tcbvloyarwfu5dnsph4
+```
+
+Once finshed save your `.env` file, make sure you do not save it as .env.txt, always verify after saving and closing files that your save was successful and named correctly.
+
+---
 
 The `config.json` file holds all the user configurations.
 
