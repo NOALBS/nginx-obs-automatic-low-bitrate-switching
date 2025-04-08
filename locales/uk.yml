@@ -1,0 +1,89 @@
+start:
+    success: "Стрім успішно запущено"
+    error: "Помилка: не вдалося запустити стрім: %{error}"
+startTwitchTranscoding:
+    trying: "Спроба запустити стрім з транскодуванням"
+    successNoTranscoding: "Успішно запущено стрім без транскодування"
+    success: "Стрім запущено з транскодуванням %{attemptsMessage}"
+    attempts: ", зроблено %{count} спроб"
+stop:
+    success: "Стрім успішно зупинено"
+    raid: "Стрім зупинено та здійснено рейд на %{display_channel}, будь ласка перейдіть за посиланням %{channel}"
+    error: "Помилка: не вдалося зупинити стрім: %{error}"
+switch:
+    noParams: "Сцену не вказано"
+    success: "Сцену успішно перемкнено на \"%{scene}\""
+    error: "Помилка: не вдалося перемкнутися на сцену \"%{scene}\""
+source:
+    noParams: "Джерело не вказано"
+    success: "Джерело \"%{name}\" успішно %{status}"
+    error: "Помилка при перемиканні джерела \"%{name}\""
+    enabled: "увімкнено"
+    disabled: "вимкнено"
+bitrate:
+    success: "%{name}: %{message}"
+    error: "Немає з'єднання :("
+trigger:
+    success: "Тригер успішно встановлено на %{number}"
+    successDisabled: "Тригер успішно вимкнено"
+    error: "Помилка при редагуванні тригера %{number}, недійсне значення"
+    current: "Поточний тригер встановлено на %{number}"
+    disabled: "Поточний тригер вимкнено"
+sourceinfo:
+    noInfo: "Немає інформації"
+    notFound: "Помилка: не знайдено жодного сервера з ім'ям: %{name}"
+serverinfo:
+    noInfo: "Немає доступної інформації про сервер"
+    success: "сцена: %{scene}, бітрейт: %{bitrate} Kbps, fps: %{fps}, пропуски через: мережу: %{network}, затримку рендерингу: %{rendering}, затримку кодування: %{encoding}, ЦП: %{cpu}, пам'ять: %{memory}, вільне місце на диску: %{disk}"
+rec:
+    started: "Запис розпочато"
+    stopped: "Запис зупинено"
+    errorStatus: "Помилка отримання статусу запису"
+    errorToggle: "Помилка перемикання запису"
+fix:
+    try: "Спроба виправити стрім"
+    error: "Помилка виправлення стріму"
+refresh:
+    try: "Оновлення стріму"
+    error: "Помилка оновлення стріму"
+    success: "Оновлення стріму завершено"
+    noScene: "Не задано сцену для оновлення, використовується fix"
+alias:
+    success: "Додано псевдонім %{alias} -> %{command}"
+    removed: "Псевдонім %{alias} видалено"
+    errorCommand: "Команда %{command} не існує"
+    errorAlias: "Псевдонім %{alias} не існує"
+    errorAlreadyUsed: "%{alias} вже використовується"
+    errorIncorrectArguments: "Помилка: надано неправильні аргументи"
+sceneSwitch:
+    switch: "Сцену перемкнуто на \"%{scene}\""
+offlineTimeout:
+    timeout: "Досягнуто граничного часу офлайн, зупинка стріму"
+handleCommands:
+    public: "Публічні команди %{condition}"
+    mod: "Команди модератора %{condition}"
+    notify: "Автосповіщення про перемикання %{condition}"
+    autostop: "Автоматична зупинка стріму %{condition}"
+    enabled: "увімкнено"
+    disabled: "вимкнено"
+noalbs:
+    prefix: "Префікс NOALBS оновлено до %{prefix}"
+    errorPrefix: "Не вдалося оновити префікс NOALBS"
+    switcherEnabled: "Перемикач успішно увімкнено"
+    switcherDisabled: "Перемикач успішно вимкнено"
+    instantSwitch: "Миттєве перемикання при відновленні %{condition}"
+    langError: "Не вдалося оновити мову NOALBS"
+    langErrorInvalid: "Помилка редагування мови %{lang}, недійсне значення"
+    langSuccess: "Мову NOALBS оновлено на %{lang}"
+    retryCount: "Поточну кількість спроб встановлено в %{count}"
+    retryError: "Помилка редагування кількості спроб, %{count} недійсне значення"
+    retrySuccess: "Кількість спроб встановлено в %{count}"
+scene:
+    success: "Перемикання на сцену %{scene}"
+    error: "Не задано сцену %{scene}"
+collection:
+    noParams: "Колекцію не вказано"
+    notFound: "Помилка: не знайдено жодної колекції з іменем: %{collection}"
+    success: "Колекцію успішно перемкнуто на \"%{collection}\""
+    error: "Помилка: не вдалося перемкнутися на колекцію \"%{collection}\""
+    note: "Примітка: профіль буде змінено лише коли стрім не активний"
