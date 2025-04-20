@@ -310,7 +310,7 @@ The `config.json` file holds all the user configurations.
     "twitchTranscodingCheck": false,                // Enable or Disable transcoding check on twitch for your stream. (Non-Partners Only)
     "twitchTranscodingRetries": 5,                  // How many times you would like the transcoding checked before giving up.
     "twitchTranscodingDelaySeconds": 15,            // How long you want to wait to check inbetween checks.
-    "offlineTimeout": null,                         // OBS will stop streaming when you you've been in your offline scene for this amount of time.
+    "offlineTimeout": null,                         // "offlineTimeout": 5, = 5 Minutes - OBS will stop streaming when you you've been in your offline scene for this amount of time.
     "recordWhileStreaming": false,                  // Automatically record when you start streaming.
     "switchToStartingSceneOnStreamStart": false,    // Automatically switch to the starting scene when you start streaming.
     "switchFromStartingSceneToLiveScene": false     // Automatically switch to live scene when you start streaming IRL.
