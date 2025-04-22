@@ -374,7 +374,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
 
             if !media_inputs
                 .iter()
-                .any(|m| m.starts_with("rtmp") || m.starts_with("srt") || m.starts_with("udp"))
+                .any(|m| m.starts_with("rtmp") || m.starts_with("srt") || m.starts_with("udp") || m.starts_with("rist"))
             {
                 continue;
             }
