@@ -272,7 +272,7 @@ impl Switcher {
             .optional_scenes
             .starting
             .as_ref()
-            .map_or(false, |starting_scene| {
+            .is_some_and(|starting_scene| {
                 let switch_to_live = state
                     .config
                     .optional_options

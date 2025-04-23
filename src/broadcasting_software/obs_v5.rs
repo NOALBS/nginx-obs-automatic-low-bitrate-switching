@@ -4,14 +4,11 @@ use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::StreamExt;
 use obwsv5::{
-    events::Event,
-    requests::{
+    error::Error, events::Event, requests::{
         inputs::{self, InputId},
         scene_items::SetEnabled,
         scenes::SceneId,
-    },
-    responses::media_inputs::MediaState,
-    Client,
+    }, responses::media_inputs::MediaState, Client
 };
 use tokio::sync::{self, mpsc, Mutex};
 use tracing::{error, info, warn, Instrument};
@@ -695,7 +692,7 @@ impl InnerConnection {
                 Err(e) => {
                     warn!("Unable to connect due to: {}", e);
 
-                    if let obwsv5::Error::Handshake(h) = e {
+                    if let Error::Handshake(h) = e {
                         error!("{}", h);
                     }
                 }

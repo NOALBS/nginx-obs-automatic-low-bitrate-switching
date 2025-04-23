@@ -223,8 +223,11 @@ impl ConfigLogic for File {
                             format!("TWITCH_BOT_USERNAME={}\nTWITCH_BOT_OAUTH={}", bot, oauth);
                         std::fs::write(".env", env.as_bytes())?;
 
-                        std::env::set_var("TWITCH_BOT_USERNAME", bot);
-                        std::env::set_var("TWITCH_BOT_OAUTH", oauth);
+                        // TODO: set_var is now unsafe. Check if it's safe to use.
+                        unsafe {
+                            std::env::set_var("TWITCH_BOT_USERNAME", bot);
+                            std::env::set_var("TWITCH_BOT_OAUTH", oauth);
+                        }
                     }
 
                     let c = Config::from(o);

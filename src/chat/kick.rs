@@ -294,7 +294,7 @@ impl Inner {
         Ok(())
     }
 
-    async fn send<'a>(&mut self, request: &Request<'a>) -> Result<(), error::Error> {
+    async fn send(&mut self, request: &Request<'_>) -> Result<(), error::Error> {
         let json = serde_json::to_string(request)?;
 
         if self.connection.send(TMessage::Text(json)).await.is_err() {
