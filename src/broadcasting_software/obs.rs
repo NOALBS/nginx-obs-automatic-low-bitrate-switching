@@ -341,7 +341,7 @@ impl BroadcastingSoftwareLogic for Obs {
 
             if !media_inputs
                 .iter()
-                .any(|m| m.starts_with("rtmp") || m.starts_with("srt"))
+                .any(|m| m.starts_with("rtmp") || m.starts_with("srt") || m.starts_with("udp") || m.starts_with("rist"))
             {
                 continue;
             }
