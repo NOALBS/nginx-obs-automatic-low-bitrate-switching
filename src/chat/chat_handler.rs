@@ -9,7 +9,7 @@ use tokio::time;
 use tracing::{debug, error, info};
 
 use crate::chat::{self, HandleMessage, OptionalScene, Permission};
-use crate::{config, error, events, switcher, user_manager, Noalbs};
+use crate::{Noalbs, config, error, events, switcher, user_manager};
 
 pub struct ChatHandler {
     chat_handler_rx: mpsc::Receiver<super::HandleMessage>,
@@ -1380,7 +1380,6 @@ impl DispatchCommand {
 
         let state = self.user.state.read().await;
         let collections = match &state.config.software {
-            config::SoftwareConnection::ObsOld(o) => &o.collections,
             config::SoftwareConnection::Obs(o) => &o.collections,
         };
 

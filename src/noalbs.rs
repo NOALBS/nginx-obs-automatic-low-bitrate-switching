@@ -1,10 +1,10 @@
 use std::{collections::HashMap, sync::Arc};
 
-use tokio::sync::{mpsc, RwLock};
+use tokio::sync::{RwLock, mpsc};
 use tracing::{debug, info};
 
 use crate::{
-    broadcasting_software::{obs::Obs, obs_v5::Obsv5, BroadcastingSoftwareLogic},
+    broadcasting_software::{BroadcastingSoftwareLogic, obs_v5::Obsv5},
     chat, config, error,
     state::{self, State},
     stream_servers,
@@ -57,10 +57,6 @@ impl Noalbs {
             let mut w_state = state.write().await;
 
             let connection: Box<dyn BroadcastingSoftwareLogic> = match w_state.config.software {
-                config::SoftwareConnection::ObsOld(ref obs_conf) => {
-                    let obs = Obs::new(obs_conf.clone(), state.clone());
-                    Box::new(obs)
-                }
                 config::SoftwareConnection::Obs(ref obs_conf) => {
                     let obs = Obsv5::new(obs_conf.clone(), state.clone());
                     Box::new(obs)

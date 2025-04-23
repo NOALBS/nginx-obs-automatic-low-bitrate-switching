@@ -3,7 +3,6 @@ use tokio::sync;
 
 use crate::{error::Error, state};
 
-pub mod obs;
 pub mod obs_v5;
 
 #[async_trait]

@@ -103,7 +103,6 @@ impl Default for Switcher {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum SoftwareConnection {
-    ObsOld(ObsConfig),
     Obs(ObsConfig),
 }
 

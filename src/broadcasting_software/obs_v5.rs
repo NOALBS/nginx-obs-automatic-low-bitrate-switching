@@ -4,14 +4,19 @@ use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::StreamExt;
 use obwsv5::{
-    error::Error, events::Event, requests::{
+    Client,
+    error::Error,
+    events::Event,
+    requests::{
         inputs::{self, InputId},
         scene_items::SetEnabled,
         scenes::SceneId,
-    }, responses::media_inputs::MediaState, Client
+    },
+    responses::media_inputs::MediaState,
 };
-use tokio::sync::{self, mpsc, Mutex};
-use tracing::{error, info, warn, Instrument};
+use serde::Deserialize;
+use tokio::sync::{self, Mutex, mpsc};
+use tracing::{Instrument, error, info, warn};
 
 use crate::{
     config::{self, ObsConfig},
@@ -19,10 +24,7 @@ use crate::{
     state::{self, ClientStatus},
 };
 
-use super::{
-    obs::{FfmpegSource, SourceItem, VlcSource},
-    BroadcastingSoftwareLogic,
-};
+use super::BroadcastingSoftwareLogic;
 
 pub struct Obsv5 {
     connection: Arc<Mutex<Option<obwsv5::Client>>>,
@@ -369,10 +371,12 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                 s => unimplemented!("Fix not implemented for {}", s),
             };
 
-            if !media_inputs
-                .iter()
-                .any(|m| m.starts_with("rtmp") || m.starts_with("srt") || m.starts_with("udp") || m.starts_with("rist"))
-            {
+            if !media_inputs.iter().any(|m| {
+                m.starts_with("rtmp")
+                    || m.starts_with("srt")
+                    || m.starts_with("udp")
+                    || m.starts_with("rist")
+            }) {
                 continue;
             }
 
@@ -730,4 +734,34 @@ impl Drop for Obsv5 {
         self.connection_join.abort();
         self.event_join.abort();
     }
+}
+
+#[derive(Debug)]
+pub struct SourceItem {
+    pub id: i64,
+    pub scene_name: String,
+    pub source_name: String,
+    pub source_kind: String,
+}
+
+// From obws
+/// Settings specific to a **FFmpeg** video source.
+#[derive(Deserialize)]
+pub struct FfmpegSource {
+    /// URL of the remote media file. Only used if [`Self::is_local_file`] is set to `false`.
+    pub input: Option<String>,
+}
+
+/// Settings specific to a **VLC** video source.
+#[derive(Deserialize)]
+pub struct VlcSource {
+    /// List of files to play.
+    pub playlist: Vec<SlideshowFile>,
+}
+
+/// Single file as part of a [`Slideshow`].
+#[derive(Deserialize)]
+pub struct SlideshowFile {
+    /// Location of the file to display.
+    pub value: String,
 }
