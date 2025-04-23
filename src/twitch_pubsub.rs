@@ -1,19 +1,19 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use futures_util::{
-    stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
+    stream::{SplitSink, SplitStream},
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::{
     net::TcpStream,
-    sync::{mpsc, oneshot, Mutex},
+    sync::{Mutex, mpsc, oneshot},
     time::{self, Instant},
 };
 use tokio_tungstenite::{
-    tungstenite::{self, protocol::CloseFrame, Message as TMessage},
     MaybeTlsStream, WebSocketStream,
+    tungstenite::{self, Message as TMessage, protocol::CloseFrame},
 };
 use tracing::{debug, error, info, trace, warn};
 

@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use tracing::error;
 
-use super::{default_reqwest_client, Bsl, StreamServersCommands, SwitchLogic};
+use super::{Bsl, StreamServersCommands, SwitchLogic, default_reqwest_client};
 use crate::switcher::{SwitchType, Triggers};
 
 #[derive(Deserialize, Debug)]

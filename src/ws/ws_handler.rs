@@ -2,17 +2,18 @@ use std::{collections::HashMap, sync::Arc};
 
 use futures_util::StreamExt;
 use tokio::sync::{
-    mpsc::{UnboundedReceiver, UnboundedSender},
     RwLock,
+    mpsc::{UnboundedReceiver, UnboundedSender},
 };
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use tracing::debug;
 
-use crate::{user_manager, Noalbs};
+use crate::{Noalbs, user_manager};
 
 use super::{
+    InternalClientToken, WsClient, WsMessage,
     requests::{Auth, SetPassword},
-    responses, InternalClientToken, WsClient, WsMessage,
+    responses,
 };
 
 pub struct WsHandler {

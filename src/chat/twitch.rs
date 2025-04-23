@@ -4,16 +4,16 @@ use async_trait::async_trait;
 use tokio::sync::mpsc;
 use tracing::{error, info, trace};
 use twitch_irc::{
+    ClientConfig, SecureTCPTransport, TwitchIRCClient,
     login::StaticLoginCredentials,
     message,
     transport::tcp::{TCPTransport, TLS},
-    ClientConfig, SecureTCPTransport, TwitchIRCClient,
 };
 
 use crate::{
+    ChatSender,
     chat::{self, ChatPlatform, HandleMessage},
     twitch_pubsub::PubsubManager,
-    ChatSender,
 };
 
 #[derive(Clone)]
@@ -62,8 +62,7 @@ impl Twitch {
                 message::ServerMessage::RoomState(state) => {
                     trace!(
                         "user_id: {}, user_name: {}",
-                        state.channel_id,
-                        state.channel_login
+                        state.channel_id, state.channel_login
                     );
                     pubsub.add_raid(state.channel_id, state.channel_login).await;
                 }

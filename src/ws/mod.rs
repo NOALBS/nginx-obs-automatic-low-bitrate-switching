@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use argon2::{
-    password_hash::{
-        rand_core::{OsRng, RngCore},
-        PasswordHash, PasswordHasher, PasswordVerifier, SaltString,
-    },
     Argon2,
+    password_hash::{
+        PasswordHash, PasswordHasher, PasswordVerifier, SaltString,
+        rand_core::{OsRng, RngCore},
+    },
 };
 use base64::Engine;
 use tokio::sync::mpsc;

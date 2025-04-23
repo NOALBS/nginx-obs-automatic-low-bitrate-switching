@@ -4,7 +4,7 @@ use std::{env, sync::Arc};
 use anyhow::Result;
 use tokio::signal;
 
-use noalbs::{chat::ChatPlatform, config, Noalbs};
+use noalbs::{Noalbs, chat::ChatPlatform, config};
 use tracing::warn;
 
 #[tokio::main]

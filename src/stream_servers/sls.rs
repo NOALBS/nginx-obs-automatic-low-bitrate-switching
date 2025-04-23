@@ -3,7 +3,7 @@ use log::{error, trace};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use super::{default_reqwest_client, Bsl, StreamServersCommands, SwitchLogic};
+use super::{Bsl, StreamServersCommands, SwitchLogic, default_reqwest_client};
 use crate::switcher::{SwitchType, Triggers};
 
 #[derive(Deserialize, Debug)]

@@ -4,15 +4,16 @@ use std::time::Duration;
 use async_trait::async_trait;
 use futures_util::{SinkExt as _, StreamExt as _};
 use tokio::{
-    sync::{mpsc, Mutex},
+    sync::{Mutex, mpsc},
     time,
 };
 use tokio_tungstenite::tungstenite::Message as TMessage;
 use tracing::{info, warn};
 
 use crate::{
+    ChatSender,
     chat::{self, ChatPlatform, HandleMessage, InternalUpdate},
-    config, error, ChatSender,
+    config, error,
 };
 
 const KICK_CHAT_WS: &str = "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=7.6.0&flash=false";
@@ -337,8 +338,8 @@ impl Inner {
     }
 }
 
-async fn get_connection(
-) -> tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>> {
+async fn get_connection()
+-> tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>> {
     let mut retry_grow = 1;
 
     loop {

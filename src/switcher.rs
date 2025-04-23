@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 use tokio::sync::Notify;
-use tracing::{debug, error, info, Instrument};
+use tracing::{Instrument, debug, error, info};
 
 use crate::{
     chat, error,

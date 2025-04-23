@@ -3,7 +3,7 @@ use std::sync::Arc;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use tokio::sync::mpsc::{self, UnboundedSender};
 use tracing::info;
-use warp::{ws::WebSocket, Filter};
+use warp::{Filter, ws::WebSocket};
 
 use crate::{user_manager::UserManager, ws};
 
