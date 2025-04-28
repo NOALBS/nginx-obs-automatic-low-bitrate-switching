@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
-use tokio::sync::Notify;
+use tokio::{sync::Notify, time::Instant};
 use tracing::{Instrument, debug, error, info};
 
 use crate::{
@@ -23,7 +23,7 @@ impl Switcher {
         let f = async move {
             let mut prev_switch_type: SwitchType = SwitchType::Offline;
             let mut same_type: u8 = 0;
-            let mut same_type_seconds = 0;
+            let mut same_type_seconds = Instant::now();
 
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
@@ -31,6 +31,7 @@ impl Switcher {
 
                 if let Some(notifier) = switcher.get_sleep_notifier_if_necessary().await {
                     notifier.notified().await;
+                    same_type_seconds = Instant::now();
                     info!("Switcher running");
                     continue;
                 }
@@ -90,7 +91,7 @@ impl Switcher {
         &self,
         prev_switch_type: &mut SwitchType,
         same_type: &mut u8,
-        same_type_seconds: &mut u32,
+        same_type_seconds: &mut Instant,
     ) -> Result<(), error::Error> {
         let state = self.state.read().await;
 
@@ -115,7 +116,7 @@ impl Switcher {
 
             *prev_switch_type = current_switch_type;
             *same_type = 0;
-            *same_type_seconds = 0;
+            *same_type_seconds = Instant::now();
         }
 
         debug!("type: {:?}, same: {:?}", current_switch_type, same_type);
@@ -135,13 +136,12 @@ impl Switcher {
             return Ok(());
         }
 
-        if state.broadcasting_software.is_streaming {
-            *same_type_seconds += *same_type as u32;
-            debug!("Same type seconds: {}", same_type_seconds);
-        }
-
-        if !state.broadcasting_software.is_streaming && *same_type_seconds > 0 {
-            *same_type_seconds = 0;
+        // Avoid triggering the offline timeout when starting the stream.
+        if !state.config.switcher.only_switch_when_streaming
+            && state.broadcasting_software.last_stream_started_at.elapsed()
+                <= Duration::from_secs((*retry_attempts + 5).into())
+        {
+            *same_type_seconds = Instant::now();
         }
 
         *same_type = 0;
@@ -149,7 +149,11 @@ impl Switcher {
         if current_switch_type == SwitchType::Offline {
             // TODO: Refactor the timeout code
             if let Some(min) = &state.config.optional_options.offline_timeout {
-                if *same_type_seconds >= (min * 60) {
+                if state.broadcasting_software.is_streaming
+                    && same_type_seconds.elapsed() >= Duration::from_secs((min * 60).into())
+                {
+                    info!("Offline timeout reached, stopping the stream");
+
                     let bsc = state
                         .broadcasting_software
                         .connection
@@ -170,17 +174,15 @@ impl Switcher {
                         }
                     }
 
-                    if state.broadcasting_software.is_streaming {
-                        if let Some(chat) = &state.config.chat {
-                            let message =
-                                chat::HandleMessage::InternalChatUpdate(chat::InternalChatUpdate {
-                                    platform: chat.platform.kind(),
-                                    channel: chat.username.to_owned(),
-                                    kind: chat::InternalUpdate::OfflineTimeout,
-                                });
+                    if let Some(chat) = &state.config.chat {
+                        let message =
+                            chat::HandleMessage::InternalChatUpdate(chat::InternalChatUpdate {
+                                platform: chat.platform.kind(),
+                                channel: chat.username.to_owned(),
+                                kind: chat::InternalUpdate::OfflineTimeout,
+                            });
 
-                            let _ = self.chat_sender.send(message).await;
-                        }
+                        let _ = self.chat_sender.send(message).await;
                     }
                 }
             }
