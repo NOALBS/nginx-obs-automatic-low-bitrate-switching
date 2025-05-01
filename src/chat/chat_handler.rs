@@ -277,6 +277,25 @@ impl ChatHandler {
     ) -> Option<bool> {
         let state = user.state.read().await;
         let chat = state.config.chat.as_ref()?;
+        let prefix = &chat.prefix;
+        // grab the raw command token (e.g. "!switch" → "switch")
+        let raw = msg.message.split_whitespace().next().unwrap_or("");
+        if let Some(cmd_str) = raw.strip_prefix(prefix) {
+            let cmd = super::Command::from(cmd_str);
+            let disabled_in_user = chat
+                .commands
+                .as_ref()
+                .and_then(|m| m.get(&cmd))
+                .map_or(false, |info| info.disabled);
+            let disabled_in_default = self
+                .default_commands
+                .get(&cmd)
+                .map_or(false, |info| info.disabled);
+            if disabled_in_user || disabled_in_default {
+                debug!("Command {:?} is disabled, skipping execution", cmd);
+                return Some(false);
+            }
+        }
 
         let chat::CommandPermissions {
             permission,
