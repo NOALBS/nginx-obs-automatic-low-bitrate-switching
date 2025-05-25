@@ -108,7 +108,7 @@ Do you offer a similar solution or paid service? Want your link here? Message [@
 <details>
 <summary>Click to view the chat commands section</summary>
   
-This script gives you the option to enable some simple chat commands to help you manage your stream from your own Twitch chat, here is how to use them:
+NOALBS gives you the option to enable some simple chat commands to help you manage your stream from your own Twitch/Kick chat, here is how to use them:
 
 > Please note: Admins are all the users in the `admins` array in `chat` config section, MODs are all of your MODs, and Public is anyone in your chat.
 
