@@ -648,6 +648,19 @@ Note: `application`, `key` and `publisher` are optional fields. Use either `appl
   },
 ```
 
+---
+
+### Using OpenIRL
+
+```JSON
+  "streamServer": {
+    "type": "OpenIRL",
+    "statsUrl": "http://hostname:8080/stats/play_38f01143fc4049c5836d7f7dcaf1a31f",
+  },
+```
+
+- `statsUrl`: URL to OpenIRL stats page
+
 </details>
 
 ## Depends on
