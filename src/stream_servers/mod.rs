@@ -1,4 +1,4 @@
-use std::any::Any;
+use std::{any::Any, env};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -93,6 +93,7 @@ static APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_P
 fn default_reqwest_client() -> reqwest::Client {
     reqwest::Client::builder()
         .user_agent(APP_USER_AGENT)
+        .danger_accept_invalid_certs(env::var("ACCEPT_INVALID_CERTS").is_ok())
         .build()
         .expect("Failed to create reqwest client")
 }
