@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tracing::{error, trace};
+use tracing::{debug, error, trace};
 
 use super::{Bsl, StreamServersCommands, SwitchLogic, default_reqwest_client};
 use crate::switcher::{SwitchType, Triggers};
@@ -160,7 +160,10 @@ impl Mediamtx {
             }
         };
 
-        if res.status() == reqwest::StatusCode::INTERNAL_SERVER_ERROR {
+        if matches!(
+            res.status(),
+            reqwest::StatusCode::INTERNAL_SERVER_ERROR | reqwest::StatusCode::NOT_FOUND
+        ) {
             return None;
         }
 
