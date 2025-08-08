@@ -79,7 +79,7 @@ noalbs:
     retryError: Fehler beim Bearbeiten der Wiederholungsversuche %{count} ist kein gültiger Wert
     retrySuccess: Wiederholungsversuche auf %{count} festgelegt
 scene:
-    success: Zur Szene %{scene} wechseln
+    success: Wechsle auf Szene %{scene}
     error: Keine %{scene}-Szene angegeben
 collection:
     noParams: Keine Szenen-Sammlung angegeben
