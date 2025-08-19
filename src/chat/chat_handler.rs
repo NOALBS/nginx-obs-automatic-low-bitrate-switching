@@ -249,7 +249,14 @@ impl ChatHandler {
 
         let mut message = msg.message.split_ascii_whitespace();
         let command = message.next().unwrap().strip_prefix(prefix)?;
-        let mut command = super::Command::from(command);
+        
+        // --- Disable via config.json (vor Enum-Mapping/Logging) ---
+        let cmd_lc = command.to_ascii_lowercase();
+        if chat.disabled_commands.iter().any(|c| c == &cmd_lc) {
+            return None;
+        }
+        // --- Ende Guard ---
+let mut command = super::Command::from(command);
 
         if let super::Command::Unknown(ref cmd) = command {
             if let Some(cmd_from_alias) =
