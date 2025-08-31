@@ -345,6 +345,7 @@ struct RtmpOld {
     key: Option<String>,
     id: Option<String>,
     publisher: Option<String>,
+    api_key: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -507,6 +508,7 @@ impl From<RtmpOld> for stream_servers::StreamServer {
                     Box::new(stream_servers::sls::SrtLiveServer {
                         stats_url,
                         publisher,
+                        api_key: r.api_key,
                         client: reqwest::Client::new(),
                     })
                 }
