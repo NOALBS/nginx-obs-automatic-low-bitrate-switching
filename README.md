@@ -1,8 +1,8 @@
 # NOALBS ![GitHub stars](https://img.shields.io/github/stars/NOALBS/nginx-obs-automatic-low-bitrate-switching) ![GitHub forks](https://img.shields.io/github/forks/NOALBS/nginx-obs-automatic-low-bitrate-switching)
 <b>-------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
 <h3>If you have any issues or questions, the easiest and fastest way to reach me is directly on Discord.</h3>
-> My username is **_[noonenook](https://discordapp.com/users/437695615095275520)_**<br>
-> Direct link to my Discord profile: [https://discordapp.com/users/437695615095275520](https://discordapp.com/users/437695615095275520?utm_source=chatgpt.com)
+> My username is **_noonenook_**<br>
+> Direct link to my Discord profile: HERE https://discordapp.com/users/437695615095275520
 <br>
 <b>-------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
 <br>
