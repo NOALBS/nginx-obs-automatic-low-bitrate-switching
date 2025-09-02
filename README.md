@@ -1,5 +1,14 @@
 # NOALBS ![GitHub stars](https://img.shields.io/github/stars/NOALBS/nginx-obs-automatic-low-bitrate-switching) ![GitHub forks](https://img.shields.io/github/forks/NOALBS/nginx-obs-automatic-low-bitrate-switching)
-
+<b>-------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
+<h3>If you have any issues or questions, the easiest and fastest way to reach me is directly on Discord.</h3>
+> My username is **_[noonenook](https://discordapp.com/users/437695615095275520)_**<br>
+> Direct link to my Discord profile: [https://discordapp.com/users/437695615095275520](https://discordapp.com/users/437695615095275520?utm_source=chatgpt.com)
+<br>
+<b>-------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
+<br>
+<br>
+<br>
+<br>
 A simple executable for all Operating Systems (Windows, Mac & Linux) to automatically switch scenes in OBS Studio/OBS.Live; based on the current bitrate fetched from your ingest server stats.  NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely from your ingest server (RTMP, SRT, SRTLA, RIST Etc..).
 
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/NOALBS/nginx-obs-automatic-low-bitrate-switching/latest)
