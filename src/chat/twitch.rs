@@ -139,7 +139,7 @@ impl super::ChatLogic for Twitch {
                         "broadcaster_id": broadcaster_id,
                         "sender_id": self.bot_user_id,
                         "message": message,
-                        "for_source_only": false
+                        "for_source_only": true
                     })
                 } else {
                     serde_json::json!({
