@@ -55,7 +55,7 @@ Don't feel like setting this all up by yourself?
 Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord.
 - Also if your service is already listed above and you would like me to add any type of tracking to the URL so you know where your traffic is coming from send me a DM on Discord.
 ---
-### [**👉 MPORTANT GUIDE CLICK HERE** – Update to the .env file](../ENV FILE EDIT.md)
+### [**👉 MPORTANT GUIDE CLICK HERE** – Update to the .env file](https://github.com/NoOneNook/nginx-obs-automatic-low-bitrate-switching/blob/160f03b410bb3139d0b2554d7114d514ca9bf8f2/ENV%20FILE%20EDIT.md)
 
 The .env file has been updated with two new lines.
 These lines are required only if you want to enable the Twitch “bot badge” for chat messages sent by the user.
