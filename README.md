@@ -54,7 +54,15 @@ Don't feel like setting this all up by yourself?
 
 Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord.
 - Also if your service is already listed above and you would like me to add any type of tracking to the URL so you know where your traffic is coming from send me a DM on Discord.
+---
+### [**👉 MPORTANT GUIDE CLICK HERE** – Update to the .env file](../ENV FILE EDIT.md)
 
+The .env file has been updated with two new lines.
+These lines are required only if you want to enable the Twitch “bot badge” for chat messages sent by the user.
+```
+TWITCH_APP_CLIENT_ID=YOUR_APP_CLIENT_ID_HERE
+TWITCH_APP_CLIENT_SECRET=YOUR_APP_CLIENT_SECRET_HERE
+```
 ---
 
 ## Table of Contents
