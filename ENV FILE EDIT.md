@@ -1,4 +1,4 @@
-## **Enable replies only in your own chat (and not in other shared chats) & activate the Twitch chat badge, please follow these steps:**
+## **Enable only replies in your own chat during shared chats & activate the Twitch chat badge, please follow these steps:**
 _Create a Twitch app:_
 
 Go to:
