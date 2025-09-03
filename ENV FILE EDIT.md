@@ -1,10 +1,4 @@
 ## **Enable only replies in your own chat during shared chats & activate the Twitch chat badge, please follow these steps:**
-<h3>If you have any issues or questions, the easiest and fastest way to reach me is directly on Discord.</h3>
-> My username is **_[noonenook](https://discordapp.com/users/437695615095275520)_**<br>
-> Direct link to my Discord profile: [https://discordapp.com/users/437695615095275520](https://discordapp.com/users/437695615095275520?utm_source=chatgpt.com)
-<br><br><br>
-_Create a Twitch app:_
-
 <h1>Go to:</h1>
 [https://dev.twitch.tv/console/extensions/create](https://dev.twitch.tv/console/extensions/create)
 
