@@ -547,6 +547,17 @@ So in actuality your 'publisher' is your default `StreamID`, like in the example
 > Switches on low bitrate or high RTT (high RTT seems to be a more accurate way of determining if the stream is bad with this)
 You can change the high RTT trigger value inside config.json:
 
+If you're using the [irl-srt-server](https://github.com/irlserver/irl-srt-server) version of srt-live-server you need to add a [pre-configured](https://github.com/irlserver/irl-srt-server/blob/master/src/sls.conf#L11) `apiKey` for authentication.
+
+```JSON
+"streamServer": {
+  "type": "SrtLiveServer",
+  "statsUrl": "http://localhost:8181/stats",
+  "apiKey": "YOUR_API_KEY"
+  "publisher": "publish/live/feed1"
+}
+```
+
 #### How do I publish to the SLS Server?
 
 see [HERE](https://gitlab.com/mattwb65/srt-live-server#1test-with-ffmpeg)

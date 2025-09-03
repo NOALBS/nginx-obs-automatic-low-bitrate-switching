@@ -30,6 +30,8 @@ pub struct SrtLiveServer {
     /// StreamID of the where you are publishing the feed. (ex; publish/live/feed1 )
     pub publisher: String,
 
+    pub api_key: Option<String>,
+
     /// Client to make HTTP requests with
     #[serde(skip, default = "default_reqwest_client")]
     pub client: reqwest::Client,
@@ -37,7 +39,14 @@ pub struct SrtLiveServer {
 
 impl SrtLiveServer {
     pub async fn get_stats(&self) -> Option<Stat> {
-        let res = match self.client.get(&self.stats_url).send().await {
+        let client = &self.client;
+        let mut request = client.get(&self.stats_url);
+
+        if let Some(api_key) = &self.api_key {
+            request = request.header("Authorization", api_key);
+        }
+
+        let res = match request.send().await {
             Ok(res) => res,
             Err(_) => {
                 error!("Stats page ({}) is unreachable", self.stats_url);
@@ -45,8 +54,13 @@ impl SrtLiveServer {
             }
         };
 
-        if res.status() != reqwest::StatusCode::OK {
-            error!("Error accessing stats page ({})", self.stats_url);
+        let response_status = res.status();
+
+        if response_status != reqwest::StatusCode::OK {
+            match response_status {
+                reqwest::StatusCode::UNAUTHORIZED => { error!("Unauthorized (401) access to stats page ({}). Check api_key.", self.stats_url); }
+                _ => { error!("Error accessing stats page ({})", self.stats_url); }
+            }
             return None;
         }
 
