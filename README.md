@@ -16,7 +16,7 @@ A simple executable for all Operating Systems (Windows, Mac & Linux) to automati
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/715209?logo=GitHub%20Sponsors&label=715209's%20sponsors%3A&color=%23DB61A2&link=%23)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/b3ck?logo=GitHub%20Sponsors&label=b3ck's%20sponsors%3A&color=%23DB61A2&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fb3ck)
 <br>
---------------------------------------------------------------------------------------------------------------------------------------------------------<br>
+-------------------------------------------------------------------------------------------------------------------------------------------<br>
 
 ### IMPORTANT - THERE IS A NEW UPDATE TO THE .ENV FILE! ⚠️
 <!-- # There is a new update to the .env file! -->
