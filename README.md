@@ -100,7 +100,14 @@ Do you offer a similar solution or paid service? Want your link here? Message [@
 # Quick Start
 
 - Download the latest binary from [releases](https://github.com/715209/nginx-obs-automatic-low-bitrate-switching/releases)
-- Have [OBS-Studio](https://github.com/obsproject/obs-studio/) and [OBS-WebSocket](https://github.com/obsproject/obs-websocket/releases/latest) 5.0.0 or higher installed
+- Have [OBS-Studio](https://github.com/obsproject/obs-studio/) (OBS-WebSocket 5.x+ comes with OBS.
+- Enable OBS Websocket in OBS:
+<img width="176" height="202" alt="image" src="https://github.com/user-attachments/assets/e7b07f70-de40-4548-90cf-a37e209dc3cf" />
+
+---
+
+<img width="584" height="546" alt="image" src="https://github.com/user-attachments/assets/8e4221c8-5375-448d-8a79-9f9ba2e66122" />
+
 - [Configure NOALBS](#configure-noalbs)
 - Run the executable
 
