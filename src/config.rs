@@ -146,6 +146,15 @@ pub struct Chat {
     pub enable_auto_stop_stream_on_host_or_raid: bool,
     pub announce_raid_on_auto_stop: bool,
     pub commands: Option<HashMap<chat::Command, CommandInfo>>,
+
+    /// Liste gesperrter Commands (ohne "!", kleingeschrieben)
+    #[serde(
+        default,
+        alias = "disabledCommands",
+        alias = "disabled_commands",
+        alias = "DisabledCommands"
+    )]
+    pub disabled_commands: Vec<String>,
 }
 
 impl Default for Chat {
@@ -161,6 +170,7 @@ impl Default for Chat {
             enable_auto_stop_stream_on_host_or_raid: true,
             announce_raid_on_auto_stop: true,
             commands: None,
+            disabled_commands: Vec::new(),
         }
     }
 }
@@ -255,7 +265,13 @@ impl ConfigLogic for File {
                     .flatten()
                     .for_each(|u| u.make_ascii_lowercase());
             }
-        }
+        
+            // disabledCommands normalisieren & beim Start anzeigen
+            for c in &mut chat.disabled_commands {
+                c.make_ascii_lowercase();
+            }
+            info!("Disabled commands loaded: {:?}", chat.disabled_commands);
+}
 
         Ok(config)
     }
