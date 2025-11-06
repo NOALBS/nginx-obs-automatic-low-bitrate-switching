@@ -1,5 +1,4 @@
 # NOALBS ![GitHub stars](https://img.shields.io/github/stars/NOALBS/nginx-obs-automatic-low-bitrate-switching) ![GitHub forks](https://img.shields.io/github/forks/NOALBS/nginx-obs-automatic-low-bitrate-switching)
-
 A simple executable for all Operating Systems (Windows, Mac & Linux) to automatically switch scenes in OBS Studio/OBS.Live; based on the current bitrate fetched from your ingest server stats.  NOALBS is used as a DIY tool to have your OBS Studio/OBS.Live auto switch scenes when you are either in a LOW bitrate situation or if your source disconnects completely from your ingest server (RTMP, SRT, SRTLA, RIST Etc..).
 
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/NOALBS/nginx-obs-automatic-low-bitrate-switching/latest)
@@ -16,6 +15,21 @@ A simple executable for all Operating Systems (Windows, Mac & Linux) to automati
 
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/715209?logo=GitHub%20Sponsors&label=715209's%20sponsors%3A&color=%23DB61A2&link=%23)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/b3ck?logo=GitHub%20Sponsors&label=b3ck's%20sponsors%3A&color=%23DB61A2&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fb3ck)
+<br>
+---------------------------------------------------------------------------------------------------------------------------------<br>
+
+### IMPORTANT - THERE IS A NEW UPDATE TO THE .ENV FILE! ⚠️
+<!-- # There is a new update to the .env file! -->
+  
+___**The .env file has been updated with two new lines.**___
+<br>
+___**These lines are required!!**___
+
+```plaintext
+TWITCH_APP_CLIENT_ID=YOUR_APP_CLIENT_ID_HERE
+TWITCH_APP_CLIENT_SECRET=YOUR_APP_CLIENT_SECRET_HERE
+```
+### [ <b> CHECK OUT THE NEW GUIDE FOR APP TOKENS IN .ENV FILE HERE 🔗 </b> ](https://github.com/NoOneNook/nginx-obs-automatic-low-bitrate-switching/blob/160f03b410bb3139d0b2554d7114d514ca9bf8f2/ENV%20FILE%20EDIT.md)
 
 ---
 # Try out the new [NOALBS Cloud Alpha](https://noalbs.com/signin) (Twitch Only) today!
@@ -54,7 +68,6 @@ Don't feel like setting this all up by yourself?
 
 Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord.
 - Also if your service is already listed above and you would like me to add any type of tracking to the URL so you know where your traffic is coming from send me a DM on Discord.
-
 ---
 
 ## Table of Contents
