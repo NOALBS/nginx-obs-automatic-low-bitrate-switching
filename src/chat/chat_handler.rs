@@ -247,9 +247,9 @@ impl ChatHandler {
         let chat = state.config.chat.as_ref()?;
         let prefix = &chat.prefix;
 
-        let mut message = msg.message.split_ascii_whitespace();
-        let command = message.next().unwrap().strip_prefix(prefix)?;
-        let mut command = super::Command::from(command);
+        let message = msg.message.strip_prefix(prefix)?;
+        let mut message = message.split_ascii_whitespace();
+        let mut command = super::Command::from(message.next()?);
 
         if let super::Command::Unknown(ref cmd) = command
             && let Some(cmd_from_alias) =
