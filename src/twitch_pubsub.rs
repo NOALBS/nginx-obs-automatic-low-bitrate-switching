@@ -327,8 +327,8 @@ async fn keepalive(write: Arc<Mutex<Option<Writer>>>, mut cancel_rx: oneshot::Re
 
         trace!("Sending ping");
 
-        if let Some(w) = write.lock().await.as_mut() {
-            if (w
+        if let Some(w) = write.lock().await.as_mut()
+            && (w
                 .send(TMessage::Text(
                     serde_json::to_string(&Request {
                         kind: RequestKind::Ping,
@@ -339,9 +339,8 @@ async fn keepalive(write: Arc<Mutex<Option<Writer>>>, mut cancel_rx: oneshot::Re
                 ))
                 .await)
                 .is_err()
-            {
-                break;
-            }
+        {
+            break;
         }
 
         time::sleep(Duration::from_secs(290)).await;
@@ -376,44 +375,43 @@ async fn handle_messages(
 
             trace!(?msg, "Received message");
 
-            if let MessageKind::Message = msg.kind {
-                if let Some(data) = msg.data {
-                    if let TopicMessage::RaidGoV2 { raid } = data.message {
-                        debug!(?raid, "Raided");
+            if let MessageKind::Message = msg.kind
+                && let Some(data) = msg.data
+                && let TopicMessage::RaidGoV2 { raid } = data.message
+            {
+                debug!(?raid, "Raided");
 
-                        let (channel, ignore) = {
-                            let mut lock = state.lock().await;
-                            let user = lock.users.get_mut(&raid.source_id).unwrap();
-                            let ignore = user.last_raid.elapsed().as_secs() < 10;
-                            let channel = user.username.to_owned();
+                let (channel, ignore) = {
+                    let mut lock = state.lock().await;
+                    let user = lock.users.get_mut(&raid.source_id).unwrap();
+                    let ignore = user.last_raid.elapsed().as_secs() < 10;
+                    let channel = user.username.to_owned();
 
-                            user.last_raid = Instant::now();
+                    user.last_raid = Instant::now();
 
-                            (channel, ignore)
-                        };
+                    (channel, ignore)
+                };
 
-                        if ignore {
-                            continue;
-                        }
-
-                        let target = chat::RaidedInfo {
-                            target: raid.target_login,
-                            display: raid.target_display_name,
-                            platform: chat::ChatPlatform::Twitch,
-                        };
-
-                        chat_handler_tx
-                            .send(chat::HandleMessage::InternalChatUpdate(
-                                chat::InternalChatUpdate {
-                                    channel,
-                                    platform: chat::ChatPlatform::Twitch,
-                                    kind: chat::InternalUpdate::Raided(target),
-                                },
-                            ))
-                            .await
-                            .unwrap();
-                    }
+                if ignore {
+                    continue;
                 }
+
+                let target = chat::RaidedInfo {
+                    target: raid.target_login,
+                    display: raid.target_display_name,
+                    platform: chat::ChatPlatform::Twitch,
+                };
+
+                chat_handler_tx
+                    .send(chat::HandleMessage::InternalChatUpdate(
+                        chat::InternalChatUpdate {
+                            channel,
+                            platform: chat::ChatPlatform::Twitch,
+                            kind: chat::InternalUpdate::Raided(target),
+                        },
+                    ))
+                    .await
+                    .unwrap();
             }
         }
     }

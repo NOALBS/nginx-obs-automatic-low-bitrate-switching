@@ -79,12 +79,11 @@ pub fn generate_token() -> String {
 pub fn hash(password: &[u8]) -> String {
     let rational_salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
-    let password_hash = argon2
+
+    argon2
         .hash_password(password, &rational_salt)
         .unwrap()
-        .to_string();
-
-    password_hash
+        .to_string()
 }
 
 pub fn verify(password_hash: &str, password: &[u8]) -> bool {

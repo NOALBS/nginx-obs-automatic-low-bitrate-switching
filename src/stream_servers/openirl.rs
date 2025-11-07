@@ -44,7 +44,7 @@ impl OpenIRL {
 
         let text = res.text().await.ok()?;
         let data: Value = serde_json::from_str(&text).ok()?;
-        
+
         // Check if "publisher" field exists - if not, stream is offline
         let publisher = match data.get("publisher") {
             Some(publisher) => publisher,
@@ -78,16 +78,17 @@ impl SwitchLogic for OpenIRL {
             None => return SwitchType::Offline,
         };
 
-        if let Some(offline) = triggers.offline {
-            if stats.bitrate > 0 && stats.bitrate <= offline.into() {
-                return SwitchType::Offline;
-            }
+        if let Some(offline) = triggers.offline
+            && stats.bitrate > 0
+            && stats.bitrate <= offline
+        {
+            return SwitchType::Offline;
         }
 
-        if let Some(rtt_offline) = triggers.rtt_offline {
-            if stats.rtt >= rtt_offline.into() {
-                return SwitchType::Offline;
-            }
+        if let Some(rtt_offline) = triggers.rtt_offline
+            && stats.rtt >= rtt_offline.into()
+        {
+            return SwitchType::Offline;
         }
 
         if stats.bitrate == 0 {
@@ -98,16 +99,16 @@ impl SwitchLogic for OpenIRL {
             return SwitchType::Previous;
         }
 
-        if let Some(low) = triggers.low {
-            if stats.bitrate <= low.into() {
-                return SwitchType::Low;
-            }
+        if let Some(low) = triggers.low
+            && stats.bitrate <= low
+        {
+            return SwitchType::Low;
         }
 
-        if let Some(rtt) = triggers.rtt {
-            if stats.rtt >= rtt.into() {
-                return SwitchType::Low;
-            }
+        if let Some(rtt) = triggers.rtt
+            && stats.rtt >= rtt.into()
+        {
+            return SwitchType::Low;
         }
 
         return SwitchType::Normal;
@@ -132,7 +133,12 @@ impl StreamServersCommands for OpenIRL {
     async fn source_info(&self) -> Option<String> {
         let stats = self.get_stats().await?;
 
-        let bitrate = format!("{} Kbps, {} ms at {} ms latency", stats.bitrate, stats.rtt.round(), stats.latency);
+        let bitrate = format!(
+            "{} Kbps, {} ms at {} ms latency",
+            stats.bitrate,
+            stats.rtt.round(),
+            stats.latency
+        );
         let dropped = format!("dropped {} packets", stats.dropped_pkts);
 
         Some(format!("{} | {}", bitrate, dropped))

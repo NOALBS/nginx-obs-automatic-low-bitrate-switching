@@ -92,32 +92,33 @@ impl SwitchLogic for Rist {
             .unwrap();
         let rtt = stats.iter().map(|p| p.stats.rtt).sum::<f64>() / stats.len() as f64;
 
-        if let Some(offline) = triggers.offline {
-            if bitrate > 0 && bitrate <= offline {
-                return SwitchType::Offline;
-            }
+        if let Some(offline) = triggers.offline
+            && bitrate > 0
+            && bitrate <= offline
+        {
+            return SwitchType::Offline;
         }
 
-        if let Some(rtt_offline) = triggers.rtt_offline {
-            if rtt >= rtt_offline.into() {
-                return SwitchType::Offline;
-            }
+        if let Some(rtt_offline) = triggers.rtt_offline
+            && rtt >= rtt_offline.into()
+        {
+            return SwitchType::Offline;
         }
 
         if bitrate == 0 {
             return SwitchType::Offline;
         }
 
-        if let Some(low) = triggers.low {
-            if bitrate <= low {
-                return SwitchType::Low;
-            }
+        if let Some(low) = triggers.low
+            && bitrate <= low
+        {
+            return SwitchType::Low;
         }
 
-        if let Some(rtt_trigger) = triggers.rtt {
-            if rtt >= rtt_trigger.into() {
-                return SwitchType::Low;
-            }
+        if let Some(rtt_trigger) = triggers.rtt
+            && rtt >= rtt_trigger.into()
+        {
+            return SwitchType::Low;
         }
 
         SwitchType::Normal

@@ -157,20 +157,21 @@ impl SwitchLogic for Xiu {
             None => return SwitchType::Offline,
         };
 
-        if let Some(offline) = triggers.offline {
-            if stats.recv_bitrate > 0 && stats.recv_bitrate <= offline.into() {
-                return SwitchType::Offline;
-            }
+        if let Some(offline) = triggers.offline
+            && stats.recv_bitrate > 0
+            && stats.recv_bitrate <= offline.into()
+        {
+            return SwitchType::Offline;
         }
 
         if stats.recv_bitrate == 0 {
             return SwitchType::Previous;
         }
 
-        if let Some(low) = triggers.low {
-            if stats.recv_bitrate <= low.into() {
-                return SwitchType::Low;
-            }
+        if let Some(low) = triggers.low
+            && stats.recv_bitrate <= low.into()
+        {
+            return SwitchType::Low;
         }
 
         return SwitchType::Normal;

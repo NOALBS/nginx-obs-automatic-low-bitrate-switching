@@ -187,10 +187,10 @@ impl Noalbs {
         };
 
         let command = commands.iter_mut().find_map(|(_, value)| {
-            if let Some(aliases) = &value.alias {
-                if aliases.iter().any(|x| x == alias) {
-                    return Some(value);
-                }
+            if let Some(aliases) = &value.alias
+                && aliases.iter().any(|x| x == alias)
+            {
+                return Some(value);
             }
 
             None

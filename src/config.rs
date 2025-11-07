@@ -453,10 +453,10 @@ impl From<ConfigOld> for Config {
         let ss = stream_servers::StreamServer::from(o.rtmp);
         config.switcher.stream_servers.push(ss);
 
-        if let Some(lang) = o.language {
-            if let Ok(l) = lang.parse() {
-                config.chat.as_mut().unwrap().language = l;
-            }
+        if let Some(lang) = o.language
+            && let Ok(l) = lang.parse()
+        {
+            config.chat.as_mut().unwrap().language = l;
         }
 
         config

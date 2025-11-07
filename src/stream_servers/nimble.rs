@@ -174,32 +174,33 @@ impl SwitchLogic for Nimble {
         let bitrate = stats.rtmp.bandwidth.parse::<u32>().unwrap();
         let bitrate = bitrate / 1024;
 
-        if let Some(offline) = triggers.offline {
-            if bitrate > 0 && bitrate <= offline {
-                return SwitchType::Offline;
-            }
+        if let Some(offline) = triggers.offline
+            && bitrate > 0
+            && bitrate <= offline
+        {
+            return SwitchType::Offline;
         }
 
-        if let Some(rtt_offline) = triggers.rtt_offline {
-            if stats.srt.stats.link.rtt >= rtt_offline.into() {
-                return SwitchType::Offline;
-            }
+        if let Some(rtt_offline) = triggers.rtt_offline
+            && stats.srt.stats.link.rtt >= rtt_offline.into()
+        {
+            return SwitchType::Offline;
         }
 
         if bitrate == 0 {
             return SwitchType::Normal;
         }
 
-        if let Some(low) = triggers.low {
-            if bitrate <= low {
-                return SwitchType::Low;
-            }
+        if let Some(low) = triggers.low
+            && bitrate <= low
+        {
+            return SwitchType::Low;
         }
 
-        if let Some(rtt) = triggers.rtt {
-            if stats.srt.stats.link.rtt >= rtt.into() {
-                return SwitchType::Low;
-            }
+        if let Some(rtt) = triggers.rtt
+            && stats.srt.stats.link.rtt >= rtt.into()
+        {
+            return SwitchType::Low;
         }
 
         return SwitchType::Normal;

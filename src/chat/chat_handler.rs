@@ -251,12 +251,11 @@ impl ChatHandler {
         let command = message.next().unwrap().strip_prefix(prefix)?;
         let mut command = super::Command::from(command);
 
-        if let super::Command::Unknown(ref cmd) = command {
-            if let Some(cmd_from_alias) =
+        if let super::Command::Unknown(ref cmd) = command
+            && let Some(cmd_from_alias) =
                 try_get_command_from_alias(&chat.commands, &self.default_commands, cmd)
-            {
-                command = cmd_from_alias;
-            }
+        {
+            command = cmd_from_alias;
         }
 
         let permission = get_permission(&command, &chat.commands, &self.default_commands);
@@ -289,10 +288,10 @@ impl ChatHandler {
             return Some(true);
         }
 
-        if let Some(user_permissions) = user_permissions {
-            if user_permissions.contains(&msg.sender) {
-                return Some(true);
-            }
+        if let Some(user_permissions) = user_permissions
+            && user_permissions.contains(&msg.sender)
+        {
+            return Some(true);
         }
 
         if *user_permission == chat::Permission::Mod
@@ -303,14 +302,13 @@ impl ChatHandler {
             return Some(false);
         }
 
-        if let Some(permission) = permission {
-            if *user_permission == chat::Permission::Mod
-                && *permission == chat::Permission::Mod
-                && !chat.enable_mod_commands
-            {
-                debug!("Mod commands disabled");
-                return Some(false);
-            }
+        if let Some(permission) = permission
+            && *user_permission == chat::Permission::Mod
+            && *permission == chat::Permission::Mod
+            && !chat.enable_mod_commands
+        {
+            debug!("Mod commands disabled");
+            return Some(false);
         }
 
         if *user_permission == chat::Permission::Public && !chat.enable_public_commands {
@@ -474,10 +472,10 @@ fn try_get_command_from_alias(
     potential_command: &str,
 ) -> Option<chat::Command> {
     // check if user defined alias
-    if let Some(user_cmd) = user_commands {
-        if let Some(cmd) = get_command_from_alias_string(user_cmd, potential_command) {
-            return Some(cmd);
-        }
+    if let Some(user_cmd) = user_commands
+        && let Some(cmd) = get_command_from_alias_string(user_cmd, potential_command)
+    {
+        return Some(cmd);
     }
 
     if let Some(cmd) = get_command_from_alias_string(default_commands, potential_command) {
@@ -495,10 +493,10 @@ pub fn get_command_from_alias_string(
     alias: &str,
 ) -> Option<chat::Command> {
     commands.iter().find_map(|(key, value)| {
-        if let Some(aliases) = &value.alias {
-            if aliases.iter().any(|x| x == alias) {
-                return Some(key.to_owned());
-            }
+        if let Some(aliases) = &value.alias
+            && aliases.iter().any(|x| x == alias)
+        {
+            return Some(key.to_owned());
         }
 
         None
@@ -599,12 +597,12 @@ impl DispatchCommand {
                 return;
             }
 
-            if let Ok(success) = self.user.remove_alias(a2).await {
-                if success {
-                    self.save_config().await;
-                    self.send(t!("alias.removed", locale = &self.lang, alias = a2))
-                        .await;
-                }
+            if let Ok(success) = self.user.remove_alias(a2).await
+                && success
+            {
+                self.save_config().await;
+                self.send(t!("alias.removed", locale = &self.lang, alias = a2))
+                    .await;
             }
 
             return;
@@ -902,11 +900,11 @@ impl DispatchCommand {
     }
 
     async fn notify(&self, enabled: Option<&str>) {
-        if let Some(enabled) = enabled {
-            if let Ok(b) = enabled_to_bool(enabled) {
-                self.user.set_notify(b).await;
-                self.save_config().await;
-            }
+        if let Some(enabled) = enabled
+            && let Ok(b) = enabled_to_bool(enabled)
+        {
+            self.user.set_notify(b).await;
+            self.save_config().await;
         }
 
         let msg = t!(
@@ -919,11 +917,11 @@ impl DispatchCommand {
     }
 
     async fn autostop(&self, enabled: Option<&str>) {
-        if let Some(enabled) = enabled {
-            if let Ok(b) = enabled_to_bool(enabled) {
-                self.user.set_autostop(b).await.unwrap();
-                self.save_config().await;
-            }
+        if let Some(enabled) = enabled
+            && let Ok(b) = enabled_to_bool(enabled)
+        {
+            self.user.set_autostop(b).await.unwrap();
+            self.save_config().await;
         }
 
         let msg = t!(
@@ -1216,11 +1214,11 @@ impl DispatchCommand {
     }
 
     async fn enable_mod(&self, enabled: Option<&str>) {
-        if let Some(enabled) = enabled {
-            if let Ok(b) = enabled_to_bool(enabled) {
-                self.user.set_enable_mod(b).await.unwrap();
-                self.save_config().await;
-            }
+        if let Some(enabled) = enabled
+            && let Ok(b) = enabled_to_bool(enabled)
+        {
+            self.user.set_enable_mod(b).await.unwrap();
+            self.save_config().await;
         }
 
         let msg = t!(
@@ -1233,11 +1231,11 @@ impl DispatchCommand {
     }
 
     async fn enable_public(&self, enabled: Option<&str>) {
-        if let Some(enabled) = enabled {
-            if let Ok(b) = enabled_to_bool(enabled) {
-                self.user.set_enable_public(b).await.unwrap();
-                self.save_config().await;
-            }
+        if let Some(enabled) = enabled
+            && let Ok(b) = enabled_to_bool(enabled)
+        {
+            self.user.set_enable_public(b).await.unwrap();
+            self.save_config().await;
         }
 
         let msg = t!(

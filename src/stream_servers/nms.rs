@@ -85,20 +85,21 @@ impl SwitchLogic for NodeMediaServer {
             return SwitchType::Offline;
         }
 
-        if let Some(offline) = triggers.offline {
-            if stats.bitrate > 0 && stats.bitrate <= offline.into() {
-                return SwitchType::Offline;
-            }
+        if let Some(offline) = triggers.offline
+            && stats.bitrate > 0
+            && stats.bitrate <= offline.into()
+        {
+            return SwitchType::Offline;
         }
 
         if stats.bitrate == 0 {
             return SwitchType::Previous;
         }
 
-        if let Some(low) = triggers.low {
-            if stats.bitrate <= low.into() {
-                return SwitchType::Low;
-            }
+        if let Some(low) = triggers.low
+            && stats.bitrate <= low.into()
+        {
+            return SwitchType::Low;
         }
 
         return SwitchType::Normal;

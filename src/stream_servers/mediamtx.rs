@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tracing::{debug, error, trace};
+use tracing::{error, trace};
 
 use super::{Bsl, StreamServersCommands, SwitchLogic, default_reqwest_client};
 use crate::switcher::{SwitchType, Triggers};
@@ -254,36 +254,35 @@ impl SwitchLogic for Mediamtx {
 
         let ms_rtt = stats.srt.map(|s| s.ms_rtt);
 
-        if let Some(offline) = triggers.offline {
-            if stats.bitrate > 0 && stats.bitrate <= offline {
-                return SwitchType::Offline;
-            }
+        if let Some(offline) = triggers.offline
+            && stats.bitrate > 0
+            && stats.bitrate <= offline
+        {
+            return SwitchType::Offline;
         }
 
-        if let Some(rtt_offline) = triggers.rtt_offline {
-            if let Some(ms_rtt) = ms_rtt {
-                if ms_rtt >= rtt_offline.into() {
-                    return SwitchType::Offline;
-                }
-            }
+        if let Some(rtt_offline) = triggers.rtt_offline
+            && let Some(ms_rtt) = ms_rtt
+            && ms_rtt >= rtt_offline.into()
+        {
+            return SwitchType::Offline;
         }
 
         if stats.bitrate == 0 {
             return SwitchType::Previous;
         }
 
-        if let Some(low) = triggers.low {
-            if stats.bitrate <= low {
-                return SwitchType::Low;
-            }
+        if let Some(low) = triggers.low
+            && stats.bitrate <= low
+        {
+            return SwitchType::Low;
         }
 
-        if let Some(rtt) = triggers.rtt {
-            if let Some(ms_rtt) = ms_rtt {
-                if ms_rtt >= rtt.into() {
-                    return SwitchType::Low;
-                }
-            }
+        if let Some(rtt) = triggers.rtt
+            && let Some(ms_rtt) = ms_rtt
+            && ms_rtt >= rtt.into()
+        {
+            return SwitchType::Low;
         }
 
         SwitchType::Normal

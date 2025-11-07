@@ -58,10 +58,11 @@ impl UserManager {
         for value in (*lock).values() {
             let state = &value.state.read().await;
 
-            if let Some(chat) = &state.config.chat {
-                if chat.username == username && &chat.platform.kind() == platform {
-                    return Some(value.clone());
-                }
+            if let Some(chat) = &state.config.chat
+                && chat.username == username
+                && &chat.platform.kind() == platform
+            {
+                return Some(value.clone());
             }
         }
 

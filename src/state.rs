@@ -37,14 +37,13 @@ impl State {
             }
         }
 
-        if let Some(starting_scene) = &self.config.optional_scenes.starting {
-            if self
+        if let Some(starting_scene) = &self.config.optional_scenes.starting
+            && self
                 .config
                 .optional_options
                 .switch_from_starting_scene_to_live_scene
-            {
-                all_scenes.insert(starting_scene.to_owned());
-            }
+        {
+            all_scenes.insert(starting_scene.to_owned());
         }
     }
 }

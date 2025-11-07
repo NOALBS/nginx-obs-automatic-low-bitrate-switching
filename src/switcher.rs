@@ -121,15 +121,13 @@ impl Switcher {
 
         debug!("type: {:?}, same: {:?}", current_switch_type, same_type);
 
-        if let SwitchType::Previous = &current_switch_type {
-            if let Some(s) = server {
-                if let Some(last) = &state.switcher_state.last_used_server {
-                    if last != &s.name {
-                        current_switch_type = SwitchType::Normal;
-                        force_switch = true;
-                    }
-                }
-            }
+        if let SwitchType::Previous = &current_switch_type
+            && let Some(s) = server
+            && let Some(last) = &state.switcher_state.last_used_server
+            && last != &s.name
+        {
+            current_switch_type = SwitchType::Normal;
+            force_switch = true;
         }
 
         if !(same_type == retry_attempts || force_switch) {
@@ -148,42 +146,40 @@ impl Switcher {
 
         if current_switch_type == SwitchType::Offline {
             // TODO: Refactor the timeout code
-            if let Some(min) = &state.config.optional_options.offline_timeout {
-                if state.broadcasting_software.is_streaming
-                    && same_type_seconds.elapsed() >= Duration::from_secs((min * 60).into())
+            if let Some(min) = &state.config.optional_options.offline_timeout
+                && state.broadcasting_software.is_streaming
+                && same_type_seconds.elapsed() >= Duration::from_secs((min * 60).into())
+            {
+                info!("Offline timeout reached, stopping the stream");
+
+                let bsc = state
+                    .broadcasting_software
+                    .connection
+                    .as_ref()
+                    .ok_or(error::Error::NoSoftwareSet)?;
+
+                if let Err(error) = bsc.stop_streaming().await {
+                    error!("Offline timeout error {:?}", error);
+                    return Ok(());
+                }
+
+                if state.config.optional_options.record_while_streaming
+                    && bsc.is_recording().await?
+                    && let Err(error) = bsc.toggle_recording().await
                 {
-                    info!("Offline timeout reached, stopping the stream");
+                    error!("Offline timeout error {:?}", error);
+                    return Ok(());
+                }
 
-                    let bsc = state
-                        .broadcasting_software
-                        .connection
-                        .as_ref()
-                        .ok_or(error::Error::NoSoftwareSet)?;
+                if let Some(chat) = &state.config.chat {
+                    let message =
+                        chat::HandleMessage::InternalChatUpdate(chat::InternalChatUpdate {
+                            platform: chat.platform.kind(),
+                            channel: chat.username.to_owned(),
+                            kind: chat::InternalUpdate::OfflineTimeout,
+                        });
 
-                    if let Err(error) = bsc.stop_streaming().await {
-                        error!("Offline timeout error {:?}", error);
-                        return Ok(());
-                    }
-
-                    if state.config.optional_options.record_while_streaming
-                        && bsc.is_recording().await?
-                    {
-                        if let Err(error) = bsc.toggle_recording().await {
-                            error!("Offline timeout error {:?}", error);
-                            return Ok(());
-                        }
-                    }
-
-                    if let Some(chat) = &state.config.chat {
-                        let message =
-                            chat::HandleMessage::InternalChatUpdate(chat::InternalChatUpdate {
-                                platform: chat.platform.kind(),
-                                channel: chat.username.to_owned(),
-                                kind: chat::InternalUpdate::OfflineTimeout,
-                            });
-
-                        let _ = self.chat_sender.send(message).await;
-                    }
+                    let _ = self.chat_sender.send(message).await;
                 }
             }
 
@@ -310,18 +306,17 @@ impl Switcher {
 
         if state.broadcasting_software.is_streaming
             && state.config.switcher.auto_switch_notification
+            && let Some(chat) = &state.config.chat
         {
-            if let Some(chat) = &state.config.chat {
-                let message =
-                    chat::HandleMessage::AutomaticSwitchingScene(chat::AutomaticSwitchingScene {
-                        platform: chat.platform.kind(),
-                        channel: chat.username.to_owned(),
-                        scene: switch_scene.to_owned(),
-                        switch_type,
-                    });
+            let message =
+                chat::HandleMessage::AutomaticSwitchingScene(chat::AutomaticSwitchingScene {
+                    platform: chat.platform.kind(),
+                    channel: chat.username.to_owned(),
+                    scene: switch_scene.to_owned(),
+                    switch_type,
+                });
 
-                let _ = self.chat_sender.send(message).await;
-            }
+            let _ = self.chat_sender.send(message).await;
         }
 
         Ok(())
@@ -332,11 +327,11 @@ async fn get_optional_scenes<'a>(
     server: Option<&'a stream_servers::StreamServer>,
     state: &tokio::sync::RwLockReadGuard<'_, crate::state::State>,
 ) -> Option<&'a SwitchingScenes> {
-    if let Some(depends) = &server?.depends_on {
-        if !is_stream_server_online(&depends.name, state).await {
-            debug!("The depended stream server is offline. Going to use the backup scenes.");
-            return Some(&depends.backup_scenes);
-        }
+    if let Some(depends) = &server?.depends_on
+        && !is_stream_server_online(&depends.name, state).await
+    {
+        debug!("The depended stream server is offline. Going to use the backup scenes.");
+        return Some(&depends.backup_scenes);
     }
 
     server?.override_scenes.as_ref()

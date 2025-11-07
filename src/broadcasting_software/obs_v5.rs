@@ -195,30 +195,30 @@ async fn get_media_sources_rec(
     let current_name = scene;
 
     for item in items {
-        if let Some(ref input_kind) = item.input_kind {
-            if matches!(input_kind.as_ref(), "ffmpeg_source" | "vlc_source") {
-                let status = match client
-                    .media_inputs()
-                    .status(InputId::Name(&item.source_name))
-                    .await
-                {
-                    Ok(s) => s,
-                    Err(_) => continue,
-                };
+        if let Some(ref input_kind) = item.input_kind
+            && matches!(input_kind.as_ref(), "ffmpeg_source" | "vlc_source")
+        {
+            let status = match client
+                .media_inputs()
+                .status(InputId::Name(&item.source_name))
+                .await
+            {
+                Ok(s) => s,
+                Err(_) => continue,
+            };
 
-                if matches!(
-                    status.state,
-                    MediaState::Playing | MediaState::Buffering | MediaState::Opening
-                ) {
-                    sources.push(SourceItem {
-                        id: item.id,
-                        scene_name: current_name.to_owned(),
-                        source_name: item.source_name,
-                        source_kind: input_kind.to_owned(),
-                    });
-                }
-                continue;
+            if matches!(
+                status.state,
+                MediaState::Playing | MediaState::Buffering | MediaState::Opening
+            ) {
+                sources.push(SourceItem {
+                    id: item.id,
+                    scene_name: current_name.to_owned(),
+                    source_name: item.source_name,
+                    source_kind: input_kind.to_owned(),
+                });
             }
+            continue;
         }
 
         if matches!(
@@ -639,10 +639,10 @@ impl InnerConnection {
                     let bs = &read.broadcasting_software;
                     let mut status = None;
 
-                    if bs.is_streaming {
-                        if let Some(client) = &bs.connection {
-                            status = client.info(read).await.ok()
-                        }
+                    if bs.is_streaming
+                        && let Some(client) = &bs.connection
+                    {
+                        status = client.info(read).await.ok()
                     }
 
                     status
