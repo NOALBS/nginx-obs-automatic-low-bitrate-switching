@@ -657,7 +657,7 @@ Note: `application`, `key` and `publisher` are optional fields. Use either `appl
 
 ---
 
-### Using an OBS Source
+### Using an OBS Source (Currently Not Working - DO NOT USE)
 
 ```JSON
   "streamServer": {
