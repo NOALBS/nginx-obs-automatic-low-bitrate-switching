@@ -513,7 +513,18 @@ pub struct DispatchCommand {
 
 impl DispatchCommand {
     pub async fn run_command(&self) {
-        let mut params = self.chat_message.message.split_whitespace();
+        let mut params = {
+            // Unwrap is safe here because the command was already parsed
+            let state = self.user.state.read().await;
+            let chat = state.config.chat.as_ref().unwrap();
+            let prefix = &chat.prefix;
+
+            self.chat_message
+                .message
+                .strip_prefix(prefix)
+                .unwrap()
+                .split_whitespace()
+        };
         params.next();
 
         match &self.command {
