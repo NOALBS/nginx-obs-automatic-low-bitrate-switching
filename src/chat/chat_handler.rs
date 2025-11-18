@@ -516,14 +516,11 @@ impl DispatchCommand {
         let mut params = {
             // Unwrap is safe here because the command was already parsed
             let state = self.user.state.read().await;
+            let msg = &self.chat_message.message;
             let chat = state.config.chat.as_ref().unwrap();
             let prefix = &chat.prefix;
 
-            self.chat_message
-                .message
-                .strip_prefix(prefix)
-                .unwrap()
-                .split_whitespace()
+            msg.strip_prefix(prefix).unwrap_or(msg).split_whitespace()
         };
         params.next();
 
