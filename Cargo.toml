@@ -1,6 +1,6 @@
 [package]
 name = "noalbs"
-version = "2.14.2"
+version = "2.14.3"
 authors = ["Brian Spit <brian@715209.net>"]
 edition = "2024"
 

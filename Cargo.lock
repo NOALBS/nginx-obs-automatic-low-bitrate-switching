@@ -1208,7 +1208,7 @@ dependencies = [
 
 [[package]]
 name = "noalbs"
-version = "2.14.2"
+version = "2.14.3"
 dependencies = [
  "anyhow",
  "argon2",
