@@ -376,6 +376,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                     || m.starts_with("srt")
                     || m.starts_with("udp")
                     || m.starts_with("rist")
+                    || m.starts_with("rtsp")
             }) {
                 continue;
             }
