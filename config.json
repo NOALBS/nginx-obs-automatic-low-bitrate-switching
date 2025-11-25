@@ -1,7 +1,7 @@
 {
   "user": {
     "id": null,
-    "name": "715209",
+    "name": "NOALBSbot",
     "passwordHash": null
   },
   "switcher": {
@@ -146,8 +146,9 @@
   },
   "chat": {
     "platform": "Twitch",
-    "username": "715209",
+    "username": "NOALBSbot",
     "admins": ["b3ck"],
+    "ignoreUsers": [],
     "language": "EN",
     "prefix": "!",
     "enablePublicCommands": true,
