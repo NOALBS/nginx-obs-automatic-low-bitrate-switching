@@ -78,6 +78,9 @@ noalbs:
     retryCount: Bieżaca próba ustawiona na %{count}
     retryError: Błąd edycji ponownych prób %{count} nie jest prawidłową wartoscią
     retrySuccess: Ponowne próby ustawiono na %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Przełączono na %{scene} scena
     error: Nie %{scene} zestaw scena

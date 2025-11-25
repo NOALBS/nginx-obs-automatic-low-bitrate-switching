@@ -380,6 +380,28 @@ impl Noalbs {
         Ok(())
     }
 
+    pub async fn add_ignore_user(&self, username: String) -> Result<(), error::Error> {
+        let mut state = self.state.write().await;
+        let chat = state.config.chat.as_mut().ok_or(error::Error::NoChat)?;
+
+        if !chat.ignore_users.contains(&username) {
+            chat.ignore_users.push(username);
+        }
+
+        Ok(())
+    }
+
+    pub async fn remove_ignore_user(&self, username: &str) -> Result<(), error::Error> {
+        let mut state = self.state.write().await;
+        let chat = state.config.chat.as_mut().ok_or(error::Error::NoChat)?;
+
+        if let Some(pos) = chat.ignore_users.iter().position(|x| *x == username) {
+            chat.ignore_users.swap_remove(pos);
+        }
+
+        Ok(())
+    }
+
     pub async fn remove_event_sender(&self, token: &str) {
         let mut state = self.state.write().await;
         let pos = state

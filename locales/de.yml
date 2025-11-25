@@ -78,6 +78,9 @@ noalbs:
     retryCount: Aktueller Wiederholungsversuch auf %{count} festgelegt
     retryError: Fehler beim Bearbeiten der Wiederholungsversuche %{count} ist kein gültiger Wert
     retrySuccess: Wiederholungsversuche auf %{count} festgelegt
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Wechsle auf Szene %{scene}
     error: Keine %{scene}-Szene angegeben

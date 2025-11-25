@@ -76,6 +76,9 @@ noalbs:
     retryCount: Nuvarande återförsök ställt till %{count}
     retryError: Fel vid redigering av återförsök %{count} är inte ett giltigt värde
     retrySuccess: Återförsök ställt till %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Växla till %{scene} scen
     error: Ingen %{scene} scenuppsättning

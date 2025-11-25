@@ -78,6 +78,9 @@ noalbs:
     retryCount: "Tentativa atual: %{count}"
     retryError: Erro ao editar as tentativas %{count}, não é um valor valido
     retrySuccess: "Tentativa escolhida: %{count}"
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Trocando para cena "%{scene}"
     error: A cena %{scene} não pode ser escolhida

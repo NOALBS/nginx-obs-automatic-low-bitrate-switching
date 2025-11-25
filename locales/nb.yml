@@ -78,6 +78,9 @@ noalbs:
     retryCount: Gjeldende gjenopprettingsforsøk er %{count}
     retryError: Feil ved endring av gjenopprettingsforsøk, %{count} er ikke en gyldig verdi
     retrySuccess: Gjenopprettingsforsøk satt til %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Bytter til %{scene}-scene
     error: Ingen %{scene}-scene valgt

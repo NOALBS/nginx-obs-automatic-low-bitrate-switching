@@ -196,6 +196,11 @@ impl ChatHandler {
             .get_user_by_chat_platform(&msg.channel, &msg.platform)
             .await?;
 
+        if let Some(true) = self.is_user_ignored(&user, &msg).await {
+            debug!("Ignoring message from {}", msg.sender);
+            return None;
+        }
+
         let (command, permission) = self.get_command(&user, &msg).await?;
 
         if !self
@@ -234,6 +239,13 @@ impl ChatHandler {
         tokio::spawn(async move { dc.run_command().await });
 
         Some(())
+    }
+
+    async fn is_user_ignored(&self, user: &Noalbs, msg: &chat::ChatMessage) -> Option<bool> {
+        let state = user.state.read().await;
+        let chat = state.config.chat.as_ref()?;
+
+        Some(msg.permission != chat::Permission::Admin && chat.ignore_users.contains(&msg.sender))
     }
 
     // TODO: refactor this
@@ -1104,12 +1116,38 @@ impl DispatchCommand {
                 }
             }
             "retry" => self.set_retry_attempts(args.next()).await,
+            "ignore" => self.ignore_user(args).await,
             _ => String::new(),
         };
 
         if !msg.is_empty() {
             self.send(msg).await;
         }
+    }
+
+    async fn ignore_user<'a, I>(&self, args: I) -> String
+    where
+        I: IntoIterator<Item = &'a str>,
+    {
+        let mut args = args.into_iter();
+
+        let Some(a1) = args.next() else {
+            return t!("noalbs.ignoreNoUsername", locale = &self.lang);
+        };
+
+        if a1 == "rem" {
+            let Some(a2) = args.next() else {
+                return t!("noalbs.ignoreNoUsername", locale = &self.lang);
+            };
+
+            let _ = self.user.remove_ignore_user(a2).await;
+            self.save_config().await;
+            return t!("noalbs.ignoreRemoved", locale = &self.lang, username = a2);
+        }
+
+        let _ = self.user.add_ignore_user(a1.to_owned()).await;
+        self.save_config().await;
+        t!("noalbs.ignoreAdded", locale = &self.lang, username = a1)
     }
 
     async fn set_retry_attempts(&self, value_string: Option<&str>) -> String {

@@ -80,6 +80,9 @@ noalbs:
     retryCount: 目前重試設置為 %{count} 次
     retryError: 發生錯誤 設置重試為 %{count} 次 不為正確數值
     retrySuccess: 成功試置重試嘗試次數為 %{count} 次
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: 正在切換到 %{scene}
     error: 沒有找到場景名稱為 %{scene} 的廠景

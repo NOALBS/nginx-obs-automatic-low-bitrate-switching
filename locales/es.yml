@@ -78,6 +78,9 @@ noalbs:
     retryCount: Reintento actual establecido en %{count}
     retryError: Error al editar reintentos %{count} no es un valor valido
     retrySuccess: Intentos de reintento establecidos en %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Cambiando a escena %{scene}
     error: La escena %{scene} no existe

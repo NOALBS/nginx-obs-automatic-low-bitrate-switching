@@ -78,6 +78,9 @@ noalbs:
     retryCount: "Количество попыток переподключения: %{count}"
     retryError: "Невозможно изменить количество попыток переподключения на %{count}: задано неверное значение"
     retrySuccess: Количество попыток переподключения изменено на %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Сцена переключена на "%{scene}"
     error: Ошибка переключения на сцену "%{scene}"

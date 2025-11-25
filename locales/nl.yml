@@ -78,6 +78,9 @@ noalbs:
     retryCount: Huidige poging ingesteld op %{count}
     retryError: Fout bij het bewerken van nieuwe pogingen %{count} is geen geldige waarde
     retrySuccess: Opnieuw proberen ingesteld op %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Overschakelen naar %{scene} scène
     error: Geen %{scene} scène ingesteld

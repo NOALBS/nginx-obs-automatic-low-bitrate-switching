@@ -78,6 +78,9 @@ noalbs:
     retryCount: Actuellement configuré à %{count}
     retryError: Erreur lors de la modification du nombre de tentatives, %{count} n'est pas une valeur valide
     retrySuccess: Nombre de tentatives configurée à %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Changement de scène pour %{scene}
     error: Pas de scène %{scene} configurée

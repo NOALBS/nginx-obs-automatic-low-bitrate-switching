@@ -137,6 +137,7 @@ pub struct Chat {
     pub platform: ConfigChatPlatform,
     pub username: String,
     pub admins: Vec<String>,
+    pub ignore_users: Vec<String>,
     pub language: chat::ChatLanguage,
 
     pub prefix: String,
@@ -154,6 +155,7 @@ impl Default for Chat {
             platform: ConfigChatPlatform::Twitch,
             username: "715209".to_string(),
             admins: vec![],
+            ignore_users: vec![],
             language: chat::ChatLanguage::EN,
             prefix: "!".to_string(),
             enable_public_commands: true,
@@ -246,6 +248,10 @@ impl ConfigLogic for File {
 
             for admin in &mut chat.admins {
                 admin.make_ascii_lowercase();
+            }
+
+            for ignore_user in &mut chat.ignore_users {
+                ignore_user.make_ascii_lowercase();
             }
 
             if let Some(commands) = &mut chat.commands {

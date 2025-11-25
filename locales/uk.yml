@@ -78,6 +78,9 @@ noalbs:
     retryCount: "Поточну кількість спроб встановлено в %{count}"
     retryError: "Помилка редагування кількості спроб, %{count} недійсне значення"
     retrySuccess: "Кількість спроб встановлено в %{count}"
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: "Перемикання на сцену %{scene}"
     error: "Не задано сцену %{scene}"

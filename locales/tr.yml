@@ -78,6 +78,9 @@ noalbs:
     retryCount: Current retry set at %{count}
     retryError: Error editing retry attempts %{count} is not a valid value
     retrySuccess: Retry attempts set to %{count}
+    ignoreAdded: Added %{username} to NOALBS ignore list
+    ignoreRemoved: Removed %{username} from NOALBS ignore list
+    ignoreNoUsername: No username provided
 scene:
     success: Switching to %{scene} scene
     error: No %{scene} scene set
