@@ -90,6 +90,7 @@ impl Twitch {
                                 match badge.name.as_str() {
                                     "vip" => chat::Permission::Vip,
                                     "moderator" => chat::Permission::Mod,
+                                    "lead_moderator" => chat::Permission::Mod,
                                     "broadcaster" => chat::Permission::Admin,
                                     _ => acc,
                                 }
