@@ -78,7 +78,7 @@ noalbs:
     retryCount: Aktueller Wiederholungsversuch auf %{count} festgelegt
     retryError: Fehler beim Bearbeiten der Wiederholungsversuche %{count} ist kein gültiger Wert
     retrySuccess: Wiederholungsversuche auf %{count} festgelegt
-    ignoreAdded: "%{username} wurde zur NOALBS-Ignorierliste hinzugefüg"
+    ignoreAdded: "%{username} wurde zur NOALBS-Ignorierliste hinzugefügt"
     ignoreRemoved: "%{username} wurde aus der NOALBS-Ignorierliste entfernt"
     ignoreNoUsername: Kein Benutzername angegeben
 scene:
