@@ -379,18 +379,19 @@ NOALBS supports integration with both Twitch and Kick as chat platforms. Below a
 When configuring NOALBS to use Kick, you need to specify the `channelId` and `chatroomId`. You can obtain these IDs by visiting [this link](https://b3ck.com/kick/info/).
 
 ```json
-"chat": {
-  "platform": {
-    "Kick": {
-      "channelId": 177817,
-      "chatroomId": 177815
-    }
-  },
-  "admins": ["username1", "username2", "username3", "username4"]
-}
+  "chat": {
+    "platform": {
+      "Kick": {
+        "channelId": 177817,
+        "chatroomId": 177815
+      }
+    },
+    "username": "b3ck",
+    "admins": ["username1", "username2", "username3", "username4"],
+    "language": "EN",
 ```
 
- - PLEASE NOTE: NOALBS Can read Kick chat but cannot respond back in chat since Kick has not released a Public API.. but I heard it's going to be released in 3 weeks, so fingers crossed 😆🤞
+ - PLEASE NOTE: NOALBS Can read Kick chat but cannot respond back in chat as the released Kick Public API is limited.
 
 ### Example for Twitch
 
