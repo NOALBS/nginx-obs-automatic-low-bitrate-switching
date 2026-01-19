@@ -981,6 +981,11 @@ impl DispatchCommand {
             }
         };
         let prev_scene = state.broadcasting_software.current_scene.to_owned();
+        if prev_scene == scene {
+            info!("Skipping refresh - already in refresh scene");
+            return
+        }
+
         drop(state);
 
         self.send(t!("refresh.try", locale = &self.lang)).await;
