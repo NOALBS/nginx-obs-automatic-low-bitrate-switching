@@ -11,7 +11,8 @@ use crate::switcher::{SwitchType, Triggers};
 #[serde(rename_all = "camelCase")]
 pub struct StreamStats {
     pub name: String,
-    pub source: Source,
+    pub ready: bool,
+    pub source: Option<Source>,
     pub bytes_received: u64,
 }
 
@@ -180,10 +181,16 @@ impl Mediamtx {
             }
         };
 
+        if !stream.ready {
+            return None;
+        }
+
         let mut stats = Stats::default();
 
-        if stream.source.kind == "srtConn" {
-            stats.srt = self.get_srt_stats(&stream.source.id).await;
+        if let Some(source) = &stream.source
+            && source.kind == "srtConn"
+        {
+            stats.srt = self.get_srt_stats(&source.id).await;
         }
 
         let mut cache = self.cache.lock().unwrap();
