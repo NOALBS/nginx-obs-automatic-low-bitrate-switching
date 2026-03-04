@@ -327,13 +327,42 @@ impl BroadcastingSoftwareLogic for Obsv5 {
     }
 
     async fn stop_streaming(&self) -> Result<(), error::Error> {
-        let connection = self.connection.lock().await;
+        const MAX_ATTEMPTS: usize = 4;
+        const INITIAL_RETRY_DELAY: Duration = Duration::from_millis(25);
 
-        let client = connection
-            .as_ref()
-            .ok_or(error::Error::UnableInitialConnection)?;
+        let mut last_error = None;
+        let mut retry_delay = INITIAL_RETRY_DELAY;
 
-        Ok(client.streaming().stop().await?)
+        for attempt in 1..=MAX_ATTEMPTS {
+            let stop_result = {
+                let connection = self.connection.lock().await;
+
+                match connection.as_ref() {
+                    Some(client) => client.streaming().stop().await.map_err(error::Error::from),
+                    None => Err(error::Error::UnableInitialConnection),
+                }
+            };
+
+            match stop_result {
+                Ok(()) => return Ok(()),
+                Err(e) => {
+                    warn!(
+                        %e,
+                        attempt,
+                        MAX_ATTEMPTS,
+                        "Unable to stop stream, retrying"
+                    );
+                    last_error = Some(e);
+
+                    if attempt < MAX_ATTEMPTS {
+                        tokio::time::sleep(retry_delay).await;
+                        retry_delay = retry_delay.saturating_mul(2);
+                    }
+                }
+            }
+        }
+
+        Err(last_error.unwrap())
     }
 
     async fn fix(&self) -> Result<(), error::Error> {
