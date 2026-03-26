@@ -236,7 +236,8 @@ The `config.json` file holds all the user configurations.
     "triggers": {
       "low": 500,                                   // Low Bitrate threshold in kbps.
       "rtt": 1000,                                  // RTT threshold in ms for SRT.
-      "offline": 450                                // Bitrate in kbps to switch to your offline scene.
+      "offline": 450,                               // Bitrate in kbps to switch to your offline scene.
+      "rttOffline": 3500                            // RTT threshold in ms to switch to offline scene.
     },
     "switchingScenes": {
       "normal": "Live",                             // Scene you want to use in OBS when your bitrate is above your low bitrate threshold.
@@ -287,6 +288,7 @@ The `config.json` file holds all the user configurations.
     "enablePublicCommands": false,                  // Enable or Disable public commands to anyone can use !bitrate in chat.
     "enableModCommands": true,                      // Enable or Disable mod only commands.
     "enableAutoStopStreamOnHostOrRaid": true,       // Enable or Disable auto stop stream in OBS when raiding or hosting.
+    "announceRaidOnAutoStop": true,                 // Enable or Disanle the chat announcement when you raid/host a channel.
     "commands": {                                   // Command Options to override defaults to be used in chat.
       "Fix": {                                      // Full Command Name
         "permission": null,                         // null = Administrators/Default, Public = Public, Vip = VIP, Mod = Moderators, Admin = Administrators
