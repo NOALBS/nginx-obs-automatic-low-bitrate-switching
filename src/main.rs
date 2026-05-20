@@ -1,11 +1,21 @@
 use std::path::PathBuf;
-use std::{env, sync::Arc};
+use std::{
+    env, fs,
+    sync::Arc,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use anyhow::Result;
 use tokio::signal;
 
 use noalbs::{Noalbs, chat::ChatPlatform, config};
 use tracing::warn;
+use tracing_appender::non_blocking::WorkerGuard;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+const DEFAULT_LOG_DIR: &str = "logs";
+const LOG_DIR_ENV: &str = "LOG_DIR";
+const LOG_FILE_NAME_ENV: &str = "LOG_FILE_NAME";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -20,19 +30,7 @@ async fn main() -> Result<()> {
         }
     }
 
-    let (non_blocking_appender, _guard) = tracing_appender::non_blocking(appender());
-    if cfg!(windows) {
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-            .with_ansi(false)
-            .with_writer(non_blocking_appender)
-            .init();
-    } else {
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-            .with_writer(non_blocking_appender)
-            .init();
-    }
+    let _guard = setup_logging()?;
 
     check_env_file();
 
@@ -185,16 +183,38 @@ fn check_env_file() {
     };
 }
 
-fn appender() -> Box<dyn std::io::Write + Send + 'static> {
-    if let Ok(log_dir) = env::var("LOG_DIR") {
-        let file_name_prefix = if let Ok(f) = env::var("LOG_FILE_NAME") {
-            f
-        } else {
-            "noalbs.log".to_string()
-        };
+fn setup_logging() -> Result<WorkerGuard> {
+    let log_dir = env::var(LOG_DIR_ENV).unwrap_or_else(|_| DEFAULT_LOG_DIR.to_string());
+    fs::create_dir_all(&log_dir)?;
 
-        Box::new(tracing_appender::rolling::daily(log_dir, file_name_prefix))
-    } else {
-        Box::new(std::io::stdout())
+    let file_name = log_file_name()?;
+    let log_file = fs::OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(PathBuf::from(log_dir).join(file_name))?;
+    let (file_writer, guard) = tracing_appender::non_blocking(log_file);
+    let env_filter = tracing_subscriber::EnvFilter::from_default_env();
+    let stdout_layer = tracing_subscriber::fmt::layer()
+        .with_ansi(!cfg!(windows))
+        .with_writer(std::io::stdout);
+    let file_layer = tracing_subscriber::fmt::layer()
+        .with_ansi(false)
+        .with_writer(file_writer);
+
+    tracing_subscriber::registry()
+        .with(env_filter)
+        .with(stdout_layer)
+        .with(file_layer)
+        .init();
+
+    Ok(guard)
+}
+
+fn log_file_name() -> Result<String> {
+    if let Ok(file_name) = env::var(LOG_FILE_NAME_ENV) {
+        return Ok(file_name);
     }
+
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
+    Ok(format!("noalbs-{}.log", timestamp))
 }

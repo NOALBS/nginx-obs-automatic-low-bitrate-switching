@@ -8,7 +8,7 @@ use crate::{
     chat, error,
     noalbs::{self, ChatSender},
     state::ClientStatus,
-    stream_servers,
+    stream_servers::{self, websocket},
 };
 
 pub struct Switcher {
@@ -24,9 +24,13 @@ impl Switcher {
             let mut prev_switch_type: SwitchType = SwitchType::Offline;
             let mut same_type: u8 = 0;
             let mut same_type_seconds = Instant::now();
+            let stats_update_notifier = websocket::stats_update_notifier();
 
             loop {
-                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                tokio::select! {
+                    _ = tokio::time::sleep(tokio::time::Duration::from_secs(1)) => {}
+                    _ = stats_update_notifier.notified() => {}
+                }
                 tracing::debug!("Switcher loop");
 
                 if let Some(notifier) = switcher.get_sleep_notifier_if_necessary().await {
@@ -99,15 +103,23 @@ impl Switcher {
         let triggers = &switcher_config.triggers;
         let stream_servers = &switcher_config.stream_servers;
         let retry_attempts = &switcher_config.retry_attempts;
-        let instant_recover = &switcher_config.instantly_switch_on_recover;
+        let instant_recover = switcher_config.instantly_switch_on_recover;
 
         let (mut server, mut current_switch_type) =
             Self::get_online_stream_server(stream_servers, triggers).await;
 
-        // When stream comes back from offline, instantly switch.
-        let mut force_switch = *instant_recover
+        let instant_recover = instant_recover
             && *prev_switch_type == SwitchType::Offline
             && current_switch_type != SwitchType::Offline;
+        let instant_degrade = Self::should_instant_degrade(
+            server,
+            stream_servers,
+            *prev_switch_type,
+            current_switch_type,
+        );
+        let delay_normal_recovery =
+            Self::should_delay_normal_recovery(server, *prev_switch_type, current_switch_type);
+        let mut force_switch = (instant_recover || instant_degrade) && !delay_normal_recovery;
 
         if prev_switch_type == &current_switch_type {
             *same_type += 1;
@@ -130,7 +142,13 @@ impl Switcher {
             force_switch = true;
         }
 
-        if !(same_type == retry_attempts || force_switch) {
+        let retry_satisfied = if delay_normal_recovery {
+            same_type_seconds.elapsed() >= Duration::from_secs((*retry_attempts).into())
+        } else {
+            same_type == retry_attempts
+        };
+
+        if !(retry_satisfied || force_switch) {
             return Ok(());
         }
 
@@ -246,6 +264,36 @@ impl Switcher {
         }
 
         (None, SwitchType::Offline)
+    }
+
+    fn should_instant_degrade(
+        server: Option<&stream_servers::StreamServer>,
+        stream_servers: &[stream_servers::StreamServer],
+        previous: SwitchType,
+        current: SwitchType,
+    ) -> bool {
+        if !matches!(previous, SwitchType::Normal | SwitchType::Low)
+            || !matches!(current, SwitchType::Low | SwitchType::Offline)
+            || previous == current
+        {
+            return false;
+        }
+
+        server.is_some_and(|server| server.stream_server.instant_degrade())
+            || (current == SwitchType::Offline
+                && stream_servers
+                    .iter()
+                    .any(|server| server.enabled && server.stream_server.instant_degrade()))
+    }
+
+    fn should_delay_normal_recovery(
+        server: Option<&stream_servers::StreamServer>,
+        previous: SwitchType,
+        current: SwitchType,
+    ) -> bool {
+        current == SwitchType::Normal
+            && previous != SwitchType::Normal
+            && server.is_some_and(|server| server.stream_server.delay_normal_recovery())
     }
 
     pub async fn switch_if_necessary(
