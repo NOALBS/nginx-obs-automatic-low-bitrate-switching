@@ -67,25 +67,25 @@ impl Noalbs {
             w_state.broadcasting_software.connection = Some(connection);
         }
 
-        // Add state to any OBS stream servers
-        let obs_state = state.clone();
-        {
-            let mut r_state = state.write().await;
-            let stream_servers = &mut r_state.config.switcher.stream_servers;
+        // // Add state to any OBS stream servers
+        // let obs_state = state.clone();
+        // {
+        //     let mut r_state = state.write().await;
+        //     let stream_servers = &mut r_state.config.switcher.stream_servers;
 
-            for ss in stream_servers {
-                if let Some(obs) = ss
-                    .stream_server
-                    .as_any_mut()
-                    .downcast_mut::<stream_servers::Obs>()
-                {
-                    obs.state = Some(obs_state.clone());
-                    if let Some(scenes) = &ss.override_scenes {
-                        obs.scenes = Some(scenes.to_owned());
-                    }
-                }
-            }
-        }
+        //     for ss in stream_servers {
+        //         if let Some(obs) = ss
+        //             .stream_server
+        //             .as_any_mut()
+        //             .downcast_mut::<stream_servers::Obs>()
+        //         {
+        //             obs.state = Some(obs_state.clone());
+        //             if let Some(scenes) = &ss.override_scenes {
+        //                 obs.scenes = Some(scenes.to_owned());
+        //             }
+        //         }
+        //     }
+        // }
 
         let mut user = Self {
             state,

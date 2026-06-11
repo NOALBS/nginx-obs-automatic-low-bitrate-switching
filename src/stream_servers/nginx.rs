@@ -110,8 +110,10 @@ impl Nginx {
             .application
             .into_iter()
             .filter_map(|x| {
-                if x.live.is_some() && x.name == self.application {
-                    x.live.unwrap().stream
+                if let Some(live) = x.live
+                    && x.name == self.application
+                {
+                    live.stream
                 } else {
                     None
                 }

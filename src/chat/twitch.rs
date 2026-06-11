@@ -77,7 +77,7 @@ impl Twitch {
                 message::ServerMessage::Privmsg(msg) => {
                     // Ignore messages not originating from the current channel
                     let source_room_id = msg.source.tags.0.get("source-room-id");
-                    if let Some(Some(source_room_id)) = source_room_id
+                    if let Some(source_room_id) = source_room_id
                         && &msg.channel_id != source_room_id
                     {
                         continue;
