@@ -583,6 +583,7 @@ impl DispatchCommand {
             chat::Command::Public => self.enable_public(params.next()).await,
             chat::Command::Sourceinfo => self.source_info(params).await,
             chat::Command::Source => self.source(params.next()).await,
+            chat::Command::StreamServer => self.stream_server(params).await,
             chat::Command::Unknown(_) => {}
 
             chat::Command::StopOnRaid(target_info) => {
@@ -983,7 +984,7 @@ impl DispatchCommand {
         let prev_scene = state.broadcasting_software.current_scene.to_owned();
         if prev_scene == scene {
             info!("Skipping refresh - already in refresh scene");
-            return
+            return;
         }
 
         drop(state);
@@ -1365,6 +1366,36 @@ impl DispatchCommand {
         );
 
         self.send(msg).await;
+    }
+
+    async fn stream_server<'a, I>(&self, name: I)
+    where
+        I: IntoIterator<Item = &'a str>,
+    {
+        let name = name.into_iter().collect::<Vec<_>>().join(" ");
+
+        if name.is_empty() {
+            self.send(t!("streamserver.noParams", locale = &self.lang)).await;
+            return;
+        };
+
+        let Ok((name, enabled)) = self.user.toggle_stream_server(&name).await else {
+            self.send(t!("streamserver.notFound", locale = &self.lang, name = name)).await;
+            return;
+        };
+
+        self.save_config().await;
+
+        self.send(t!(
+            if enabled {
+                "streamserver.successEnabled"
+            } else {
+                "streamserver.successDisabled"
+            },
+            locale = &self.lang,
+            name = name
+        ))
+        .await;
     }
 
     async fn source(&self, name: Option<&str>) {

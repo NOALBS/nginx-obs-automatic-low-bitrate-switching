@@ -104,6 +104,30 @@ impl Noalbs {
         state.config.switcher.add_stream_server(stream_server);
     }
 
+    pub async fn toggle_stream_server(&self, name: &str) -> Result<(String, bool), error::Error> {
+        let mut state = self.state.write().await;
+        let servers = &mut state.config.switcher.stream_servers;
+
+        let res = servers
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                let s = &s.name.to_lowercase();
+                (i, strsim::normalized_damerau_levenshtein(name, s))
+            })
+            .min_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+        let server = if let Some(s) = res {
+            &mut servers[s.0]
+        } else {
+            return Err(error::Error::NoStreamServerFound);
+        };
+
+        server.enabled = !server.enabled;
+
+        Ok((server.name.to_string(), server.enabled))
+    }
+
     /// Runs a new switcher
     pub async fn start_switcher(&mut self) {
         let user = { self.state.read().await.config.user.name.to_owned() };

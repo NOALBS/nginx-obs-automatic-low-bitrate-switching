@@ -49,4 +49,7 @@ pub enum Error {
 
     #[error("No server info available")]
     NoServerInfo,
+
+    #[error("No stream server found")]
+    NoStreamServerFound
 }

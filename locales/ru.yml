@@ -90,3 +90,8 @@ collection:
     success: Коллекция сцен переключена на "%{collection}"
     error: Ошибка переключения на коллекцию сцен "%{collection}"
     note: "Внимание: профиль может быть переключен только при остановленно стриме"
+streamserver:
+    noParams: No stream server specified
+    notFound: "Error no stream server found with the name: %{name}"
+    successEnabled: Stream server %{name} successfully enabled
+    successDisabled: Stream server %{name} successfully disabled
