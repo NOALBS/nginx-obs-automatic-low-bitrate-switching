@@ -90,3 +90,8 @@ collection:
     success: "Колекцію успішно перемкнуто на \"%{collection}\""
     error: "Помилка: не вдалося перемкнутися на колекцію \"%{collection}\""
     note: "Примітка: профіль буде змінено лише коли стрім не активний"
+streamserver:
+    noParams: No stream server specified
+    notFound: "Error no stream server found with the name: %{name}"
+    successEnabled: Stream server %{name} successfully enabled
+    successDisabled: Stream server %{name} successfully disabled

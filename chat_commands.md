@@ -12,6 +12,7 @@
 |    Admins    | !privacy                  | switch to the privacy scene.                                                                            | !privacy              |
 |    Admins    | !starting                 | switch to the starting scene.                                                                           | !starting             |
 |    Admins    | !ending                   | switch to the ending scene.                                                                             | !ending               |
+|    Admins    | !streamserver (name)      | Toggles the stream server on or off.                                                                    | !streamserver belabox |
 |    Admins    | !noalbs prefix (prefix)   | change noalbs command prefix.                                                                           | !noalbs prefix #      |
 |    Admins    | !noalbs retry (value)     | changes the retry value for the switcher.                                                               | !noalbs retry 5       |
 |    Admins    | !noalbs lang (value)      | changes the chat response language.                                                                     | !noalbs lang zh_tw    |

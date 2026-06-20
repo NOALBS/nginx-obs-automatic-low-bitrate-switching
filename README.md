@@ -136,6 +136,7 @@ NOALBS gives you the option to enable some simple chat commands to help you mana
 |    Admins    | !privacy                  | switch to the privacy scene.                                                                            | !privacy              |
 |    Admins    | !starting                 | switch to the starting scene.                                                                           | !starting             |
 |    Admins    | !ending                   | switch to the ending scene.                                                                             | !ending               |
+|    Admins    | !streamserver (name)      | Toggles the stream server on or off.                                                                    | !streamserver belabox |
 |    Admins    | !noalbs prefix (prefix)   | change noalbs command prefix.                                                                           | !noalbs prefix #      |
 |    Admins    | !noalbs retry (value)     | changes the retry value for the switcher.                                                               | !noalbs retry 5       |
 |    Admins    | !noalbs lang (value)      | changes the chat response language.                                                                     | !noalbs lang zh_tw    |
@@ -232,7 +233,7 @@ The `config.json` file holds all the user configurations.
     "onlySwitchWhenStreaming": false,               // Enable or Disable the requirement switching only if OBS has streaming active.
     "instantlySwitchOnRecover": true,               // Bypass retryAttempts and instantly switch to live on bitrate recovery.
     "autoSwitchNotification": true,                 // Enable or Disable chat notifications when auto switching scenes.
-    "retryAttempts": 5,                             // Number of retry attempts NOALBS will check bitrate before actually switching.
+    "retryAttempts": 5,                             // Number of consecutive bitrate checks before switching scenes. NOALBS checks once per second, so 5 = ~5 seconds before switching.
     "triggers": {
       "low": 500,                                   // Low Bitrate threshold in kbps.
       "rtt": 1000,                                  // RTT threshold in ms for SRT.

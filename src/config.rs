@@ -67,8 +67,7 @@ impl Switcher {
 
     /// Sort by highest number first
     pub fn sort_stream_servers(&mut self) {
-        self.stream_servers
-            .sort_by(|a, b| a.priority.cmp(&b.priority));
+        self.stream_servers.sort_by_key(|a| a.priority);
     }
 
     pub fn set_bitrate_switcher_enabled(&mut self, enabled: bool) {
