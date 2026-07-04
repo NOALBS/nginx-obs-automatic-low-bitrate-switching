@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
         }
     }
 
-    let _guard = setup_logging()?;
+    let _guard = setup_logging();
 
     check_env_file();
 
@@ -183,7 +183,23 @@ fn check_env_file() {
     };
 }
 
-fn setup_logging() -> Result<WorkerGuard> {
+/// Sets up logging to stdout plus a rotating-per-run log file. If file
+/// logging can't be set up (e.g. the log directory isn't writable), this
+/// falls back to stdout-only logging instead of failing to start -- a
+/// logging problem should never prevent NOALBS from running.
+fn setup_logging() -> WorkerGuard {
+    match setup_file_and_stdout_logging() {
+        Ok(guard) => guard,
+        Err(err) => {
+            eprintln!(
+                "warning: failed to set up file logging ({err}), continuing with stdout logging only"
+            );
+            setup_stdout_only_logging()
+        }
+    }
+}
+
+fn setup_file_and_stdout_logging() -> Result<WorkerGuard> {
     let log_dir = env::var(LOG_DIR_ENV).unwrap_or_else(|_| DEFAULT_LOG_DIR.to_string());
     fs::create_dir_all(&log_dir)?;
 
@@ -208,6 +224,19 @@ fn setup_logging() -> Result<WorkerGuard> {
         .init();
 
     Ok(guard)
+}
+
+fn setup_stdout_only_logging() -> WorkerGuard {
+    let (stdout_writer, guard) = tracing_appender::non_blocking(std::io::stdout());
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_ansi(!cfg!(windows))
+                .with_writer(stdout_writer),
+        )
+        .init();
+    guard
 }
 
 fn log_file_name() -> Result<String> {
