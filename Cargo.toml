@@ -1,6 +1,6 @@
 [package]
 name = "noalbs"
-version = "2.17.0"
+version = "2.18.0"
 authors = ["Brian Spit <brian@715209.net>"]
 edition = "2024"
 
@@ -38,7 +38,6 @@ tracing-appender = "0.2"
 
 warp = "0.3"
 
-once_cell = "1.10"
 rust-i18n = "2.3"
 
 [target.x86_64-unknown-linux-musl.dependencies]
