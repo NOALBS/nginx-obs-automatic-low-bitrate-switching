@@ -417,7 +417,7 @@ Make sure to replace the placeholders with your actual Kick channel and chatroom
 <details>
 <summary>Click to view the servers section</summary>
 
-Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud), [MediaMTX](#using-mediamtx) and [OBS Sources](#using-an-obs-source).
+Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud), [MediaMTX](#using-mediamtx), [WebSocket stats](#using-websocket-stats) and [OBS Sources](#using-an-obs-source).
 You can have as many servers as you want to use in the config.
 
 Example stream server object:
@@ -443,7 +443,7 @@ Example stream server object:
 ```
 
 - `streamServer`: Replace the entire `streamServer` section with the one of [these](#stream-server-objects).
-- `type`: Nginx, NodeMediaServer, Nimble, SrtLiveServer, Belabox, or Mediamtx
+- `type`: Nginx, NodeMediaServer, Nimble, SrtLiveServer, Belabox, Mediamtx, or WebSocket
 - `name`: A unique name to distinguish the server
 - `priority`: Decides which stream server to monitor when multiple are online. 0 is consired the highest.
 - `overrideScenes`: Optional field to override the default scenes
@@ -663,6 +663,81 @@ Note: `application`, `key` and `publisher` are optional fields. Use either `appl
 
 ---
 
+### Using WebSocket stats
+
+```JSON
+  "streamServer": {
+    "type": "WebSocket",
+    "url": "ws://127.0.0.1/ws-stats",
+    "feed": "feed1",
+    "reconnectIntervalMs": 1000,
+    "staleTimeoutMs": 3000
+  },
+```
+
+You can also pass the feed in the WebSocket URL:
+
+```JSON
+  "streamServer": {
+    "type": "WebSocket",
+    "url": "ws://127.0.0.1/ws-stats?feed=feed2",
+    "reconnectIntervalMs": 1000,
+    "staleTimeoutMs": 3000
+  },
+```
+
+- `url`: WebSocket stats endpoint. This is intended for relay services that poll HTTP stats once and broadcast updates to NOALBS.
+- `feed`: Optional feed name to select from multi-stream messages. This is dynamic and can be `feed1`, `feed2`, `main`, `backpack`, `cameraA`, or any other stream name.
+- `token`: Optional token. It can also be passed as `token` in the URL query string.
+- `reconnectIntervalMs`: Optional reconnect delay. Defaults to `1000`.
+- `staleTimeoutMs`: Optional timeout after the last received stats update. Defaults to `3000`.
+
+The WebSocket backend accepts single-feed stats messages:
+
+```JSON
+{
+  "type": "stats",
+  "timestamp": 1710000000000,
+  "streamId": "publish/live/feed1",
+  "feed": "feed1",
+  "bitrate": 6200,
+  "packetLoss": 0,
+  "rtt": 80,
+  "connected": true
+}
+```
+
+It also accepts multi-stream stats messages:
+
+```JSON
+{
+  "type": "stats",
+  "timestamp": 1710000000000,
+  "streams": [
+    {
+      "streamId": "publish/live/feed2",
+      "feed": "feed2",
+      "bitrate": 6200,
+      "packetLoss": 0,
+      "rtt": 80,
+      "connected": true
+    }
+  ]
+}
+```
+
+If `feed` is configured, NOALBS matches either the `feed` field or the last segment of `streamId`, so `publish/live/feed2` and `play/live/feed2` both match `feed2`. If no feed is configured, NOALBS uses the first connected stream with bitrate above zero, falling back to the first parseable stream.
+
+To test locally, run the mock server:
+
+```bash
+python3 tools/mock_websocket_stats_server.py
+```
+
+Then configure NOALBS with `ws://127.0.0.1:8765/ws-stats?feed=feed1`. The mock server sends healthy stats every 250ms and periodically drops bitrate to test low/offline switching.
+
+---
+
 ### Using an OBS Source (Currently Not Working - DO NOT USE)
 
 ```JSON
@@ -847,9 +922,27 @@ In the `.env` file add the line `CONFIG_DIR=configs` where `configs` is the fold
 
 ---
 
-## How to log to a file instead
+## Logging
 
-In the `.env` file add the line `LOG_DIR=logs` and `LOG_FILE_NAME=noalbs.log` where `LOG_DIR` is the folder that holds all the log files and `LOG_FILE_NAME` the prefix used for the file name. A new log file will be generated daily.
+By default NOALBS logs to stdout and also writes a log file per run. To
+customize the log file location/name, add `LOG_DIR=logs` and/or
+`LOG_FILE_NAME=noalbs.log` to the `.env` file, where `LOG_DIR` is the folder
+that holds the log files and `LOG_FILE_NAME` is the file name used (defaults
+to a timestamped `noalbs-<unix-ms>.log` in a `logs` folder).
+
+To disable file logging entirely (stdout only), set `"logToFile": false` at
+the top level of `config.json`:
+
+```JSON
+{
+  "user": { ... },
+  "switcher": { ... },
+  "logToFile": false
+}
+```
+
+If file logging can't be set up (e.g. the directory isn't writable), NOALBS
+falls back to stdout-only logging instead of failing to start.
 
 ---
 
