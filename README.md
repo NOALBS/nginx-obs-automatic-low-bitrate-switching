@@ -922,9 +922,27 @@ In the `.env` file add the line `CONFIG_DIR=configs` where `configs` is the fold
 
 ---
 
-## How to log to a file instead
+## Logging
 
-In the `.env` file add the line `LOG_DIR=logs` and `LOG_FILE_NAME=noalbs.log` where `LOG_DIR` is the folder that holds all the log files and `LOG_FILE_NAME` the prefix used for the file name. A new log file will be generated daily.
+By default NOALBS logs to stdout and also writes a log file per run. To
+customize the log file location/name, add `LOG_DIR=logs` and/or
+`LOG_FILE_NAME=noalbs.log` to the `.env` file, where `LOG_DIR` is the folder
+that holds the log files and `LOG_FILE_NAME` is the file name used (defaults
+to a timestamped `noalbs-<unix-ms>.log` in a `logs` folder).
+
+To disable file logging entirely (stdout only), set `"logToFile": false` at
+the top level of `config.json`:
+
+```JSON
+{
+  "user": { ... },
+  "switcher": { ... },
+  "logToFile": false
+}
+```
+
+If file logging can't be set up (e.g. the directory isn't writable), NOALBS
+falls back to stdout-only logging instead of failing to start.
 
 ---
 

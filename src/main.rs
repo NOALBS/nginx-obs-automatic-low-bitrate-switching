@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
         }
     }
 
-    let _guard = setup_logging();
+    let _guard = setup_logging(should_log_to_file());
 
     check_env_file();
 
@@ -183,11 +183,16 @@ fn check_env_file() {
     };
 }
 
-/// Sets up logging to stdout plus a rotating-per-run log file. If file
+/// Sets up logging to stdout plus a rotating-per-run log file. If
+/// `log_to_file` is false (see `config.json`'s `logToFile` field), or file
 /// logging can't be set up (e.g. the log directory isn't writable), this
 /// falls back to stdout-only logging instead of failing to start -- a
 /// logging problem should never prevent NOALBS from running.
-fn setup_logging() -> WorkerGuard {
+fn setup_logging(log_to_file: bool) -> WorkerGuard {
+    if !log_to_file {
+        return setup_stdout_only_logging();
+    }
+
     match setup_file_and_stdout_logging() {
         Ok(guard) => guard,
         Err(err) => {
@@ -196,6 +201,46 @@ fn setup_logging() -> WorkerGuard {
             );
             setup_stdout_only_logging()
         }
+    }
+}
+
+/// Peeks at the config file(s) to see whether file logging has been
+/// disabled, without doing a full config load (which happens later, and
+/// asynchronously). Logging is set up once for the whole process, so in
+/// `CONFIG_DIR` (multi-user) mode, file logging is disabled if *any*
+/// config explicitly sets `logToFile` to `false`. Defaults to `true` if
+/// the field is missing or the file can't be read/parsed yet -- config
+/// errors are surfaced properly later during the real load.
+fn should_log_to_file() -> bool {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LogToFileOnly {
+        #[serde(default = "default_log_to_file")]
+        log_to_file: bool,
+    }
+
+    fn default_log_to_file() -> bool {
+        true
+    }
+
+    fn wants_file_logging(path: &std::path::Path) -> bool {
+        fs::read_to_string(path)
+            .ok()
+            .and_then(|contents| serde_json::from_str::<LogToFileOnly>(&contents).ok())
+            .map(|c| c.log_to_file)
+            .unwrap_or(true)
+    }
+
+    match env::var("CONFIG_DIR") {
+        Ok(dir) => match fs::read_dir(dir) {
+            Ok(entries) => entries
+                .filter_map(|e| e.ok())
+                .map(|e| e.path())
+                .filter(|p| p.extension().is_some_and(|ext| ext == "json"))
+                .all(|p| wants_file_logging(&p)),
+            Err(_) => true,
+        },
+        Err(_) => wants_file_logging(std::path::Path::new("config.json")),
     }
 }
 
