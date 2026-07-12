@@ -125,21 +125,6 @@
         },
         "dependsOn": null,
         "enabled": true
-      },
-      {
-        "streamServer": {
-          "type": "Librtmp2",
-          "statsUrl": "http://localhost:8080/stats?key=YOUR_STATS_KEY"
-        },
-        "name": "librtmp2",
-        "priority": 1,
-        "overrideScenes": {
-          "normal": "normal",
-          "low": "low",
-          "offline": "offline"
-        },
-        "dependsOn": null,
-        "enabled": true
       }
     ]
   },
