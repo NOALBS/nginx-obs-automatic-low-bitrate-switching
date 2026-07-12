@@ -8,17 +8,17 @@ use crate::switcher::{SwitchType, Triggers};
 /// Response shape of librtmp2-server's `GET /stats?key=<stats_key>` endpoint.
 /// Only present while the stream is live; offline returns a plain-text body.
 #[derive(Deserialize, Debug)]
-pub struct Librtmp2Stats {
+pub struct OpenRTMPStats {
     pub uptime: i64,
     pub bitrate_kbps: u64,
     pub rtt_ms: u64,
     pub bytes_in: u64,
-    pub video: Option<Librtmp2Video>,
-    pub audio: Option<Librtmp2Audio>,
+    pub video: Option<OpenRTMPVideo>,
+    pub audio: Option<OpenRTMPAudio>,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Librtmp2Video {
+pub struct OpenRTMPVideo {
     pub codec: String,
     pub width: u32,
     pub height: u32,
@@ -26,13 +26,13 @@ pub struct Librtmp2Video {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Librtmp2Audio {
+pub struct OpenRTMPAudio {
     pub codec: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Librtmp2 {
+pub struct OpenRTMP {
     /// Full url to the librtmp2-server stats endpoint, e.g.
     /// `https://host:port/stats?key=<stats_key>`
     pub stats_url: String,
@@ -42,10 +42,10 @@ pub struct Librtmp2 {
     pub client: reqwest::Client,
 }
 
-impl Librtmp2 {
+impl OpenRTMP {
     /// Returns `None` when the stream is offline, unreachable, or the stats
     /// key is invalid.
-    pub async fn get_stats(&self) -> Option<Librtmp2Stats> {
+    pub async fn get_stats(&self) -> Option<OpenRTMPStats> {
         let res = match self.client.get(&self.stats_url).send().await {
             Ok(res) => res,
             Err(_) => {
@@ -60,7 +60,7 @@ impl Librtmp2 {
         }
 
         let text = res.text().await.ok()?;
-        let stats: Librtmp2Stats = match serde_json::from_str(&text) {
+        let stats: OpenRTMPStats = match serde_json::from_str(&text) {
             Ok(stats) => stats,
             Err(_) => {
                 // Offline streams respond with a plain-text body instead of JSON.
@@ -79,7 +79,7 @@ impl Librtmp2 {
 
 #[async_trait]
 #[typetag::serde]
-impl SwitchLogic for Librtmp2 {
+impl SwitchLogic for OpenRTMP {
     /// Which scene to switch to
     async fn switch(&self, triggers: &Triggers) -> SwitchType {
         let stats = match self.get_stats().await {
@@ -110,7 +110,7 @@ impl SwitchLogic for Librtmp2 {
 
 #[async_trait]
 #[typetag::serde]
-impl StreamServersCommands for Librtmp2 {
+impl StreamServersCommands for OpenRTMP {
     async fn bitrate(&self) -> super::Bitrate {
         let stats = match self.get_stats().await {
             Some(stats) => stats,
@@ -134,7 +134,7 @@ impl StreamServersCommands for Librtmp2 {
 }
 
 #[typetag::serde]
-impl Bsl for Librtmp2 {
+impl Bsl for OpenRTMP {
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
     }
@@ -147,7 +147,7 @@ mod tests {
     #[test]
     fn stream() {
         let s = r#"{"uptime":42,"bitrate_kbps":2500,"rtt_ms":18,"bytes_in":1048576,"video":{"codec":"H264","width":1920,"height":1080,"fps":60.0},"audio":{"codec":"AAC"}}"#;
-        let parsed: Librtmp2Stats = serde_json::from_str(s).unwrap();
+        let parsed: OpenRTMPStats = serde_json::from_str(s).unwrap();
         assert_eq!(parsed.bitrate_kbps, 2500);
         assert_eq!(parsed.video.unwrap().width, 1920);
         assert_eq!(parsed.audio.unwrap().codec, "AAC");
@@ -156,7 +156,7 @@ mod tests {
     #[test]
     fn offline_body_is_not_json() {
         let s = "Stream offline";
-        let parsed: Result<Librtmp2Stats, _> = serde_json::from_str(s);
+        let parsed: Result<OpenRTMPStats, _> = serde_json::from_str(s);
         assert!(parsed.is_err());
     }
 }
