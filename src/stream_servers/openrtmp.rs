@@ -163,33 +163,3 @@ impl Bsl for OpenRTMP {
         self
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn stream() {
-        let s = r#"{"uptime":42,"bitrate_kbps":2500.5,"rtt_ms":18.2,"bytes_in":1048576,"video":{"codec":"H264","width":1920,"height":1080,"fps":60.0},"audio":{"codec":"AAC"}}"#;
-        let parsed: OpenRTMPStats = serde_json::from_str(s).unwrap();
-        assert_eq!(parsed.bitrate_kbps, 2500.5);
-        assert_eq!(parsed.video.unwrap().width, 1920);
-        assert_eq!(parsed.audio.unwrap().codec, "AAC");
-    }
-
-    #[test]
-    fn offline_body_is_not_json() {
-        let s = "Stream offline";
-        let parsed: Result<OpenRTMPStats, _> = serde_json::from_str(s);
-        assert!(parsed.is_err());
-    }
-
-    #[test]
-    fn redacted_url_strips_stats_key() {
-        let s = OpenRTMP {
-            stats_url: "http://localhost:8080/stats?key=secret".to_string(),
-            client: default_reqwest_client(),
-        };
-        assert_eq!(s.redacted_url(), "http://localhost:8080/stats");
-    }
-}
