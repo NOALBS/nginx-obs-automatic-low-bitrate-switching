@@ -50,7 +50,7 @@ Don't feel like setting this all up by yourself?
 | [IRLServer](https://irlserver.com) | Simplify and Stabilize your IRL-stream. |
 | [OBS-Hosting](https://obs-hosting.de) | German OBS/IRL & 24/7 VOD Server Hosting by dataforest GmbH |
 | [Redefined-Streaming](https://redefined-streaming.eu/) | German SRT/SRTLA Server Hosting |
-| [IRL.com.de](https://irl.com.de/?lang=en&mtm_campaign=noalbs) | Free SRT/SRTLA Relays hosted in Germany |
+| [IRL.com.de](https://irl.com.de/?lang=en&mtm_campaign=noalbs) | Free SRT/SRTLA and RTMP/RTMPS relay endpoints hosted in Germany | |
 | [Streamable](https://streamable.run) | Cloud hosting and endpoints - Never IRL Stream with Issues Again! |
 
 
