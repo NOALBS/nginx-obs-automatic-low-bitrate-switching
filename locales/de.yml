@@ -90,3 +90,8 @@ collection:
     success: Sammlung erfolgreich auf "%{collection}" umgestellt
     error: "Fehler: Wechsel zur Szenen-Sammlung „%{collection}“ nicht möglich"
     note: "Hinweis: Das Stream-Profil wird nur geändert, wenn nicht gestreamt wird"
+streamserver:
+    noParams: No stream server specified
+    notFound: "Error no stream server found with the name: %{name}"
+    successEnabled: Stream server %{name} successfully enabled
+    successDisabled: Stream server %{name} successfully disabled

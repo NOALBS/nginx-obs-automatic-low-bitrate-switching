@@ -33,20 +33,20 @@ pub trait BroadcastingSoftwareLogic: Send + Sync {
         state: &sync::RwLockReadGuard<state::State>,
     ) -> Result<state::StreamStatus, Error>;
 
-    async fn get_media_source_status(
-        &self,
-        source_name: &str,
-    ) -> Result<(obws::responses::MediaState, i64), Error>;
+    // async fn get_media_source_status(
+    //     &self,
+    //     source_name: &str,
+    // ) -> Result<(obws::responses::MediaState, i64), Error>;
 
-    async fn create_special_media_source(
-        &self,
-        source_name: &str,
-        scene: &str,
-    ) -> Result<String, Error>;
+    // async fn create_special_media_source(
+    //     &self,
+    //     source_name: &str,
+    //     scene: &str,
+    // ) -> Result<String, Error>;
 
-    async fn remove_special_media_source(
-        &self,
-        source_name: &str,
-        scene: &str,
-    ) -> Result<(), Error>;
+    // async fn remove_special_media_source(
+    //     &self,
+    //     source_name: &str,
+    //     scene: &str,
+    // ) -> Result<(), Error>;
 }

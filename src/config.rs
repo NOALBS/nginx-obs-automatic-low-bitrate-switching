@@ -17,6 +17,15 @@ pub struct Config {
     pub chat: Option<Chat>,
     pub optional_scenes: OptionalScenes,
     pub optional_options: OptionalOptions,
+
+    /// Whether to also write logs to a file in addition to stdout.
+    /// Defaults to true when not present, for backwards compatibility.
+    #[serde(default = "default_log_to_file")]
+    pub log_to_file: bool,
+}
+
+fn default_log_to_file() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
@@ -67,8 +76,7 @@ impl Switcher {
 
     /// Sort by highest number first
     pub fn sort_stream_servers(&mut self) {
-        self.stream_servers
-            .sort_by(|a, b| a.priority.cmp(&b.priority));
+        self.stream_servers.sort_by_key(|a| a.priority);
     }
 
     pub fn set_bitrate_switcher_enabled(&mut self, enabled: bool) {
@@ -420,6 +428,7 @@ impl From<ConfigOld> for Config {
             }),
             optional_scenes: OptionalScenes::default(),
             optional_options: OptionalOptions::default(),
+            log_to_file: default_log_to_file(),
         };
 
         let commands = config.chat.as_mut().unwrap().commands.as_mut().unwrap();

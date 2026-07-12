@@ -11,10 +11,12 @@ pub mod mediamtx;
 pub mod nginx;
 pub mod nimble;
 pub mod nms;
-pub mod obs;
+// pub mod obs;
 pub mod openirl;
+pub mod openrtmp;
 pub mod rist;
 pub mod sls;
+pub mod websocket;
 pub mod xiu;
 
 pub use belabox::Belabox;
@@ -23,10 +25,12 @@ pub use mediamtx::Mediamtx;
 pub use nginx::Nginx;
 pub use nimble::Nimble;
 pub use nms::NodeMediaServer;
-pub use obs::Obs;
+// pub use obs::Obs;
 pub use openirl::OpenIRL;
+pub use openrtmp::OpenRTMP;
 pub use rist::Rist;
 pub use sls::SrtLiveServer;
+pub use websocket::WebSocketStats;
 pub use xiu::Xiu;
 
 #[async_trait]
@@ -47,6 +51,14 @@ pub trait StreamServersCommands {
 #[typetag::serde(tag = "type")]
 pub trait Bsl: SwitchLogic + StreamServersCommands + Send + Sync {
     fn as_any_mut(&mut self) -> &mut dyn Any;
+
+    fn instant_degrade(&self) -> bool {
+        false
+    }
+
+    fn delay_normal_recovery(&self) -> bool {
+        false
+    }
 }
 
 #[derive(Debug)]
