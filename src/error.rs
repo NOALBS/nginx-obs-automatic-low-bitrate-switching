@@ -10,7 +10,7 @@ pub enum Error {
     XmlParsing(#[from] quick_xml::DeError),
 
     #[error("OBS error {0}")]
-    ObsV5Error(#[from] obwsv5::error::Error),
+    ObsV5Error(#[from] obws::error::Error),
 
     #[error("SwitchType conversion not allowed")]
     SwitchTypeNotSupported,
@@ -49,4 +49,7 @@ pub enum Error {
 
     #[error("No server info available")]
     NoServerInfo,
+
+    #[error("No stream server found")]
+    NoStreamServerFound
 }

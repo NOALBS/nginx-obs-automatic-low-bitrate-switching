@@ -1,11 +1,21 @@
 use std::path::PathBuf;
-use std::{env, sync::Arc};
+use std::{
+    env, fs,
+    sync::Arc,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use anyhow::Result;
 use tokio::signal;
 
 use noalbs::{Noalbs, chat::ChatPlatform, config};
 use tracing::warn;
+use tracing_appender::non_blocking::WorkerGuard;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+const DEFAULT_LOG_DIR: &str = "logs";
+const LOG_DIR_ENV: &str = "LOG_DIR";
+const LOG_FILE_NAME_ENV: &str = "LOG_FILE_NAME";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -20,19 +30,7 @@ async fn main() -> Result<()> {
         }
     }
 
-    let (non_blocking_appender, _guard) = tracing_appender::non_blocking(appender());
-    if cfg!(windows) {
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-            .with_ansi(false)
-            .with_writer(non_blocking_appender)
-            .init();
-    } else {
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-            .with_writer(non_blocking_appender)
-            .init();
-    }
+    let _guard = setup_logging(should_log_to_file());
 
     check_env_file();
 
@@ -185,16 +183,112 @@ fn check_env_file() {
     };
 }
 
-fn appender() -> Box<dyn std::io::Write + Send + 'static> {
-    if let Ok(log_dir) = env::var("LOG_DIR") {
-        let file_name_prefix = if let Ok(f) = env::var("LOG_FILE_NAME") {
-            f
-        } else {
-            "noalbs.log".to_string()
-        };
-
-        Box::new(tracing_appender::rolling::daily(log_dir, file_name_prefix))
-    } else {
-        Box::new(std::io::stdout())
+/// Sets up logging to stdout plus a rotating-per-run log file. If
+/// `log_to_file` is false (see `config.json`'s `logToFile` field), or file
+/// logging can't be set up (e.g. the log directory isn't writable), this
+/// falls back to stdout-only logging instead of failing to start -- a
+/// logging problem should never prevent NOALBS from running.
+fn setup_logging(log_to_file: bool) -> WorkerGuard {
+    if !log_to_file {
+        return setup_stdout_only_logging();
     }
+
+    match setup_file_and_stdout_logging() {
+        Ok(guard) => guard,
+        Err(err) => {
+            eprintln!(
+                "warning: failed to set up file logging ({err}), continuing with stdout logging only"
+            );
+            setup_stdout_only_logging()
+        }
+    }
+}
+
+/// Peeks at the config file(s) to see whether file logging has been
+/// disabled, without doing a full config load (which happens later, and
+/// asynchronously). Logging is set up once for the whole process, so in
+/// `CONFIG_DIR` (multi-user) mode, file logging is disabled if *any*
+/// config explicitly sets `logToFile` to `false`. Defaults to `true` if
+/// the field is missing or the file can't be read/parsed yet -- config
+/// errors are surfaced properly later during the real load.
+fn should_log_to_file() -> bool {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LogToFileOnly {
+        #[serde(default = "default_log_to_file")]
+        log_to_file: bool,
+    }
+
+    fn default_log_to_file() -> bool {
+        true
+    }
+
+    fn wants_file_logging(path: &std::path::Path) -> bool {
+        fs::read_to_string(path)
+            .ok()
+            .and_then(|contents| serde_json::from_str::<LogToFileOnly>(&contents).ok())
+            .map(|c| c.log_to_file)
+            .unwrap_or(true)
+    }
+
+    match env::var("CONFIG_DIR") {
+        Ok(dir) => match fs::read_dir(dir) {
+            Ok(entries) => entries
+                .filter_map(|e| e.ok())
+                .map(|e| e.path())
+                .filter(|p| p.extension().is_some_and(|ext| ext == "json"))
+                .all(|p| wants_file_logging(&p)),
+            Err(_) => true,
+        },
+        Err(_) => wants_file_logging(std::path::Path::new("config.json")),
+    }
+}
+
+fn setup_file_and_stdout_logging() -> Result<WorkerGuard> {
+    let log_dir = env::var(LOG_DIR_ENV).unwrap_or_else(|_| DEFAULT_LOG_DIR.to_string());
+    fs::create_dir_all(&log_dir)?;
+
+    let file_name = log_file_name()?;
+    let log_file = fs::OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(PathBuf::from(log_dir).join(file_name))?;
+    let (file_writer, guard) = tracing_appender::non_blocking(log_file);
+    let env_filter = tracing_subscriber::EnvFilter::from_default_env();
+    let stdout_layer = tracing_subscriber::fmt::layer()
+        .with_ansi(!cfg!(windows))
+        .with_writer(std::io::stdout);
+    let file_layer = tracing_subscriber::fmt::layer()
+        .with_ansi(false)
+        .with_writer(file_writer);
+
+    tracing_subscriber::registry()
+        .with(env_filter)
+        .with(stdout_layer)
+        .with(file_layer)
+        .init();
+
+    Ok(guard)
+}
+
+fn setup_stdout_only_logging() -> WorkerGuard {
+    let (stdout_writer, guard) = tracing_appender::non_blocking(std::io::stdout());
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_ansi(!cfg!(windows))
+                .with_writer(stdout_writer),
+        )
+        .init();
+    guard
+}
+
+fn log_file_name() -> Result<String> {
+    if let Ok(file_name) = env::var(LOG_FILE_NAME_ENV) {
+        return Ok(file_name);
+    }
+
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
+    Ok(format!("noalbs-{}.log", timestamp))
 }

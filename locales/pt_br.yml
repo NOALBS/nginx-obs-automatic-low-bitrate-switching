@@ -90,3 +90,8 @@ collection:
     success: Coleção trocada com sucesso para "%{collection}"
     error: Não foi possível mudar para a coleção "%{collection}"
     note: "Nota: O perfil será alterado quando não estiver transmitindo"
+streamserver:
+    noParams: No stream server specified
+    notFound: "Error no stream server found with the name: %{name}"
+    successEnabled: Stream server %{name} successfully enabled
+    successDisabled: Stream server %{name} successfully disabled

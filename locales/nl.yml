@@ -90,3 +90,8 @@ collection:
     success: Verzameling succesvol geschakeld naar "%{collection}"
     error: Fout, kan niet overschakelen naar verzameling "%{collection}"
     note: "Opmerking: het profiel wordt alleen gewijzigd als er niet wordt gestreamd"
+streamserver:
+    noParams: No stream server specified
+    notFound: "Error no stream server found with the name: %{name}"
+    successEnabled: Stream server %{name} successfully enabled
+    successDisabled: Stream server %{name} successfully disabled

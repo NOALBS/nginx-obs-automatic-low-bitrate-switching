@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Duration};
 use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::StreamExt;
-use obwsv5::{
+use obws::{
     Client,
     error::Error,
     events::Event,
@@ -27,7 +27,7 @@ use crate::{
 use super::BroadcastingSoftwareLogic;
 
 pub struct Obsv5 {
-    connection: Arc<Mutex<Option<obwsv5::Client>>>,
+    connection: Arc<Mutex<Option<obws::Client>>>,
     connection_join: tokio::task::JoinHandle<()>,
     event_join: tokio::task::JoinHandle<()>,
 }
@@ -223,7 +223,7 @@ async fn get_media_sources_rec(
 
         if matches!(
             item.source_type,
-            obwsv5::responses::scene_items::SourceType::Scene
+            obws::responses::scene_items::SourceType::Scene
         ) && !visited.contains(&item.source_name)
         {
             visited.push(item.source_name.to_owned());
@@ -269,7 +269,7 @@ async fn get_sources_rec(
 
         if matches!(
             item.source_type,
-            obwsv5::responses::scene_items::SourceType::Scene
+            obws::responses::scene_items::SourceType::Scene
         ) && !visited.contains(&item.source_name)
         {
             visited.push(item.source_name.to_owned());
@@ -417,28 +417,28 @@ impl BroadcastingSoftwareLogic for Obsv5 {
         Ok(status.active)
     }
 
-    async fn get_media_source_status(
-        &self,
-        _source_name: &str,
-    ) -> Result<(obws::responses::MediaState, i64), error::Error> {
-        Err(error::Error::UnableInitialConnection)
-    }
+    // async fn get_media_source_status(
+    //     &self,
+    //     _source_name: &str,
+    // ) -> Result<(obws::responses::MediaState, i64), error::Error> {
+    //     Err(error::Error::UnableInitialConnection)
+    // }
 
-    async fn create_special_media_source(
-        &self,
-        _source_name: &str,
-        _scene_name: &str,
-    ) -> Result<String, error::Error> {
-        Err(error::Error::UnableInitialConnection)
-    }
+    // async fn create_special_media_source(
+    //     &self,
+    //     _source_name: &str,
+    //     _scene_name: &str,
+    // ) -> Result<String, error::Error> {
+    //     Err(error::Error::UnableInitialConnection)
+    // }
 
-    async fn remove_special_media_source(
-        &self,
-        _source_name: &str,
-        _scene: &str,
-    ) -> Result<(), error::Error> {
-        Err(error::Error::UnableInitialConnection)
-    }
+    // async fn remove_special_media_source(
+    //     &self,
+    //     _source_name: &str,
+    //     _scene: &str,
+    // ) -> Result<(), error::Error> {
+    //     Err(error::Error::UnableInitialConnection)
+    // }
 
     async fn current_scene(&self) -> Result<String, error::Error> {
         let connection = self.connection.lock().await;
@@ -497,14 +497,8 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             available_disk_space: stats.available_disk_space,
         };
 
-        if state.broadcasting_software.initial_stream_status.is_some() {
-            ss = ss.calculate_current(
-                state
-                    .broadcasting_software
-                    .initial_stream_status
-                    .as_ref()
-                    .unwrap(),
-            );
+        if let Some(initial_stream_status) = &state.broadcasting_software.initial_stream_status {
+            ss = ss.calculate_current(initial_stream_status);
         };
 
         Ok(ss)
@@ -578,7 +572,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
 pub struct InnerConnection {
     connection_info: config::ObsConfig,
     state: noalbs::UserState,
-    connection: Arc<Mutex<Option<obwsv5::Client>>>,
+    connection: Arc<Mutex<Option<obws::Client>>>,
     event_sender: mpsc::Sender<Event>,
 }
 
@@ -587,7 +581,7 @@ impl InnerConnection {
         loop {
             let client = self.get_client().await;
 
-            use obwsv5::requests::EventSubscription;
+            use obws::requests::EventSubscription;
             let events = EventSubscription::SCENES | EventSubscription::OUTPUTS;
             if let Err(e) = client.reidentify(events).await {
                 error!("Error reidentifying: {:?}", e)
@@ -675,7 +669,7 @@ impl InnerConnection {
     /// An exponential backoff strategy is used to keep retrying to connect.
     /// This will grow until the 5th retry failure after which the max seconds
     /// will be reached of 32 seconds.
-    async fn get_client(&self) -> obwsv5::Client {
+    async fn get_client(&self) -> obws::Client {
         let mut retry_grow = 1;
 
         loop {

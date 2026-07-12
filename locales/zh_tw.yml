@@ -92,3 +92,8 @@ collection:
     success: Collection successfully switched to "%{collection}"
     error: Error can't switch to collection "%{collection}"
     note: "Note: the profile will only be changed when not streaming"
+streamserver:
+    noParams: No stream server specified
+    notFound: "Error no stream server found with the name: %{name}"
+    successEnabled: Stream server %{name} successfully enabled
+    successDisabled: Stream server %{name} successfully disabled
