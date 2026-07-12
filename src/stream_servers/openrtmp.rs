@@ -5,13 +5,13 @@ use serde::{Deserialize, Serialize};
 use super::{Bsl, StreamServersCommands, SwitchLogic, default_reqwest_client};
 use crate::switcher::{SwitchType, Triggers};
 
-/// Response shape of librtmp2-server's `GET /stats?key=<stats_key>` endpoint.
+/// Response shape of OpenRTMP's `GET /stats?key=<stats_key>` endpoint.
 /// Only present while the stream is live; offline returns a plain-text body.
 #[derive(Deserialize, Debug)]
 pub struct OpenRTMPStats {
     pub uptime: i64,
-    pub bitrate_kbps: u64,
-    pub rtt_ms: u64,
+    pub bitrate_kbps: f64,
+    pub rtt_ms: f64,
     pub bytes_in: u64,
     pub video: Option<OpenRTMPVideo>,
     pub audio: Option<OpenRTMPAudio>,
@@ -33,7 +33,7 @@ pub struct OpenRTMPAudio {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenRTMP {
-    /// Full url to the librtmp2-server stats endpoint, e.g.
+    /// Full url to the OpenRTMP stats endpoint, e.g.
     /// `https://host:port/stats?key=<stats_key>`
     pub stats_url: String,
 
@@ -43,19 +43,27 @@ pub struct OpenRTMP {
 }
 
 impl OpenRTMP {
+    /// The `stats_url` with any query string (which carries the stats key)
+    /// stripped, safe to write to logs.
+    fn redacted_url(&self) -> &str {
+        self.stats_url
+            .split_once('?')
+            .map_or(self.stats_url.as_str(), |(base, _)| base)
+    }
+
     /// Returns `None` when the stream is offline, unreachable, or the stats
     /// key is invalid.
     pub async fn get_stats(&self) -> Option<OpenRTMPStats> {
         let res = match self.client.get(&self.stats_url).send().await {
             Ok(res) => res,
             Err(_) => {
-                error!("librtmp2-server API ({}) is unreachable", self.stats_url);
+                error!("OpenRTMP API ({}) is unreachable", self.redacted_url());
                 return None;
             }
         };
 
         if res.status() != reqwest::StatusCode::OK {
-            error!("Error accessing librtmp2-server API ({})", self.stats_url);
+            error!("Error accessing OpenRTMP API ({})", self.redacted_url());
             return None;
         }
 
@@ -65,8 +73,9 @@ impl OpenRTMP {
             Err(_) => {
                 // Offline streams respond with a plain-text body instead of JSON.
                 trace!(
-                    "librtmp2-server ({}) stream offline: {}",
-                    self.stats_url, text
+                    "OpenRTMP ({}) stream offline: {}",
+                    self.redacted_url(),
+                    text
                 );
                 return None;
             }
@@ -88,18 +97,30 @@ impl SwitchLogic for OpenRTMP {
         };
 
         if let Some(offline) = triggers.offline
-            && stats.bitrate_kbps > 0
+            && stats.bitrate_kbps > 0.0
             && stats.bitrate_kbps <= offline.into()
         {
             return SwitchType::Offline;
         }
 
-        if stats.bitrate_kbps == 0 {
+        if let Some(rtt_offline) = triggers.rtt_offline
+            && stats.rtt_ms >= rtt_offline.into()
+        {
+            return SwitchType::Offline;
+        }
+
+        if stats.bitrate_kbps == 0.0 {
             return SwitchType::Previous;
         }
 
         if let Some(low) = triggers.low
             && stats.bitrate_kbps <= low.into()
+        {
+            return SwitchType::Low;
+        }
+
+        if let Some(rtt) = triggers.rtt
+            && stats.rtt_ms >= rtt.into()
         {
             return SwitchType::Low;
         }
@@ -118,7 +139,7 @@ impl StreamServersCommands for OpenRTMP {
         };
 
         super::Bitrate {
-            message: Some(format!("{}", stats.bitrate_kbps)),
+            message: Some(format!("{}", stats.bitrate_kbps.round())),
         }
     }
 
@@ -128,7 +149,10 @@ impl StreamServersCommands for OpenRTMP {
 
         Some(format!(
             "{}x{} {} Kbps, {}",
-            video.width, video.height, stats.bitrate_kbps, video.codec
+            video.width,
+            video.height,
+            stats.bitrate_kbps.round(),
+            video.codec
         ))
     }
 }
@@ -146,9 +170,9 @@ mod tests {
 
     #[test]
     fn stream() {
-        let s = r#"{"uptime":42,"bitrate_kbps":2500,"rtt_ms":18,"bytes_in":1048576,"video":{"codec":"H264","width":1920,"height":1080,"fps":60.0},"audio":{"codec":"AAC"}}"#;
+        let s = r#"{"uptime":42,"bitrate_kbps":2500.5,"rtt_ms":18.2,"bytes_in":1048576,"video":{"codec":"H264","width":1920,"height":1080,"fps":60.0},"audio":{"codec":"AAC"}}"#;
         let parsed: OpenRTMPStats = serde_json::from_str(s).unwrap();
-        assert_eq!(parsed.bitrate_kbps, 2500);
+        assert_eq!(parsed.bitrate_kbps, 2500.5);
         assert_eq!(parsed.video.unwrap().width, 1920);
         assert_eq!(parsed.audio.unwrap().codec, "AAC");
     }
@@ -158,5 +182,14 @@ mod tests {
         let s = "Stream offline";
         let parsed: Result<OpenRTMPStats, _> = serde_json::from_str(s);
         assert!(parsed.is_err());
+    }
+
+    #[test]
+    fn redacted_url_strips_stats_key() {
+        let s = OpenRTMP {
+            stats_url: "http://localhost:8080/stats?key=secret".to_string(),
+            client: default_reqwest_client(),
+        };
+        assert_eq!(s.redacted_url(), "http://localhost:8080/stats");
     }
 }
