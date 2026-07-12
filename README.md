@@ -759,6 +759,17 @@ Then configure NOALBS with `ws://127.0.0.1:8765/ws-stats?feed=feed1`. The mock s
 
 - `statsUrl`: URL to OpenIRL stats page
 
+### Using OpenRTMP
+
+```JSON
+  "streamServer": {
+    "type": "OpenRTMP",
+    "statsUrl": "http://hostname:8080/stats?key=sts_0123456789abcdef0123456789abcdef",
+  },
+```
+
+- `statsUrl`: URL to OpenRTMP stats page
+
 </details>
 
 ## Depends on
