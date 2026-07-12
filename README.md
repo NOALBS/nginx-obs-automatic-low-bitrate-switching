@@ -49,6 +49,7 @@ Don't feel like setting this all up by yourself?
 | [IRLtools](https://irltools.com?ref=NOALBS) | IRL Accessories & Guides
 | [IRLServer](https://irlserver.com) | Simplify and Stabilize your IRL-stream. |
 | [OBS-Hosting](https://obs-hosting.de) | German OBS/IRL & 24/7 VOD Server Hosting by dataforest GmbH |
+| [Redefined-Streaming](https://redefined-streaming.eu/) | German SRT/SRTLA Server Hosting |
 | [IRL.com.de](https://irl.com.de/?lang=en&mtm_campaign=noalbs) | Free SRT/SRTLA Relays hosted in Germany |
 
 
