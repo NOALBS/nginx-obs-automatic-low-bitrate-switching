@@ -7,6 +7,7 @@ use crate::switcher;
 
 pub mod belabox;
 pub mod irlhosting;
+pub mod librtmp2;
 pub mod mediamtx;
 pub mod nginx;
 pub mod nimble;
@@ -20,6 +21,7 @@ pub mod xiu;
 
 pub use belabox::Belabox;
 pub use irlhosting::Irlhosting;
+pub use librtmp2::Librtmp2;
 pub use mediamtx::Mediamtx;
 pub use nginx::Nginx;
 pub use nimble::Nimble;
