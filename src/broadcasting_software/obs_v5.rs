@@ -15,8 +15,11 @@ use obws::{
     responses::media_inputs::MediaState,
 };
 use serde::Deserialize;
-use tokio::sync::{self, Mutex, mpsc};
-use tracing::{Instrument, error, info, warn};
+use tokio::{
+    sync::{self, Mutex, mpsc},
+    time::{self, Instant},
+};
+use tracing::{Instrument, debug, error, info, warn};
 
 use crate::{
     config::{self, ObsConfig},
@@ -316,6 +319,58 @@ impl BroadcastingSoftwareLogic for Obsv5 {
         Ok(scene)
     }
 
+    async fn wait_for_scene_transition(&self) -> Result<(), error::Error> {
+        let transition = {
+            let connection = self.connection.lock().await;
+
+            let client = connection
+                .as_ref()
+                .ok_or(error::Error::UnableInitialConnection)?;
+
+            client.transitions().current().await?
+        };
+
+        debug!("Waiting for transition to complete");
+
+        if let Some(duration) = transition.duration {
+            let wait = Duration::from_millis(duration.whole_milliseconds() as u64)
+                + Duration::from_millis(100);
+            time::sleep(wait).await;
+            return Ok(());
+        }
+
+        let deadline = Instant::now() + Duration::from_secs(30);
+        let mut transition_started = false;
+
+        loop {
+            let cursor = {
+                let connection = self.connection.lock().await;
+
+                let client = connection
+                    .as_ref()
+                    .ok_or(error::Error::UnableInitialConnection)?;
+
+                client.transitions().current_cursor().await?
+            };
+
+            if cursor < 1.0 {
+                transition_started = true;
+            }
+
+            if transition_started && cursor >= 1.0 {
+                break;
+            }
+
+            if Instant::now() >= deadline {
+                break;
+            }
+
+            time::sleep(Duration::from_millis(500)).await;
+        }
+
+        Ok(())
+    }
+
     async fn start_streaming(&self) -> Result<(), error::Error> {
         let connection = self.connection.lock().await;
 
@@ -472,7 +527,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             .await
             .map_err(error::Error::ObsV5Error)?;
 
-        tokio::time::sleep(Duration::from_secs(2)).await;
+        time::sleep(Duration::from_secs(2)).await;
 
         let stream = client
             .streaming()
@@ -699,7 +754,7 @@ impl InnerConnection {
 
             let wait = 1 << retry_grow;
             info!("trying to connect again in {} seconds", wait);
-            tokio::time::sleep(Duration::from_secs(wait)).await;
+            time::sleep(Duration::from_secs(wait)).await;
 
             if retry_grow < 5 {
                 retry_grow += 1;

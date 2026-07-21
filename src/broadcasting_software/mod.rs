@@ -9,6 +9,8 @@ pub mod obs_v5;
 pub trait BroadcastingSoftwareLogic: Send + Sync {
     async fn switch_scene(&self, scene: &str) -> Result<String, Error>;
 
+    async fn wait_for_scene_transition(&self) -> Result<(), Error>;
+
     async fn start_streaming(&self) -> Result<(), Error>;
 
     async fn stop_streaming(&self) -> Result<(), Error>;

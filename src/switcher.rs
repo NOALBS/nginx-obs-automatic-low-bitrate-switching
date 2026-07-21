@@ -307,7 +307,14 @@ impl Switcher {
         );
 
         let state = &self.state.read().await;
-        let current_scene = &state.broadcasting_software.current_scene;
+
+        let bsc = state
+            .broadcasting_software
+            .connection
+            .as_ref()
+            .ok_or(error::Error::UnableInitialConnection)?;
+
+        let current_scene = bsc.current_scene().await?;
 
         if current_scene == switch_scene {
             return Ok(());
@@ -323,7 +330,7 @@ impl Switcher {
                     .config
                     .optional_options
                     .switch_from_starting_scene_to_live_scene;
-                current_scene == starting_scene
+                &current_scene == starting_scene
                     && switch_to_live
                     && (switch_type == SwitchType::Offline)
             });
@@ -365,6 +372,19 @@ impl Switcher {
                 });
 
             let _ = self.chat_sender.send(message).await;
+        }
+
+        // In case there's a scene transition set that's longer than the time it takes to retrigger
+        // noalbs switching, this will block the switcher until the transition has completed.
+        if let Err(error) = state
+            .broadcasting_software
+            .connection
+            .as_ref()
+            .ok_or(error::Error::NoSoftwareSet)?
+            .wait_for_scene_transition()
+            .await
+        {
+            error!("Scene transition wait error {:?}", error);
         }
 
         Ok(())
