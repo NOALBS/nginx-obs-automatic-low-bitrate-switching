@@ -79,11 +79,15 @@ impl Switcher {
             return Some(state.broadcasting_software.start_streaming_notifier());
         }
 
-        if !state
-            .switcher_state
-            .switchable_scenes
-            .contains(&state.broadcasting_software.current_scene)
-        {
+        if !state.switcher_state.switchable_scenes.contains(
+            &state
+                .broadcasting_software
+                .connection
+                .as_ref()?
+                .current_scene()
+                .await
+                .ok()?,
+        ) {
             info!("Not able to switch, waiting for scene switch to a switchable scene");
             return Some(state.broadcasting_software.switch_scene_notifier());
         }
