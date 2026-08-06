@@ -52,6 +52,8 @@ Don't feel like setting this all up by yourself?
 | [Redefined-Streaming](https://redefined-streaming.eu/) | German SRT/SRTLA Server Hosting |
 | [IRL.com.de](https://irl.com.de/?lang=en&mtm_campaign=noalbs) | Free SRT/SRTLA and RTMP/RTMPS relay endpoints hosted in Germany | |
 | [Streamable](https://streamable.run) | Cloud hosting and endpoints - Never IRL Stream with Issues Again! |
+| [StreamGrid](https://streamgrid.io) | IRL Streaming that just works. |
+| [EnhancedIRL](https://enhancedirl.com) | EU-based Cloud OBS & stream relays that keep your IRL stream alive. |
 
 
 Do you offer a similar solution or paid service? Want your link here? Message [@b3ck](https://discordapp.com/channels/@me/96991451006660608) on Discord.
