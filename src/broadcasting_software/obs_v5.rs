@@ -5,6 +5,7 @@ use async_trait::async_trait;
 use futures_util::StreamExt;
 use obws::{
     Client,
+    common::MediaAction,
     error::Error,
     events::Event,
     requests::{
@@ -199,7 +200,10 @@ async fn get_media_sources_rec(
 
     for item in items {
         if let Some(ref input_kind) = item.input_kind
-            && matches!(input_kind.as_ref(), "ffmpeg_source" | "vlc_source")
+            && matches!(
+                input_kind.as_ref(),
+                "ffmpeg_source" | "vlc_source" | "irl_source"
+            )
         {
             let status = match client
                 .media_inputs()
@@ -401,7 +405,7 @@ impl BroadcastingSoftwareLogic for Obsv5 {
             .ok_or(error::Error::UnableInitialConnection)?;
 
         for media in media_playing {
-            let media_inputs = match media.source_kind.as_ref() {
+            let (media_inputs, fix_method) = match media.source_kind.as_ref() {
                 "ffmpeg_source" => {
                     let source = client
                         .inputs()
@@ -409,20 +413,38 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                         .await?;
 
                     if let Some(input) = source.settings.input {
-                        Vec::from([input.to_lowercase()])
+                        (
+                            Vec::from([input.to_lowercase()]),
+                            FixMethod::RewriteSettings,
+                        )
                     } else {
                         continue;
                     }
                 }
-                "vlc_source" => client
-                    .inputs()
-                    .settings::<VlcSource>(InputId::Name(&media.source_name))
-                    .await?
-                    .settings
-                    .playlist
-                    .iter()
-                    .map(|s| s.value.to_lowercase())
-                    .collect::<Vec<String>>(),
+                "vlc_source" => (
+                    client
+                        .inputs()
+                        .settings::<VlcSource>(InputId::Name(&media.source_name))
+                        .await?
+                        .settings
+                        .playlist
+                        .iter()
+                        .map(|s| s.value.to_lowercase())
+                        .collect::<Vec<String>>(),
+                    FixMethod::RewriteSettings,
+                ),
+                "irl_source" => {
+                    let source = client
+                        .inputs()
+                        .settings::<IrlSource>(InputId::Name(&media.source_name))
+                        .await?;
+
+                    if let Some(url) = source.settings.url {
+                        (Vec::from([url.to_lowercase()]), FixMethod::MediaRestart)
+                    } else {
+                        continue;
+                    }
+                }
                 s => unimplemented!("Fix not implemented for {}", s),
             };
 
@@ -436,14 +458,24 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                 continue;
             }
 
-            client
-                .inputs()
-                .set_settings(inputs::SetSettings {
-                    input: InputId::Name(&media.source_name),
-                    settings: &serde_json::json!({}),
-                    overlay: None,
-                })
-                .await?;
+            match fix_method {
+                FixMethod::RewriteSettings => {
+                    client
+                        .inputs()
+                        .set_settings(inputs::SetSettings {
+                            input: InputId::Name(&media.source_name),
+                            settings: &serde_json::json!({}),
+                            overlay: None,
+                        })
+                        .await?;
+                }
+                FixMethod::MediaRestart => {
+                    client
+                        .media_inputs()
+                        .trigger_action(InputId::Name(&media.source_name), MediaAction::Restart)
+                        .await?;
+                }
+            }
         }
 
         Ok(())
@@ -807,6 +839,24 @@ pub struct FfmpegSource {
 pub struct VlcSource {
     /// List of files to play.
     pub playlist: Vec<SlideshowFile>,
+}
+/// How a source is made to reconnect.
+enum FixMethod {
+    /// Write empty settings back and rely on the source reopening the
+    /// stream from its update callback, which `ffmpeg_source` does
+    /// unconditionally for anything that is not a local file.
+    RewriteSettings,
+    /// Ask for a media restart. `irl_source` diffs incoming settings and
+    /// applies them to the running stream, so writing settings it already
+    /// has changes nothing; the restart has to be requested.
+    MediaRestart,
+}
+
+/// Settings specific to a **IRL** video source.
+#[derive(Deserialize, Debug)]
+pub struct IrlSource {
+    /// URL of the remote media file.
+    pub url: Option<String>,
 }
 
 /// Single file as part of a [`Slideshow`].
