@@ -20,6 +20,23 @@ const LOG_FILE_NAME_ENV: &str = "LOG_FILE_NAME";
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
+
+    // `noalbs kick-auth [port]` is a one-shot helper, not the bot: it walks the
+    // Kick OAuth flow and prints the refresh token to put in the config. It
+    // runs before the logo and the logging setup so its output stays readable.
+    let args: Vec<String> = env::args().collect();
+    if args.get(1).is_some_and(|a| a == "kick-auth") {
+        let port = match args.get(2) {
+            Some(port) => port.parse().map_err(|_| {
+                anyhow::anyhow!("'{port}' is not a port number. Usage: noalbs kick-auth [port]")
+            })?,
+            None => noalbs::chat::kick_auth::DEFAULT_PORT,
+        };
+
+        noalbs::chat::kick_auth::run(port).await?;
+        return Ok(());
+    }
+
     noalbs::print_logo();
     let _ = print_if_new_version().await;
 

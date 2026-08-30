@@ -9,6 +9,7 @@ use crate::{error, switcher};
 pub mod chat_handler;
 pub mod kick;
 pub mod kick_api;
+pub mod kick_auth;
 pub mod twitch;
 
 pub use chat_handler::ChatHandler;
