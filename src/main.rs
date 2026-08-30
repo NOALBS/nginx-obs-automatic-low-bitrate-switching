@@ -77,7 +77,7 @@ async fn main() -> Result<()> {
         .count()
         > 0
     {
-        let kick = noalbs::chat::Kick::new(chat_tx.clone());
+        let kick = noalbs::chat::Kick::new(chat_tx.clone(), user_manager.clone());
         for (platform, username) in user_manager
             .get_all_chat()
             .await

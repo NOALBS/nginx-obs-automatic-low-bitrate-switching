@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+use std::fs;
+use std::io::Write as _;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -8,69 +12,417 @@ use tokio::{
     time,
 };
 use tokio_tungstenite::tungstenite::Message as TMessage;
-use tracing::{info, warn};
+use tracing::{debug, error, info, warn};
 
 use crate::{
     ChatSender,
-    chat::{self, ChatPlatform, HandleMessage, InternalUpdate},
+    chat::{
+        self, ChatPlatform, HandleMessage, InternalUpdate,
+        kick_api::{self, KickApi, KickConfigStore, KickSender, KickState, ResolvedIds},
+    },
     config, error,
+    user_manager::UserManager,
 };
 
 const KICK_CHAT_WS: &str = "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=7.6.0&flash=false";
 
 pub struct Kick {
-    _req_client: reqwest::Client,
+    req_client: reqwest::Client,
     chat: KickChat,
+    /// `None` without an OAuth application: chat is then read-only.
+    api: Option<Arc<KickApi>>,
+    /// One sender per channel, keyed by the lowercased slug.
+    senders: Mutex<HashMap<String, Arc<KickSender>>>,
+    store: Arc<dyn KickConfigStore>,
 }
 
 impl Kick {
-    pub fn new(chat_handler_tx: ChatSender) -> Self {
-        let client = reqwest::Client::new();
+    pub fn new(chat_handler_tx: ChatSender, user_manager: UserManager) -> Self {
+        let client = kick_api::http_client();
         let chat = KickChat::connect(chat_handler_tx);
 
+        let api = kick_api::Credentials::from_env().map(|credentials| {
+            info!("Kick: OAuth application configured, chat commands can be answered");
+            Arc::new(KickApi::new(credentials))
+        });
+
+        if api.is_none() {
+            info!(
+                "Kick: KICK_CLIENT_ID and KICK_CLIENT_SECRET are not set, \
+                 chat will be read-only"
+            );
+        }
+
+        // The config file holds the token unless pointed somewhere writable.
+        let store: Arc<dyn KickConfigStore> = match std::env::var(STATE_DIR_ENV) {
+            Ok(dir) if !dir.trim().is_empty() => {
+                info!("Kick: keeping the refresh token in {}", dir);
+                Arc::new(StateDirStore {
+                    dir: PathBuf::from(dir),
+                })
+            }
+            _ => Arc::new(ConfigStore { user_manager }),
+        };
+
         Self {
-            _req_client: client,
+            req_client: client,
             chat,
+            api,
+            senders: Mutex::new(HashMap::new()),
+            store,
         }
     }
 
     pub async fn join_channel(&self, platform: config::ConfigChatPlatform, channel: String) {
         info!("Joining channel: {}", channel);
 
-        let config::ConfigChatPlatform::Kick(config) = platform else {
+        let config::ConfigChatPlatform::Kick(mut config) = platform else {
             panic!("Join called with wrong platform");
         };
 
-        let channel = if config.use_irlproxy.unwrap_or_default() {
-            tracing::error!("IRL Proxy is not implemented yet");
+        if config.use_irlproxy.unwrap_or_default() {
+            error!("IRL Proxy is not implemented yet");
             return;
-        } else {
-            let config::KickConfig {
-                channel_id,
-                chatroom_id,
-                ..
-            } = config;
+        }
 
-            let (Some(channel_id), Some(chatroom_id)) = (channel_id, chatroom_id) else {
-                tracing::error!("Kick channel_id or chatroom_id is not set, ignoring channel");
-                return;
-            };
+        // What was remembered wins over the seed in the config file.
+        let remembered = self.store.load(&channel).await;
+        if remembered.refresh_token.is_some() {
+            config.refresh_token = remembered.refresh_token;
+        }
+        config.channel_id = remembered.channel_id.or(config.channel_id);
+        config.chatroom_id = remembered.chatroom_id.or(config.chatroom_id);
+        config.broadcaster_user_id = remembered
+            .broadcaster_user_id
+            .or(config.broadcaster_user_id);
 
-            Channel {
+        self.resolve_missing_ids(&mut config, &channel).await;
+
+        let (Some(channel_id), Some(chatroom_id)) = (config.channel_id, config.chatroom_id) else {
+            error!(
+                "Kick channel_id or chatroom_id is not set for {} and could not be \
+                 looked up, ignoring channel",
+                channel
+            );
+            return;
+        };
+
+        self.register_sender(&config, &channel).await;
+
+        self.chat
+            .add_channel(Channel {
                 username: channel,
                 channel_id,
                 chatroom_id,
-            }
+            })
+            .await;
+    }
+
+    /// Fills in whatever the config left out, from the slug. Failing to look it
+    /// up just keeps what the config had.
+    async fn resolve_missing_ids(&self, config: &mut config::KickConfig, channel: &str) {
+        let wants_broadcaster = matches!(config.send_as, Some(config::KickSendAs::User))
+            && config.broadcaster_user_id.is_none();
+
+        if config.channel_id.is_some() && config.chatroom_id.is_some() && !wants_broadcaster {
+            return;
+        }
+
+        let Some((channel_id, chatroom_id, user_id)) =
+            kick_api::lookup_channel(&self.req_client, channel).await
+        else {
+            warn!("Kick: could not look up the ids of {}", channel);
+            return;
         };
 
-        self.chat.add_channel(channel).await;
+        info!(
+            "Kick: resolved {} to channel_id {}, chatroom_id {}",
+            channel, channel_id, chatroom_id
+        );
+
+        config.channel_id.get_or_insert(channel_id);
+        config.chatroom_id.get_or_insert(chatroom_id);
+        config.broadcaster_user_id.get_or_insert(user_id);
+
+        // A restart should not depend on that endpoint still being reachable.
+        // Store what is in effect, not what was looked up: the config wins.
+        if let (Some(channel_id), Some(chatroom_id), Some(broadcaster_user_id)) = (
+            config.channel_id,
+            config.chatroom_id,
+            config.broadcaster_user_id,
+        ) {
+            self.store
+                .store_ids(
+                    channel,
+                    ResolvedIds {
+                        channel_id,
+                        chatroom_id,
+                        broadcaster_user_id,
+                    },
+                )
+                .await;
+        }
+    }
+
+    async fn register_sender(&self, config: &config::KickConfig, channel: &str) {
+        let Some(api) = self.api.as_ref() else {
+            return;
+        };
+
+        let Some(sender) = KickSender::new(api.clone(), config, self.store.clone()) else {
+            info!(
+                "Kick: no refreshToken configured for {}, commands will be read \
+                 but not answered",
+                channel
+            );
+            return;
+        };
+
+        let sender = Arc::new(sender);
+        sender.announce_identity(channel).await;
+
+        // With CONFIG_DIR nothing stops two profiles from naming one channel.
+        if self
+            .senders
+            .lock()
+            .await
+            .insert(channel.to_owned(), sender)
+            .is_some()
+        {
+            warn!(
+                "Kick: more than one profile is configured for the channel {}, \
+                 only one of them will answer its chat",
+                channel
+            );
+        }
     }
 }
 
 #[async_trait]
 impl super::ChatLogic for Kick {
     async fn send_message(&self, channel: String, message: String) {
-        tracing::debug!(?channel, ?message, "Sending message to KICK");
+        // The switcher builds its notifications with the raw config username,
+        // while channels are joined lowercased.
+        let channel = channel.to_lowercase();
+        let sender = self.senders.lock().await.get(&channel).cloned();
+
+        let Some(sender) = sender else {
+            debug!(
+                ?channel,
+                ?message,
+                "Kick: no chat:write credentials for this channel, dropping message"
+            );
+            return;
+        };
+
+        if let Err(e) = sender.send(&channel, &message).await {
+            error!(?e, "Kick: could not send message to {}", channel);
+        }
+    }
+}
+
+/// Where to keep runtime state when the config file is read-only. The config
+/// is then only the seed.
+const STATE_DIR_ENV: &str = "NOALBS_STATE_DIR";
+
+/// Keeps the state of each channel in its own file inside [`STATE_DIR_ENV`].
+struct StateDirStore {
+    dir: PathBuf,
+}
+
+impl StateDirStore {
+    /// The slug is sanitised: a name like `../../etc/x` must not escape the dir.
+    fn path_for(&self, channel: &str) -> PathBuf {
+        let safe: String = channel
+            .chars()
+            .map(|c| {
+                if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
+                    c.to_ascii_lowercase()
+                } else {
+                    '_'
+                }
+            })
+            .collect();
+
+        self.dir.join(format!("kick-{safe}.json"))
+    }
+
+    async fn read(&self, channel: &str) -> KickState {
+        let path = self.path_for(channel);
+
+        let contents = match fs::read_to_string(&path) {
+            Ok(contents) => contents,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return KickState::default(),
+            Err(e) => {
+                warn!(?e, "Kick: could not read {}", path.display());
+                return KickState::default();
+            }
+        };
+
+        match serde_json::from_str(&contents) {
+            Ok(state) => state,
+            Err(e) => {
+                // Starting from the seed beats refusing to start.
+                error!(?e, "Kick: ignoring unreadable state in {}", path.display());
+                KickState::default()
+            }
+        }
+    }
+
+    /// Reads, applies `edit` and writes the whole state back.
+    async fn update<F>(&self, channel: &str, what: &str, edit: F)
+    where
+        F: FnOnce(&mut KickState) + Send,
+    {
+        let mut state = self.read(channel).await;
+        edit(&mut state);
+
+        if let Err(e) = self.write(channel, &state) {
+            error!(
+                ?e,
+                "Kick: could not persist {} for {} in {}",
+                what,
+                channel,
+                self.dir.display()
+            );
+        }
+    }
+
+    /// Through a temporary file: a crash halfway would leave no usable token.
+    fn write(&self, channel: &str, state: &KickState) -> Result<(), error::Error> {
+        fs::create_dir_all(&self.dir)?;
+
+        let path = self.path_for(channel);
+        let tmp = path.with_extension("tmp");
+
+        // It holds a credential, so it is created private rather than made
+        // private after the token is already on disk.
+        let mut options = fs::OpenOptions::new();
+        options.write(true).create(true).truncate(true);
+        #[cfg(unix)]
+        std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o600);
+
+        let mut file = options.open(&tmp)?;
+        file.write_all(serde_json::to_string_pretty(state)?.as_bytes())?;
+        file.sync_all()?;
+
+        fs::rename(&tmp, &path)?;
+
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl KickConfigStore for StateDirStore {
+    async fn load(&self, channel: &str) -> KickState {
+        self.read(channel).await
+    }
+
+    async fn store_refresh_token(&self, channel: &str, refresh_token: &str) {
+        self.update(channel, "the rotated refresh token", |state| {
+            state.refresh_token = Some(refresh_token.to_owned());
+        })
+        .await;
+    }
+
+    async fn store_ids(&self, channel: &str, ids: ResolvedIds) {
+        self.update(channel, "the resolved ids", |state| {
+            state.channel_id = Some(ids.channel_id);
+            state.chatroom_id = Some(ids.chatroom_id);
+            state.broadcaster_user_id = Some(ids.broadcaster_user_id);
+        })
+        .await;
+    }
+}
+
+/// Writes what NOALBS learned at runtime back into the user's config file.
+struct ConfigStore {
+    user_manager: UserManager,
+}
+
+enum Update {
+    RefreshToken(String),
+    Ids(ResolvedIds),
+}
+
+impl Update {
+    fn apply(self, kick: &mut config::KickConfig) {
+        match self {
+            Self::RefreshToken(token) => kick.refresh_token = Some(token),
+            Self::Ids(ids) => {
+                kick.channel_id = Some(ids.channel_id);
+                kick.chatroom_id = Some(ids.chatroom_id);
+                kick.broadcaster_user_id = Some(ids.broadcaster_user_id);
+            }
+        }
+    }
+
+    fn what(&self) -> &'static str {
+        match self {
+            Self::RefreshToken(_) => "the rotated refresh token",
+            Self::Ids(_) => "the resolved ids",
+        }
+    }
+}
+
+impl ConfigStore {
+    /// Saves on a task of its own. Answering a command holds a read guard on
+    /// the very state this has to write, and the lock is not reentrant, so
+    /// writing here would deadlock the chat handler.
+    fn save(&self, channel: String, update: Update) {
+        let user_manager = self.user_manager.clone();
+
+        tokio::spawn(async move {
+            let what = update.what();
+            let users = user_manager.get();
+            let users = users.read().await;
+
+            for user in users.values() {
+                {
+                    let mut state = user.state.write().await;
+
+                    let Some(chat) = state.config.chat.as_mut() else {
+                        continue;
+                    };
+
+                    // main() lowercases the slug before joining.
+                    if !chat.username.eq_ignore_ascii_case(&channel) {
+                        continue;
+                    }
+
+                    let config::ConfigChatPlatform::Kick(kick) = &mut chat.platform else {
+                        continue;
+                    };
+
+                    update.apply(kick);
+                }
+
+                if let Err(e) = user.save_config().await {
+                    error!(?e, "Kick: could not persist {} for {}", what, channel);
+                }
+
+                return;
+            }
+
+            warn!(
+                "Kick: no user matched {}, {} will be lost on restart",
+                channel, what
+            );
+        });
+    }
+}
+
+#[async_trait]
+impl KickConfigStore for ConfigStore {
+    async fn store_refresh_token(&self, channel: &str, refresh_token: &str) {
+        self.save(
+            channel.to_owned(),
+            Update::RefreshToken(refresh_token.to_owned()),
+        );
+    }
+
+    async fn store_ids(&self, channel: &str, ids: ResolvedIds) {
+        self.save(channel.to_owned(), Update::Ids(ids));
     }
 }
 
@@ -491,4 +843,94 @@ pub struct Badge {
     pub kind: String,
     pub text: String,
     pub count: Option<usize>,
+}
+
+#[cfg(test)]
+mod state_dir_tests {
+    use super::*;
+
+    fn store() -> (StateDirStore, PathBuf) {
+        let dir = std::env::temp_dir().join(format!(
+            "noalbs-kick-test-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+
+        (StateDirStore { dir: dir.clone() }, dir)
+    }
+
+    #[tokio::test]
+    async fn an_empty_directory_yields_no_state() {
+        let (store, _dir) = store();
+
+        assert!(store.load("someone").await.refresh_token.is_none());
+    }
+
+    #[tokio::test]
+    async fn the_token_survives_a_round_trip() {
+        let (store, dir) = store();
+
+        store.store_refresh_token("someone", "a-token").await;
+
+        assert_eq!(
+            store.load("someone").await.refresh_token.as_deref(),
+            Some("a-token")
+        );
+
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[tokio::test]
+    async fn ids_and_token_live_together() {
+        let (store, dir) = store();
+
+        store.store_refresh_token("someone", "a-token").await;
+        store
+            .store_ids(
+                "someone",
+                ResolvedIds {
+                    channel_id: 1,
+                    chatroom_id: 2,
+                    broadcaster_user_id: 3,
+                },
+            )
+            .await;
+
+        // Writing the ids must not drop the token, and the other way around.
+        let state = store.load("someone").await;
+        assert_eq!(state.refresh_token.as_deref(), Some("a-token"));
+        assert_eq!(state.channel_id, Some(1));
+        assert_eq!(state.chatroom_id, Some(2));
+        assert_eq!(state.broadcaster_user_id, Some(3));
+
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[tokio::test]
+    async fn a_corrupt_file_falls_back_to_the_seed() {
+        let (store, dir) = store();
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(store.path_for("someone"), "{not json").unwrap();
+
+        // Refusing to start would be worse: the config still has a usable token.
+        assert!(store.load("someone").await.refresh_token.is_none());
+
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn a_channel_name_cannot_escape_the_directory() {
+        let (store, dir) = store();
+
+        let path = store.path_for("../../etc/passwd");
+
+        assert_eq!(path.parent(), Some(dir.as_path()));
+        assert_eq!(
+            path.file_name().and_then(|n| n.to_str()),
+            Some("kick-______etc_passwd.json")
+        );
+    }
 }
