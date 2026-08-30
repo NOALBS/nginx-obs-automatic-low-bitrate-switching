@@ -218,6 +218,44 @@ Once finshed save your `.env` file, make sure you do not save it as .env.txt, al
 
 ---
 
+### Kick
+
+Kick chat is read without any credentials, so if you only want NOALBS to switch
+scenes there is nothing to set up. To let it **answer** in chat (`!bitrate`, the
+switching notifications, ...) you need your own Kick application:
+
+- Enable two-factor authentication on the Kick account, then go to Settings ->
+  Developer and create an application.
+- While you are there, create the application's **bot account**. That is the
+  identity your messages are posted with, and without it Kick answers `500` to
+  every message NOALBS tries to send.
+- Set the redirect URI of the application to `http://localhost:8888/kick/callback`.
+- Edit your `.env` file:
+```env
+KICK_CLIENT_ID=(YOUR CLIENT ID)
+KICK_CLIENT_SECRET=(YOUR CLIENT SECRET)
+```
+- Run `noalbs kick-auth`. It prints a link, waits for you to approve it in the
+  browser, and prints the piece of config to paste:
+```
+$ noalbs kick-auth
+
+Register http://localhost:8888/kick/callback as the redirect URI of your Kick application,
+then open this and approve:
+
+  https://id.kick.com/oauth/authorize?client_id=...
+
+Waiting for Kick to call back on port 8888...
+```
+
+> Log in with the account of the channel you want NOALBS to answer in.
+
+> If port 8888 is taken, use `noalbs kick-auth <port>` and register that port in
+> the application instead. The two have to match.
+
+
+---
+
 The `config.json` file holds all the user configurations.
 
 ## EXAMPLE CONFIG.JSON (DO NOT COPY PASTA)
@@ -281,7 +319,7 @@ The `config.json` file holds all the user configurations.
     }
   },
   "chat": {
-    "platform": "Twitch",                           // Twitch and Kick are currently supported but NOALBS will only respond in chat when using Twitch.
+    "platform": "Twitch",                           // Twitch and Kick are currently supported. Kick needs an OAuth application to respond in chat, see the chat section.
     "username": "example",                          // Username of your main Twitch Account.
     "admins": [                                     // List of admins in the form of an array, the last name in the array doesn't need a comma.
       "username1",
@@ -383,7 +421,10 @@ NOALBS supports integration with both Twitch and Kick as chat platforms. Below a
 
 ### Example for Kick
 
-When configuring NOALBS to use Kick, you need to specify the `channelId` and `chatroomId`. You can obtain these IDs by visiting [this link](https://b3ck.com/kick/info/).
+`channelId` and `chatroomId` are looked up from the `username` (the channel
+slug) when they are missing. You can still set them by hand, which is what
+happens if the lookup fails; you can obtain them by visiting
+[this link](https://b3ck.com/kick/info/).
 
 ```json
   "chat": {
@@ -398,7 +439,57 @@ When configuring NOALBS to use Kick, you need to specify the `channelId` and `ch
     "language": "EN",
 ```
 
- - PLEASE NOTE: NOALBS Can read Kick chat but cannot respond back in chat as the released Kick Public API is limited.
+#### Letting NOALBS answer in Kick chat
+
+Set up your Kick application first, see [Configure NOALBS](#configure-noalbs).
+With `KICK_CLIENT_ID`, `KICK_CLIENT_SECRET` and a `refreshToken` in place the
+config looks like this:
+
+```json
+  "chat": {
+    "platform": {
+      "Kick": {
+        "refreshToken": "(REFRESH TOKEN WITH THE chat:write SCOPE)",
+        "sendAs": "bot"
+      }
+    },
+    "username": "b3ck",
+```
+
+`sendAs` picks how the message is attributed:
+
+- `"bot"` (default): posts in the channel of the token's owner with the bot
+  badge, using the identity of your application. This requires the Kick account
+  that owns the application to have created its bot account (Settings ->
+  Developer -> your application). Without it Kick answers `500` to every send,
+  and NOALBS logs a hint saying so.
+- `"user"`: posts as the account that owns the token, which may write to any
+  channel. Use this one to run a single shared bot account, the way the Twitch
+  integration works. The target channel is `broadcasterUserId`, resolved from
+  the slug when it is not set.
+
+Without `refreshToken`, or without the two environment variables, NOALBS reads
+Kick chat and stays silent.
+
+`channelId` and `chatroomId` are looked up from the `username` when they are
+missing, so you only need them if that lookup fails.
+
+Kick hands out a new refresh token every time the old one is used, and NOALBS
+writes it back to your config file. If that file is read-only, which is what
+happens when it comes from a Kubernetes ConfigMap, point `NOALBS_STATE_DIR` at
+a writable directory instead:
+
+```env
+NOALBS_STATE_DIR=/var/lib/noalbs
+```
+
+The config file is then only the seed. What NOALBS learns while running is kept
+in `<dir>/kick-<channel>.json` and wins on the next start. Losing that directory
+is not fatal, it falls back to the token in the config.
+
+With `CONFIG_DIR` one directory serves every profile, since each channel gets
+its own file. Two profiles naming the same Kick channel share one connection and
+only one of them answers its chat; NOALBS warns when that happens.
 
 ### Example for Twitch
 
