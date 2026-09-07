@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: "Ошибка: аргументы заданы неверно"
 sceneSwitch:
     switch: Сцена переключена на "%{scene}"
+    downtimeUnknown: небольшой паузы
 offlineTimeout:
     timeout: Достигнут лимит времени ожидания, остановка стрима
 handleCommands:

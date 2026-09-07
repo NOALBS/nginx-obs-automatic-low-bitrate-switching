@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Erro nos argumentos enviados
 sceneSwitch:
     switch: Cena mudada para "%{scene}"
+    downtimeUnknown: um momento
 offlineTimeout:
     timeout: Tempo offline excedido, parando a stream
 handleCommands:

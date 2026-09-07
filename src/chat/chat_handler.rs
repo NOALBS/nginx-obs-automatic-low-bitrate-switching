@@ -174,16 +174,44 @@ impl ChatHandler {
             .get_user_by_chat_platform(&ss.channel, &ss.platform)
             .await?;
         let lang = &user.chat_language().await.unwrap().to_string();
-        let mut msg = t!("sceneSwitch.switch", locale = lang, scene = &ss.scene);
 
-        use switcher::SwitchType::*;
-        match ss.switch_type {
-            Normal | Low => {
-                let bitrate = bitrate_msg(&user, lang).await;
-                let _ = write!(msg, " | {}", bitrate);
+        let template = {
+            let state = user.state.read().await;
+            state
+                .config
+                .switcher
+                .switch_notifications
+                .messages
+                .get(&ss.switch_type)
+                .map(str::to_owned)
+        };
+
+        let msg = if let Some(template) = template {
+            let bitrate = if template.contains("{bitrate}") {
+                bitrate_msg(&user, lang).await
+            } else {
+                String::new()
+            };
+            let downtime = match ss.downtime {
+                Some(downtime) => format_downtime(downtime),
+                None => t!("sceneSwitch.downtimeUnknown", locale = lang),
+            };
+
+            render_switch_message(&template, &ss.scene, &bitrate, &downtime)
+        } else {
+            let mut msg = t!("sceneSwitch.switch", locale = lang, scene = &ss.scene);
+
+            use switcher::SwitchType::*;
+            match ss.switch_type {
+                Normal | Low => {
+                    let bitrate = bitrate_msg(&user, lang).await;
+                    let _ = write!(msg, " | {}", bitrate);
+                }
+                Previous | Offline => {}
             }
-            Previous | Offline => {}
-        }
+
+            msg
+        };
 
         sender.send_message(ss.channel, msg).await;
 
@@ -1572,6 +1600,26 @@ async fn bitrate_msg(user: &Noalbs, lang: &str) -> String {
     msg
 }
 
+/// Fills in the placeholders of a custom switch notification
+fn render_switch_message(template: &str, scene: &str, bitrate: &str, downtime: &str) -> String {
+    template
+        .replace("{scene}", scene)
+        .replace("{bitrate}", bitrate)
+        .replace("{downtime}", downtime)
+}
+
+/// Formats a downtime like `1h 2m 3s`, `2m 5s` or `45s`
+fn format_downtime(downtime: std::time::Duration) -> String {
+    let secs = downtime.as_secs();
+    let (hours, minutes, seconds) = (secs / 3600, secs % 3600 / 60, secs % 60);
+
+    match (hours, minutes) {
+        (0, 0) => format!("{seconds}s"),
+        (0, _) => format!("{minutes}m {seconds}s"),
+        _ => format!("{hours}h {minutes}m {seconds}s"),
+    }
+}
+
 #[derive(Debug)]
 pub struct Timeout {
     pub channel: String,
@@ -1650,4 +1698,34 @@ struct M3u8Query {
 struct StreamPlaybackAccessToken {
     value: String,
     signature: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn downtime_formats() {
+        assert_eq!(format_downtime(Duration::from_secs(0)), "0s");
+        assert_eq!(format_downtime(Duration::from_secs(45)), "45s");
+        assert_eq!(format_downtime(Duration::from_secs(125)), "2m 5s");
+        assert_eq!(format_downtime(Duration::from_secs(3723)), "1h 2m 3s");
+    }
+
+    #[test]
+    fn switch_message_placeholders() {
+        let msg = render_switch_message(
+            "Back on {scene} after {downtime} | {bitrate}",
+            "Live1",
+            "BELABOX cloud: 3000 Kbps",
+            "1m 20s",
+        );
+
+        assert_eq!(msg, "Back on Live1 after 1m 20s | BELABOX cloud: 3000 Kbps");
+        assert_eq!(
+            render_switch_message("Hang tight", "BRB", "", ""),
+            "Hang tight"
+        );
+    }
 }

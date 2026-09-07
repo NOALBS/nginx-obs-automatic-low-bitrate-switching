@@ -3,7 +3,7 @@ use std::{collections::HashSet, sync::Arc};
 use serde::Serialize;
 use tokio::sync::{Notify, mpsc};
 
-use crate::{broadcasting_software::BroadcastingSoftwareLogic, config};
+use crate::{broadcasting_software::BroadcastingSoftwareLogic, config, switcher};
 
 pub struct State {
     pub config: config::Config,
@@ -67,6 +67,15 @@ pub struct SwitcherState {
     /// All switchable scenes
     pub switchable_scenes: HashSet<String>,
 
+    /// The switch type the switcher last decided on
+    pub last_switch_type: Option<switcher::SwitchType>,
+
+    /// The switch type that was last announced in chat
+    pub announced_switch_type: Option<switcher::SwitchType>,
+
+    /// When the switcher left the live scene, until it is back on live
+    pub left_live_at: Option<std::time::Instant>,
+
     switcher_enabled_notifier: Arc<Notify>,
 }
 
@@ -86,6 +95,9 @@ impl Default for SwitcherState {
             last_used_server: None,
             switcher_enabled_notifier: Arc::new(Notify::new()),
             switchable_scenes: HashSet::new(),
+            last_switch_type: None,
+            announced_switch_type: None,
+            left_live_at: None,
         }
     }
 }

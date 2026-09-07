@@ -236,7 +236,7 @@ impl Switcher {
 
         drop(state);
 
-        {
+        let downtime = {
             let mut state = self.state.write().await;
 
             state.set_current_scene(current_scene);
@@ -250,9 +250,27 @@ impl Switcher {
                 debug!("Last used server set to {:?}", server_name);
                 state.switcher_state.last_used_server = server_name;
             }
-        }
 
-        self.switch_if_necessary(&scene, current_switch_type)
+            state.switcher_state.last_switch_type = Some(current_switch_type);
+
+            // Track how long the live scene is gone for the chat notification
+            match current_switch_type {
+                SwitchType::Low | SwitchType::Offline => {
+                    state
+                        .switcher_state
+                        .left_live_at
+                        .get_or_insert_with(std::time::Instant::now);
+                    None
+                }
+                SwitchType::Normal | SwitchType::Previous => state
+                    .switcher_state
+                    .left_live_at
+                    .take()
+                    .map(|left| left.elapsed()),
+            }
+        };
+
+        self.switch_if_necessary(&scene, current_switch_type, downtime)
             .await?;
 
         Ok(())
@@ -314,13 +332,14 @@ impl Switcher {
         &self,
         switch_scene: &str,
         switch_type: SwitchType,
+        downtime: Option<Duration>,
     ) -> Result<(), error::Error> {
         debug!(
             "Switch scene: {} Switch type: {:?}",
             switch_scene, switch_type
         );
 
-        let state = &self.state.read().await;
+        let state = self.state.read().await;
 
         let bsc = state
             .broadcasting_software
@@ -373,23 +392,30 @@ impl Switcher {
 
         info!("Scene switched to [{:?}] {}", switch_type, switch_scene);
 
-        if state.broadcasting_software.is_streaming
+        let notification = if state.broadcasting_software.is_streaming
             && state.config.switcher.auto_switch_notification
             && let Some(chat) = &state.config.chat
         {
-            let message =
-                chat::HandleMessage::AutomaticSwitchingScene(chat::AutomaticSwitchingScene {
-                    platform: chat.platform.kind(),
-                    channel: chat.username.to_owned(),
-                    scene: switch_scene.to_owned(),
-                    switch_type,
-                });
+            Some(chat::AutomaticSwitchingScene {
+                platform: chat.platform.kind(),
+                channel: chat.username.to_owned(),
+                scene: switch_scene.to_owned(),
+                switch_type,
+                downtime,
+            })
+        } else {
+            None
+        };
 
-            let _ = self.chat_sender.send(message).await;
+        drop(state);
+
+        if let Some(notification) = notification {
+            self.announce_switch(notification).await;
         }
 
         // In case there's a scene transition set that's longer than the time it takes to retrigger
         // noalbs switching, this will block the switcher until the transition has completed.
+        let state = self.state.read().await;
         if let Err(error) = state
             .broadcasting_software
             .connection
@@ -402,6 +428,77 @@ impl Switcher {
         }
 
         Ok(())
+    }
+
+    /// Sends the chat notification for a switch.
+    ///
+    /// With `announceAfterSeconds` set, low and offline are only announced
+    /// when they last that long, and the switch back to live only when the
+    /// drop before it was announced, so that short dips stay quiet.
+    async fn announce_switch(&self, notification: chat::AutomaticSwitchingScene) {
+        let switch_type = notification.switch_type;
+        let delay = {
+            let state = self.state.read().await;
+            state
+                .config
+                .switcher
+                .switch_notifications
+                .announce_after_seconds
+        };
+
+        if delay == 0 {
+            self.state
+                .write()
+                .await
+                .switcher_state
+                .announced_switch_type = Some(switch_type);
+            let message = chat::HandleMessage::AutomaticSwitchingScene(notification);
+            let _ = self.chat_sender.send(message).await;
+            return;
+        }
+
+        if let SwitchType::Normal | SwitchType::Previous = switch_type {
+            let mut state = self.state.write().await;
+
+            if !matches!(
+                state.switcher_state.announced_switch_type,
+                Some(SwitchType::Low | SwitchType::Offline)
+            ) {
+                debug!("Not announcing the switch back to live, the drop was not announced");
+                return;
+            }
+
+            state.switcher_state.announced_switch_type = Some(switch_type);
+            drop(state);
+
+            let message = chat::HandleMessage::AutomaticSwitchingScene(notification);
+            let _ = self.chat_sender.send(message).await;
+            return;
+        }
+
+        let state = self.state.clone();
+        let chat_sender = self.chat_sender.clone();
+
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_secs(delay)).await;
+
+            {
+                let mut state = state.write().await;
+
+                if state.switcher_state.last_switch_type != Some(switch_type) {
+                    debug!(
+                        "Not announcing {:?}, it was over within {} seconds",
+                        switch_type, delay
+                    );
+                    return;
+                }
+
+                state.switcher_state.announced_switch_type = Some(switch_type);
+            }
+
+            let message = chat::HandleMessage::AutomaticSwitchingScene(notification);
+            let _ = chat_sender.send(message).await;
+        });
     }
 }
 
@@ -514,4 +611,150 @@ pub enum SwitchType {
     Low,
     Previous,
     Offline,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{config, state};
+    use tokio::sync::{RwLock, mpsc};
+
+    fn switcher(announce_after_seconds: u64) -> (Switcher, mpsc::Receiver<chat::HandleMessage>) {
+        let config = config::Config {
+            user: config::User {
+                id: None,
+                name: "test".to_string(),
+                password_hash: None,
+            },
+            switcher: config::Switcher {
+                switch_notifications: config::SwitchNotifications {
+                    announce_after_seconds,
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            software: config::SoftwareConnection::Obs(config::ObsConfig {
+                host: "localhost".to_string(),
+                password: None,
+                port: 4455,
+                collections: None,
+            }),
+            chat: None,
+            optional_scenes: Default::default(),
+            optional_options: Default::default(),
+            log_to_file: false,
+        };
+
+        let state = Arc::new(RwLock::new(state::State {
+            config,
+            switcher_state: Default::default(),
+            broadcasting_software: Default::default(),
+            event_senders: Vec::new(),
+        }));
+        let (chat_sender, receiver) = mpsc::channel(8);
+
+        (Switcher { state, chat_sender }, receiver)
+    }
+
+    fn notification(
+        switch_type: SwitchType,
+        downtime: Option<Duration>,
+    ) -> chat::AutomaticSwitchingScene {
+        chat::AutomaticSwitchingScene {
+            platform: chat::ChatPlatform::Twitch,
+            channel: "test".to_string(),
+            scene: format!("{switch_type:?}"),
+            switch_type,
+            downtime,
+        }
+    }
+
+    async fn decide(switcher: &Switcher, switch_type: SwitchType) {
+        switcher.state.write().await.switcher_state.last_switch_type = Some(switch_type);
+    }
+
+    fn announced(receiver: &mut mpsc::Receiver<chat::HandleMessage>) -> Option<SwitchType> {
+        match receiver.try_recv() {
+            Ok(chat::HandleMessage::AutomaticSwitchingScene(s)) => Some(s.switch_type),
+            _ => None,
+        }
+    }
+
+    #[tokio::test]
+    async fn announces_right_away_without_delay() {
+        let (switcher, mut receiver) = switcher(0);
+
+        decide(&switcher, SwitchType::Low).await;
+        switcher
+            .announce_switch(notification(SwitchType::Low, None))
+            .await;
+
+        assert_eq!(announced(&mut receiver), Some(SwitchType::Low));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn short_dip_stays_quiet() {
+        let (switcher, mut receiver) = switcher(10);
+
+        decide(&switcher, SwitchType::Low).await;
+        switcher
+            .announce_switch(notification(SwitchType::Low, None))
+            .await;
+        tokio::time::sleep(Duration::from_secs(3)).await;
+
+        decide(&switcher, SwitchType::Normal).await;
+        switcher
+            .announce_switch(notification(
+                SwitchType::Normal,
+                Some(Duration::from_secs(3)),
+            ))
+            .await;
+        tokio::time::sleep(Duration::from_secs(20)).await;
+
+        assert_eq!(announced(&mut receiver), None);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn long_drop_and_the_recovery_are_announced() {
+        let (switcher, mut receiver) = switcher(10);
+
+        decide(&switcher, SwitchType::Offline).await;
+        switcher
+            .announce_switch(notification(SwitchType::Offline, None))
+            .await;
+        tokio::time::sleep(Duration::from_secs(9)).await;
+        assert_eq!(announced(&mut receiver), None);
+
+        tokio::time::sleep(Duration::from_secs(2)).await;
+        assert_eq!(announced(&mut receiver), Some(SwitchType::Offline));
+
+        decide(&switcher, SwitchType::Normal).await;
+        switcher
+            .announce_switch(notification(
+                SwitchType::Normal,
+                Some(Duration::from_secs(80)),
+            ))
+            .await;
+        assert_eq!(announced(&mut receiver), Some(SwitchType::Normal));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn drop_that_changes_kind_is_announced_once() {
+        let (switcher, mut receiver) = switcher(10);
+
+        decide(&switcher, SwitchType::Low).await;
+        switcher
+            .announce_switch(notification(SwitchType::Low, None))
+            .await;
+        tokio::time::sleep(Duration::from_secs(4)).await;
+
+        decide(&switcher, SwitchType::Offline).await;
+        switcher
+            .announce_switch(notification(SwitchType::Offline, None))
+            .await;
+        tokio::time::sleep(Duration::from_secs(20)).await;
+
+        assert_eq!(announced(&mut receiver), Some(SwitchType::Offline));
+        assert_eq!(announced(&mut receiver), None);
+    }
 }

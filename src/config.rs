@@ -52,6 +52,9 @@ pub struct Switcher {
     /// Enable auto switch chat notification
     pub auto_switch_notification: bool,
 
+    /// When and what the auto switch chat notifications say
+    pub switch_notifications: SwitchNotifications,
+
     /// Max attempts to poll the bitrate every second on low bitrate / offline.
     /// This will be used to make sure the stream is actually in a low / offline
     /// bitrate state
@@ -144,6 +147,7 @@ impl Default for Switcher {
             only_switch_when_streaming: true,
             instantly_switch_on_recover: true,
             auto_switch_notification: true,
+            switch_notifications: SwitchNotifications::default(),
             triggers: switcher::Triggers::default(),
             stream_servers: Vec::new(),
             switching_scenes: switcher::SwitchingScenes {
@@ -153,6 +157,39 @@ impl Default for Switcher {
             },
             additional_switching_scenes: Vec::new(),
             retry_attempts: MAX_LOW_RETRY,
+        }
+    }
+}
+
+/// When and what the auto switch chat notifications say
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SwitchNotifications {
+    /// Seconds a low or offline switch has to last before it is announced,
+    /// so that short dips stay quiet. 0 announces every switch right away.
+    /// The switch back to live is only announced when the drop before it
+    /// was announced.
+    pub announce_after_seconds: u64,
+
+    /// Messages to use instead of the built in ones. `{scene}`, `{bitrate}`
+    /// and `{downtime}` get replaced.
+    pub messages: SwitchMessages,
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SwitchMessages {
+    pub normal: Option<String>,
+    pub low: Option<String>,
+    pub offline: Option<String>,
+}
+
+impl SwitchMessages {
+    pub fn get(&self, switch_type: &switcher::SwitchType) -> Option<&str> {
+        match switch_type {
+            switcher::SwitchType::Normal | switcher::SwitchType::Previous => self.normal.as_deref(),
+            switcher::SwitchType::Low => self.low.as_deref(),
+            switcher::SwitchType::Offline => self.offline.as_deref(),
         }
     }
 }
@@ -800,6 +837,54 @@ mod tests {
         assert!(switcher.additional_switching_scenes.is_empty());
         assert_eq!(switcher.scene_sets().count(), 1);
         assert_eq!(switcher.active_switching_scenes("BRB", "").normal, "Live");
+    }
+
+    #[test]
+    fn switch_notifications_default_when_absent() {
+        let switcher: Switcher = serde_json::from_str("{}").unwrap();
+        let notifications = &switcher.switch_notifications;
+
+        assert_eq!(notifications.announce_after_seconds, 0);
+        assert!(
+            notifications
+                .messages
+                .get(&switcher::SwitchType::Normal)
+                .is_none()
+        );
+        assert!(
+            notifications
+                .messages
+                .get(&switcher::SwitchType::Low)
+                .is_none()
+        );
+        assert!(
+            notifications
+                .messages
+                .get(&switcher::SwitchType::Offline)
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn switch_messages_per_type() {
+        let json = r#"{"switchNotifications": {"announceAfterSeconds": 10, "messages": {"normal": "back", "offline": "gone"}}}"#;
+        let switcher: Switcher = serde_json::from_str(json).unwrap();
+        let notifications = &switcher.switch_notifications;
+
+        assert_eq!(notifications.announce_after_seconds, 10);
+        assert_eq!(
+            notifications.messages.get(&switcher::SwitchType::Normal),
+            Some("back")
+        );
+        assert_eq!(
+            notifications.messages.get(&switcher::SwitchType::Previous),
+            Some("back")
+        );
+        assert_eq!(notifications.messages.get(&switcher::SwitchType::Low), None);
+        assert_eq!(
+            notifications.messages.get(&switcher::SwitchType::Offline),
+            Some("gone")
+        );
     }
 
     #[test]

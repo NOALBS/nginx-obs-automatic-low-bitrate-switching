@@ -96,6 +96,7 @@ Do you offer a similar solution or paid service? Want your link here? Message [@
 
 - [Depends on](#depends-on)
 - [Multiple live scenes](#multiple-live-scenes)
+- [Switch notifications](#switch-notifications)
 - [Languages](#languages)
 - [Building from source](#building-from-source)
 - [FAQ](#faq)
@@ -238,6 +239,14 @@ The `config.json` file holds all the user configurations.
     "onlySwitchWhenStreaming": false,               // Enable or Disable the requirement switching only if OBS has streaming active.
     "instantlySwitchOnRecover": true,               // Bypass retryAttempts and instantly switch to live on bitrate recovery.
     "autoSwitchNotification": true,                 // Enable or Disable chat notifications when auto switching scenes.
+    "switchNotifications": {                        // Optional, explained here: https://github.com/715209/nginx-obs-automatic-low-bitrate-switching#switch-notifications
+      "announceAfterSeconds": 0,                    // Only announce low/offline when it lasts this many seconds. 0 announces every switch right away.
+      "messages": {                                 // Custom messages, null keeps the built in one. {scene}, {bitrate} and {downtime} get replaced.
+        "normal": null,
+        "low": null,
+        "offline": null
+      }
+    },
     "retryAttempts": 5,                             // Number of consecutive bitrate checks before switching scenes. NOALBS checks once per second, so 5 = ~5 seconds before switching.
     "triggers": {
       "low": 500,                                   // Low Bitrate threshold in kbps.
@@ -826,6 +835,28 @@ If you use more than one live scene, each with its own low scene, add `additiona
 - A low scene that only one set uses also selects that set, so NOALBS can be started while OBS is on a low scene.
 - `!live` switches to the live scene of the set in use.
 - `overrideScenes` and `backupScenes` on a stream server still replace the scenes when they apply.
+
+</details>
+
+## Switch notifications
+<details>
+<summary>Click to view the switch notifications section</summary>
+
+With `autoSwitchNotification` on, NOALBS posts in chat every time it switches scenes. The `switchNotifications` section in `switcher` controls when that happens and what it says.
+
+```JSON
+"switchNotifications": {
+  "announceAfterSeconds": 10,
+  "messages": {
+    "normal": "And we're back after {downtime}! {bitrate}",
+    "low": "Signal is weak, switching to the low quality scene for a bit",
+    "offline": "Lost the connection, hang tight"
+  }
+}
+```
+
+- `announceAfterSeconds`: a low or offline switch is only announced when it lasts this many seconds, so short dips stay quiet. The switch back to live is only announced when the drop before it was announced. 0 announces every switch right away.
+- `messages`: the text to post per switch type. Leave one at `null` to keep the built in message. `{scene}` becomes the scene name, `{bitrate}` the same readout as `!bitrate`, and `{downtime}` how long the live scene was gone, for example `1m 20s`.
 
 </details>
 
