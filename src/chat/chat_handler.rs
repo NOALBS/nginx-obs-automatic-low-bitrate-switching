@@ -1206,14 +1206,22 @@ impl DispatchCommand {
         }
     }
 
-    // TODO: Actually switch to the right scene
     async fn live_scene(&self) {
-        let state = self.user.state.read().await;
-        let scene = &state.config.switcher.switching_scenes.normal;
+        let scene = {
+            let state = self.user.state.read().await;
+            let bs = &state.broadcasting_software;
+
+            state
+                .config
+                .switcher
+                .active_switching_scenes(&bs.current_scene, &bs.prev_scene)
+                .normal
+                .to_owned()
+        };
 
         self.send(t!("scene.success", locale = &self.lang, scene = "live"))
             .await;
-        self.switch(Some(scene)).await;
+        self.switch(Some(&scene)).await;
     }
 
     async fn source_info<'a, I>(&self, server_name: I)

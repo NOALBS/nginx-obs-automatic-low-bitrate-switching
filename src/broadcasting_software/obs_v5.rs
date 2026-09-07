@@ -86,7 +86,7 @@ impl Obsv5 {
                             .notify_waiters();
                     }
 
-                    l.broadcasting_software.current_scene = name;
+                    l.set_current_scene(name);
                 }
                 Event::StreamStateChanged { active, .. } => {
                     let mut l = user_state.write().await;
@@ -678,11 +678,12 @@ impl InnerConnection {
 
             {
                 let state = &mut self.state.write().await;
-                let bs = &mut state.broadcasting_software;
 
                 if let Ok(s) = client.scenes().current_program_scene().await {
-                    bs.current_scene = s.id.name;
+                    state.set_current_scene(s.id.name);
                 }
+
+                let bs = &mut state.broadcasting_software;
 
                 if let Ok(s) = client.streaming().status().await {
                     bs.is_streaming = s.active;

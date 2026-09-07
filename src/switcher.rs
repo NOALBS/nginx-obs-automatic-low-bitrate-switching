@@ -210,10 +210,18 @@ impl Switcher {
             }
         }
 
+        // Ask OBS which scene is showing since the cached scene can lag behind
+        let current_scene = match &state.broadcasting_software.connection {
+            Some(bsc) => bsc.current_scene().await.ok(),
+            None => None,
+        }
+        .unwrap_or_else(|| state.broadcasting_software.current_scene.to_owned());
+
         let scenes = if let Some(scenes) = get_optional_scenes(server, &state).await {
             scenes
         } else {
-            &switcher_config.switching_scenes
+            switcher_config
+                .active_switching_scenes(&current_scene, &state.broadcasting_software.prev_scene)
         };
 
         let scene = if let SwitchType::Previous = &current_switch_type {
@@ -231,8 +239,10 @@ impl Switcher {
         {
             let mut state = self.state.write().await;
 
-            // Set the previous scene when switch_type is normal or low
-            if let SwitchType::Normal | SwitchType::Low = current_switch_type {
+            state.set_current_scene(current_scene);
+
+            // Remember the live scene so that low and offline return to it
+            if let SwitchType::Normal = current_switch_type {
                 scene.clone_into(&mut state.broadcasting_software.prev_scene);
             };
 

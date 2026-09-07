@@ -17,10 +17,11 @@ impl State {
     pub fn set_all_switchable_scenes(&mut self) {
         let all_scenes = &mut self.switcher_state.switchable_scenes;
 
-        let scenes = &self.config.switcher.switching_scenes;
-        all_scenes.insert(scenes.low.to_owned());
-        all_scenes.insert(scenes.normal.to_owned());
-        all_scenes.insert(scenes.offline.to_owned());
+        for scenes in self.config.switcher.scene_sets() {
+            all_scenes.insert(scenes.low.to_owned());
+            all_scenes.insert(scenes.normal.to_owned());
+            all_scenes.insert(scenes.offline.to_owned());
+        }
 
         for servers in &self.config.switcher.stream_servers {
             if let Some(scenes) = &servers.override_scenes {
@@ -45,6 +46,18 @@ impl State {
         {
             all_scenes.insert(starting_scene.to_owned());
         }
+    }
+
+    /// Sets the scene that is currently showing.
+    ///
+    /// A live scene is also remembered as the scene to return to, so that
+    /// recovering from low or offline goes back to the scene set in use.
+    pub fn set_current_scene(&mut self, scene: String) {
+        if self.config.switcher.is_live_scene(&scene) {
+            scene.clone_into(&mut self.broadcasting_software.prev_scene);
+        }
+
+        self.broadcasting_software.current_scene = scene;
     }
 }
 
@@ -78,6 +91,7 @@ impl Default for SwitcherState {
 }
 
 pub struct BroadcastingSoftwareState {
+    /// The live scene that was shown last
     pub prev_scene: String,
     pub current_scene: String,
     pub status: ClientStatus,
