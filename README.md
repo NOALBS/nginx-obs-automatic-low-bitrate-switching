@@ -625,11 +625,15 @@ For more details, refer to the [MediaMTX documentation](https://github.com/bluen
 ```JSON
   "streamServer": {
     "type": "Rist",
-    "statsUrl": "http://localhost:8681/stats"
+    "statsUrl": "http://localhost:8681/stats",
+    "multipath": true
   },
 ```
 
 - `statsUrl`: URL to RIST stats page (ex; <http://localhost:8681/stats> )
+- `multipath`: Optional. Set to `true` for bonded RIST inputs. NOALBS then uses the
+  flow payload bitrate and weights peer RTT by current peer traffic, so an idle or
+  low-traffic degraded path cannot trigger a scene change for a healthy flow.
 
 ---
 

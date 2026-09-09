@@ -20,11 +20,20 @@ pub struct ReceiverStats {
 #[derive(Deserialize, Debug)]
 pub struct Flowinstant {
     peers: Vec<Peer>,
+    stats: Option<FlowStats>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Peer {
+    #[serde(default)]
+    dead: usize,
     stats: PeerStats,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct FlowStats {
+    bitrate: Option<usize>,
+    bitrate_payload: Option<usize>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -40,6 +49,10 @@ pub struct PeerStats {
 pub struct Rist {
     /// URL to RIST stats page
     pub stats_url: String,
+
+    /// Use flow-level payload bitrate and traffic-weighted RTT for multipath sessions.
+    #[serde(default)]
+    pub multipath: bool,
 
     /// Client to make HTTP requests with
     #[serde(skip, default = "default_reqwest_client")]
@@ -72,56 +85,141 @@ impl Rist {
         trace!("{:#?}", stream);
         Some(stream)
     }
+
+    fn metrics(&self, flow: &Flowinstant) -> RistMetrics {
+        if self.multipath {
+            multipath_metrics(flow)
+        } else {
+            legacy_metrics(flow)
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+struct RistMetrics {
+    bitrate_kbps: u32,
+    rtt_ms: f64,
+}
+
+fn legacy_metrics(flow: &Flowinstant) -> RistMetrics {
+    let bitrate_bps = flow
+        .peers
+        .iter()
+        .map(|peer| peer.stats.bitrate)
+        .sum::<usize>();
+    let rtt_ms = mean_rtt(flow.peers.iter().map(|peer| peer.stats.rtt));
+
+    RistMetrics {
+        bitrate_kbps: to_kbps(bitrate_bps),
+        rtt_ms,
+    }
+}
+
+fn multipath_metrics(flow: &Flowinstant) -> RistMetrics {
+    let active_peers = flow
+        .peers
+        .iter()
+        .filter(|peer| peer.dead == 0 && peer.stats.bitrate > 0)
+        .collect::<Vec<_>>();
+
+    let peer_bitrate_bps = active_peers
+        .iter()
+        .map(|peer| peer.stats.bitrate)
+        .sum::<usize>();
+    let bitrate_bps = flow
+        .stats
+        .as_ref()
+        .and_then(|stats| stats.bitrate_payload.or(stats.bitrate))
+        .unwrap_or(peer_bitrate_bps);
+
+    let weighted_rtt = active_peers
+        .iter()
+        .filter(|peer| peer.stats.rtt.is_finite() && peer.stats.rtt >= 0.0)
+        .fold((0.0, 0usize), |(weighted_sum, bitrate_sum), peer| {
+            (
+                weighted_sum + peer.stats.rtt * peer.stats.bitrate as f64,
+                bitrate_sum.saturating_add(peer.stats.bitrate),
+            )
+        });
+    let rtt_ms = if weighted_rtt.1 > 0 {
+        weighted_rtt.0 / weighted_rtt.1 as f64
+    } else {
+        mean_rtt(
+            flow.peers
+                .iter()
+                .filter(|peer| peer.dead == 0)
+                .map(|peer| peer.stats.rtt),
+        )
+    };
+
+    RistMetrics {
+        bitrate_kbps: to_kbps(bitrate_bps),
+        rtt_ms,
+    }
+}
+
+fn mean_rtt(values: impl Iterator<Item = f64>) -> f64 {
+    let (sum, count) = values
+        .filter(|rtt| rtt.is_finite() && *rtt >= 0.0)
+        .fold((0.0, 0usize), |(sum, count), rtt| (sum + rtt, count + 1));
+
+    if count == 0 { 0.0 } else { sum / count as f64 }
+}
+
+fn to_kbps(bitrate_bps: usize) -> u32 {
+    u32::try_from(bitrate_bps / 1024).unwrap_or(u32::MAX)
+}
+
+fn classify(metrics: &RistMetrics, triggers: &Triggers) -> SwitchType {
+    let bitrate = metrics.bitrate_kbps;
+    let rtt = metrics.rtt_ms;
+
+    if let Some(offline) = triggers.offline
+        && bitrate > 0
+        && bitrate <= offline
+    {
+        return SwitchType::Offline;
+    }
+
+    if let Some(rtt_offline) = triggers.rtt_offline
+        && rtt >= rtt_offline.into()
+    {
+        return SwitchType::Offline;
+    }
+
+    if bitrate == 0 {
+        return SwitchType::Offline;
+    }
+
+    if let Some(low) = triggers.low
+        && bitrate <= low
+    {
+        return SwitchType::Low;
+    }
+
+    if let Some(rtt_trigger) = triggers.rtt
+        && rtt >= rtt_trigger.into()
+    {
+        return SwitchType::Low;
+    }
+
+    SwitchType::Normal
 }
 
 #[async_trait]
 #[typetag::serde]
 impl SwitchLogic for Rist {
     async fn switch(&self, triggers: &Triggers) -> SwitchType {
-        let stats = match self
+        let flow = match self
             .get_stats()
             .await
             .and_then(|stats| stats.receiver_stats)
         {
-            Some(s) => s.flowinstant.peers,
+            Some(stats) => stats.flowinstant,
             None => return SwitchType::Offline,
         };
-
-        let bitrate: u32 = (stats.iter().map(|p| p.stats.bitrate).sum::<usize>() / 1024)
-            .try_into()
-            .unwrap();
-        let rtt = stats.iter().map(|p| p.stats.rtt).sum::<f64>() / stats.len() as f64;
-
-        if let Some(offline) = triggers.offline
-            && bitrate > 0
-            && bitrate <= offline
-        {
-            return SwitchType::Offline;
-        }
-
-        if let Some(rtt_offline) = triggers.rtt_offline
-            && rtt >= rtt_offline.into()
-        {
-            return SwitchType::Offline;
-        }
-
-        if bitrate == 0 {
-            return SwitchType::Offline;
-        }
-
-        if let Some(low) = triggers.low
-            && bitrate <= low
-        {
-            return SwitchType::Low;
-        }
-
-        if let Some(rtt_trigger) = triggers.rtt
-            && rtt >= rtt_trigger.into()
-        {
-            return SwitchType::Low;
-        }
-
-        SwitchType::Normal
+        let metrics = self.metrics(&flow);
+        classify(&metrics, triggers)
     }
 }
 
@@ -129,19 +227,17 @@ impl SwitchLogic for Rist {
 #[typetag::serde]
 impl StreamServersCommands for Rist {
     async fn bitrate(&self) -> super::Bitrate {
-        let stats = match self
+        let flow = match self
             .get_stats()
             .await
             .and_then(|stats| stats.receiver_stats)
         {
-            Some(s) => s.flowinstant.peers,
+            Some(stats) => stats.flowinstant,
             None => return super::Bitrate { message: None },
         };
-
-        let bitrate: u32 = (stats.iter().map(|p| p.stats.bitrate).sum::<usize>() / 1024)
-            .try_into()
-            .unwrap();
-        let rtt = stats.iter().map(|p| p.stats.rtt).sum::<f64>() / stats.len() as f64;
+        let metrics = self.metrics(&flow);
+        let bitrate = metrics.bitrate_kbps;
+        let rtt = metrics.rtt_ms;
 
         let message = format!("{}, {} ms", bitrate, rtt.round());
         super::Bitrate {
@@ -151,12 +247,10 @@ impl StreamServersCommands for Rist {
 
     // TODO: Add more fields.
     async fn source_info(&self) -> Option<String> {
-        let stats = self.get_stats().await?.receiver_stats?.flowinstant.peers;
-
-        let bitrate: u32 = (stats.iter().map(|p| p.stats.bitrate).sum::<usize>() / 1024)
-            .try_into()
-            .unwrap();
-        let rtt = stats.iter().map(|p| p.stats.rtt).sum::<f64>() / stats.len() as f64;
+        let flow = self.get_stats().await?.receiver_stats?.flowinstant;
+        let metrics = self.metrics(&flow);
+        let bitrate = metrics.bitrate_kbps;
+        let rtt = metrics.rtt_ms;
 
         let bitrate = format!("{} Kbps, {} ms", bitrate, rtt.round());
 
@@ -174,6 +268,14 @@ impl Bsl for Rist {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn flow_from_json(json: &str) -> Flowinstant {
+        serde_json::from_str::<RistStats>(json)
+            .unwrap()
+            .receiver_stats
+            .unwrap()
+            .flowinstant
+    }
 
     #[test]
     fn no_stream() {
@@ -204,4 +306,134 @@ mod tests {
         let peer_stats = &receiver_stats.flowinstant.peers[0].stats;
         assert_eq!(peer_stats.bitrate, 6651751, "Bitrate should be 6651751");
     }
+
+    #[test]
+    fn rist_config_defaults_to_legacy_metrics() {
+        let rist: Rist =
+            serde_json::from_str(r#"{"statsUrl":"http://localhost:8681/stats"}"#).unwrap();
+
+        assert!(!rist.multipath);
+    }
+
+    #[test]
+    fn legacy_metrics_keep_summing_peer_bitrate_and_averaging_rtt() {
+        let flow = flow_from_json(MULTIPATH_STATS);
+
+        let metrics = legacy_metrics(&flow);
+
+        assert_eq!(metrics.bitrate_kbps, 7_109);
+        assert!((metrics.rtt_ms - 73.171_614_689_821_08).abs() < 0.000_001);
+    }
+
+    #[test]
+    fn multipath_metrics_use_payload_bitrate_and_traffic_weighted_rtt() {
+        let flow = flow_from_json(MULTIPATH_STATS);
+
+        let metrics = multipath_metrics(&flow);
+
+        assert_eq!(metrics.bitrate_kbps, 5_870);
+        assert!((metrics.rtt_ms - 70.704_672_409_555_5).abs() < 0.000_001);
+    }
+
+    #[test]
+    fn low_traffic_high_rtt_peer_does_not_dominate_multipath_rtt() {
+        let flow = flow_from_json(
+            r#"{"receiver-stats":{"flowinstant":{"stats":{"bitrate_payload":7000000},"peers":[{"dead":0,"stats":{"rtt":50.0,"avg_rtt":50.0,"bitrate":6900000,"avg_bitrate":6900000}},{"dead":0,"stats":{"rtt":5000.0,"avg_rtt":5000.0,"bitrate":100000,"avg_bitrate":100000}}]}}}"#,
+        );
+
+        let metrics = multipath_metrics(&flow);
+
+        assert_eq!(metrics.bitrate_kbps, 6_835);
+        assert!((metrics.rtt_ms - 120.714_285_714_285_71).abs() < 0.000_001);
+    }
+
+    #[test]
+    fn dead_peer_is_excluded_from_multipath_fallback_metrics() {
+        let flow = flow_from_json(
+            r#"{"receiver-stats":{"flowinstant":{"peers":[{"dead":0,"stats":{"rtt":60.0,"avg_rtt":60.0,"bitrate":4000000,"avg_bitrate":4000000}},{"dead":1,"stats":{"rtt":9000.0,"avg_rtt":9000.0,"bitrate":8000000,"avg_bitrate":8000000}}]}}}"#,
+        );
+
+        let metrics = multipath_metrics(&flow);
+
+        assert_eq!(metrics.bitrate_kbps, 3_906);
+        assert_eq!(metrics.rtt_ms, 60.0);
+    }
+
+    #[test]
+    fn empty_peer_list_returns_offline_metrics_without_nan() {
+        let flow = flow_from_json(
+            r#"{"receiver-stats":{"flowinstant":{"stats":{"bitrate_payload":0},"peers":[]}}}"#,
+        );
+
+        let metrics = multipath_metrics(&flow);
+
+        assert_eq!(metrics.bitrate_kbps, 0);
+        assert_eq!(metrics.rtt_ms, 0.0);
+        assert!(metrics.rtt_ms.is_finite());
+    }
+
+    #[test]
+    fn healthy_multipath_flow_stays_normal_when_one_low_traffic_peer_has_high_rtt() {
+        let flow = flow_from_json(
+            r#"{"receiver-stats":{"flowinstant":{"stats":{"bitrate_payload":7000000},"peers":[{"dead":0,"stats":{"rtt":50.0,"avg_rtt":50.0,"bitrate":6900000,"avg_bitrate":6900000}},{"dead":0,"stats":{"rtt":5000.0,"avg_rtt":5000.0,"bitrate":100000,"avg_bitrate":100000}}]}}}"#,
+        );
+        let metrics = multipath_metrics(&flow);
+
+        assert_eq!(classify(&metrics, &Triggers::default()), SwitchType::Normal);
+    }
+
+    #[test]
+    fn actual_low_payload_switches_multipath_flow_to_low() {
+        let metrics = RistMetrics {
+            bitrate_kbps: 800,
+            rtt_ms: 50.0,
+        };
+
+        assert_eq!(classify(&metrics, &Triggers::default()), SwitchType::Low);
+    }
+
+    #[test]
+    fn zero_payload_switches_multipath_flow_offline() {
+        let metrics = RistMetrics {
+            bitrate_kbps: 0,
+            rtt_ms: 0.0,
+        };
+
+        assert_eq!(
+            classify(&metrics, &Triggers::default()),
+            SwitchType::Offline
+        );
+    }
+
+    const MULTIPATH_STATS: &str = r#"{
+        "receiver-stats": {
+            "flowinstant": {
+                "peers": [
+                    {
+                        "dead": 0,
+                        "stats": {
+                            "rtt": 54.974101780060245,
+                            "avg_rtt": 47.3954839757791,
+                            "bitrate": 4133725,
+                            "avg_bitrate": 3481568
+                        }
+                    },
+                    {
+                        "dead": 0,
+                        "stats": {
+                            "rtt": 91.3691273995819,
+                            "avg_rtt": 88.26277093630755,
+                            "bitrate": 3146749,
+                            "avg_bitrate": 2595381
+                        }
+                    }
+                ],
+                "stats": {
+                    "bitrate": 6011059,
+                    "bitrate_payload": 6011059
+                }
+            }
+        },
+        "schema_version": 5
+    }"#;
 }
