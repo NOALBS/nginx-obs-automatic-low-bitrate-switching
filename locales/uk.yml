@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: "Помилка: надано неправильні аргументи"
 sceneSwitch:
     switch: "Сцену перемкнуто на \"%{scene}\""
+    downtimeUnknown: невеликої паузи
 offlineTimeout:
     timeout: "Досягнуто граничного часу офлайн, зупинка стріму"
 handleCommands:

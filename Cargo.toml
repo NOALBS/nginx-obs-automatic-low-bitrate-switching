@@ -40,5 +40,8 @@ warp = "0.3"
 
 rust-i18n = "2.3"
 
+[dev-dependencies]
+tokio = { version = "1.10", features = ["test-util"] }
+
 [target.x86_64-unknown-linux-musl.dependencies]
 openssl = { version = "=0.10", features = ["vendored"] }

@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Error. Datos incorrectos
 sceneSwitch:
     switch: Escena cambiada a "%{scene}"
+    downtimeUnknown: un momento
 offlineTimeout:
     timeout: Tiempo de espera agotado, Deteniendo el stream
 handleCommands:

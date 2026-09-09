@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Errore mi e stato dato un argomento errato
 sceneSwitch:
     switch: la scena e stata cambiata a "%{scene}"
+    downtimeUnknown: un attimo
 offlineTimeout:
     timeout: Offline tempo limite raggiunto, fermiamo la diretta
 handleCommands:
