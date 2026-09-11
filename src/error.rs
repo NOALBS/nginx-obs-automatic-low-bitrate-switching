@@ -51,5 +51,8 @@ pub enum Error {
     NoServerInfo,
 
     #[error("No stream server found")]
-    NoStreamServerFound
+    NoStreamServerFound,
+
+    #[error("Kick API error: {0}")]
+    KickApi(String)
 }
