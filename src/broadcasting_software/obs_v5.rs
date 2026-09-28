@@ -9,13 +9,14 @@ use obws::{
     error::Error,
     events::Event,
     requests::{
+        general::CallVendorRequest,
         inputs::{self, InputId},
         scene_items::SetEnabled,
         scenes::SceneId,
     },
     responses::media_inputs::MediaState,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tokio::{
     sync::{self, Mutex, mpsc},
     time::{self, Instant},
@@ -202,7 +203,7 @@ async fn get_media_sources_rec(
         if let Some(ref input_kind) = item.input_kind
             && matches!(
                 input_kind.as_ref(),
-                "ffmpeg_source" | "vlc_source" | "irl_source"
+                "ffmpeg_source" | "vlc_source" | "irl_source" | "smooth_media_source"
             )
         {
             let status = match client
@@ -445,6 +446,18 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                         continue;
                     }
                 }
+                "smooth_media_source" => {
+                    let source = client
+                        .inputs()
+                        .settings::<SmoothMediaSource>(InputId::Name(&media.source_name))
+                        .await?;
+
+                    if let Some(input) = source.settings.input {
+                        (Vec::from([input.to_lowercase()]), FixMethod::VendorRestart)
+                    } else {
+                        continue;
+                    }
+                }
                 s => unimplemented!("Fix not implemented for {}", s),
             };
 
@@ -474,6 +487,26 @@ impl BroadcastingSoftwareLogic for Obsv5 {
                         .media_inputs()
                         .trigger_action(InputId::Name(&media.source_name), MediaAction::Restart)
                         .await?;
+                }
+                FixMethod::VendorRestart => {
+                    let response = client
+                        .general()
+                        .call_vendor_request::<_, SmoothMediaRestartResponse>(CallVendorRequest {
+                            vendor_name: "obs-smooth-media",
+                            request_type: "RestartSource",
+                            request_data: &SmoothMediaRestartRequest {
+                                source_name: &media.source_name,
+                            },
+                        })
+                        .await?;
+
+                    if !response.response_data.success {
+                        return Err(error::Error::ObsVendorRequest(
+                            response.response_data.error.unwrap_or_else(|| {
+                                "Smooth Media Source restart failed".to_string()
+                            }),
+                        ));
+                    }
                 }
             }
         }
@@ -850,6 +883,9 @@ enum FixMethod {
     /// applies them to the running stream, so writing settings it already
     /// has changes nothing; the restart has to be requested.
     MediaRestart,
+    /// Ask Smooth Media Source to restart through its obs-websocket vendor
+    /// request. Rewriting unchanged settings does not restart this source.
+    VendorRestart,
 }
 
 /// Settings specific to a **IRL** video source.
@@ -859,9 +895,58 @@ pub struct IrlSource {
     pub url: Option<String>,
 }
 
+/// Settings specific to a **Smooth Media Source** input.
+#[derive(Deserialize)]
+pub struct SmoothMediaSource {
+    /// URL of the remote stream.
+    pub input: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SmoothMediaRestartRequest<'a> {
+    source_name: &'a str,
+}
+
+#[derive(Deserialize)]
+struct SmoothMediaRestartResponse {
+    success: bool,
+    #[serde(default)]
+    error: Option<String>,
+}
+
 /// Single file as part of a [`Slideshow`].
 #[derive(Deserialize)]
 pub struct SlideshowFile {
     /// Location of the file to display.
     pub value: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SmoothMediaRestartRequest, SmoothMediaRestartResponse};
+
+    #[test]
+    fn smooth_media_restart_uses_vendor_field_names() {
+        let request = SmoothMediaRestartRequest {
+            source_name: "IRL feed",
+        };
+
+        assert_eq!(
+            serde_json::to_value(request).unwrap(),
+            serde_json::json!({ "sourceName": "IRL feed" })
+        );
+    }
+
+    #[test]
+    fn smooth_media_restart_reads_vendor_errors() {
+        let response: SmoothMediaRestartResponse = serde_json::from_value(serde_json::json!({
+            "success": false,
+            "error": "Source not found"
+        }))
+        .unwrap();
+
+        assert!(!response.success);
+        assert_eq!(response.error.as_deref(), Some("Source not found"));
+    }
 }
