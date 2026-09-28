@@ -228,6 +228,9 @@ pub struct AutomaticSwitchingScene {
     pub channel: String,
     pub scene: String,
     pub switch_type: switcher::SwitchType,
+
+    /// How long the live scene was gone, when switching back to it
+    pub downtime: Option<std::time::Duration>,
 }
 
 #[derive(Debug)]

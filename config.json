@@ -9,6 +9,14 @@
     "onlySwitchWhenStreaming": false,
     "instantlySwitchOnRecover": true,
     "autoSwitchNotification": true,
+    "switchNotifications": {
+      "announceAfterSeconds": 0,
+      "messages": {
+        "normal": null,
+        "low": null,
+        "offline": null
+      }
+    },
     "retryAttempts": 5,
     "triggers": {
       "low": 450,
@@ -20,6 +28,7 @@
       "low": "LOW",
       "offline": "BRB"
     },
+    "additionalSwitchingScenes": [],
     "streamServers": [
       {
         "streamServer": {

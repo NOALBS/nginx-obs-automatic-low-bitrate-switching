@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Error incorrect arguments given
 sceneSwitch:
     switch: Scene switched to "%{scene}"
+    downtimeUnknown: a bit
 offlineTimeout:
     timeout: Offline timeout reached, stopping the stream
 handleCommands:

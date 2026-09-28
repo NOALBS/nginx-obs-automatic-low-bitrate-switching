@@ -3,7 +3,7 @@ use std::{collections::HashSet, sync::Arc};
 use serde::Serialize;
 use tokio::sync::{Notify, mpsc};
 
-use crate::{broadcasting_software::BroadcastingSoftwareLogic, config};
+use crate::{broadcasting_software::BroadcastingSoftwareLogic, config, switcher};
 
 pub struct State {
     pub config: config::Config,
@@ -17,10 +17,11 @@ impl State {
     pub fn set_all_switchable_scenes(&mut self) {
         let all_scenes = &mut self.switcher_state.switchable_scenes;
 
-        let scenes = &self.config.switcher.switching_scenes;
-        all_scenes.insert(scenes.low.to_owned());
-        all_scenes.insert(scenes.normal.to_owned());
-        all_scenes.insert(scenes.offline.to_owned());
+        for scenes in self.config.switcher.scene_sets() {
+            all_scenes.insert(scenes.low.to_owned());
+            all_scenes.insert(scenes.normal.to_owned());
+            all_scenes.insert(scenes.offline.to_owned());
+        }
 
         for servers in &self.config.switcher.stream_servers {
             if let Some(scenes) = &servers.override_scenes {
@@ -46,6 +47,18 @@ impl State {
             all_scenes.insert(starting_scene.to_owned());
         }
     }
+
+    /// Sets the scene that is currently showing.
+    ///
+    /// A live scene is also remembered as the scene to return to, so that
+    /// recovering from low or offline goes back to the scene set in use.
+    pub fn set_current_scene(&mut self, scene: String) {
+        if self.config.switcher.is_live_scene(&scene) {
+            scene.clone_into(&mut self.broadcasting_software.prev_scene);
+        }
+
+        self.broadcasting_software.current_scene = scene;
+    }
 }
 
 pub struct SwitcherState {
@@ -53,6 +66,15 @@ pub struct SwitcherState {
 
     /// All switchable scenes
     pub switchable_scenes: HashSet<String>,
+
+    /// The switch type the switcher last decided on
+    pub last_switch_type: Option<switcher::SwitchType>,
+
+    /// The switch type that was last announced in chat
+    pub announced_switch_type: Option<switcher::SwitchType>,
+
+    /// When the switcher left the live scene, until it is back on live
+    pub left_live_at: Option<std::time::Instant>,
 
     switcher_enabled_notifier: Arc<Notify>,
 }
@@ -73,11 +95,15 @@ impl Default for SwitcherState {
             last_used_server: None,
             switcher_enabled_notifier: Arc::new(Notify::new()),
             switchable_scenes: HashSet::new(),
+            last_switch_type: None,
+            announced_switch_type: None,
+            left_live_at: None,
         }
     }
 }
 
 pub struct BroadcastingSoftwareState {
+    /// The live scene that was shown last
     pub prev_scene: String,
     pub current_scene: String,
     pub status: ClientStatus,

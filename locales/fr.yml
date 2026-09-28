@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Erreur paramètres incorrects
 sceneSwitch:
     switch: Scène changée pour "%{scene}"
+    downtimeUnknown: un moment
 offlineTimeout:
     timeout: Temps d'attente hors ligne atteints, arrêt du stream
 handleCommands:

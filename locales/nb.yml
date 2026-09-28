@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Feilaktige argument brukt
 sceneSwitch:
     switch: Scene byttet til "%{scene}"
+    downtimeUnknown: et øyeblikk
 offlineTimeout:
     timeout: Tidsavbrudd uten nett er nådd, stopper strømmen
 handleCommands:

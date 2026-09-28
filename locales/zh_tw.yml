@@ -59,6 +59,7 @@ alias:
     errorIncorrectArguments: 語法錯誤,請確認後重新嘗試
 sceneSwitch:
     switch: 場景切換到 "%{scene}"
+    downtimeUnknown: 一會兒
 offlineTimeout:
     timeout: 離線畫面超時,正在結束直播
 handleCommands:

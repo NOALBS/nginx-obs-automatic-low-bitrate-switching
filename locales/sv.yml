@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Felaktiga argument har angetts
 sceneSwitch:
     switch: Scenen byttes till "%{scene}"
+    downtimeUnknown: en stund
 offlineTimeout:
     timeout: Offline timeout reached, stopping the stream
 handleCommands:

@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Error incorrect arguments given
 sceneSwitch:
     switch: Sahne değiştirildi "%{scene}"
+    downtimeUnknown: kısa bir süre
 offlineTimeout:
     timeout: Offline timeout reached, stopping the stream
 handleCommands:

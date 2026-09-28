@@ -52,6 +52,9 @@ pub struct Switcher {
     /// Enable auto switch chat notification
     pub auto_switch_notification: bool,
 
+    /// When and what the auto switch chat notifications say
+    pub switch_notifications: SwitchNotifications,
+
     /// Max attempts to poll the bitrate every second on low bitrate / offline.
     /// This will be used to make sure the stream is actually in a low / offline
     /// bitrate state
@@ -62,6 +65,11 @@ pub struct Switcher {
 
     /// The default switching scenes
     pub switching_scenes: switcher::SwitchingScenes,
+
+    /// Extra sets of switching scenes, for example a second live scene with
+    /// its own low scene. The switcher stays within the set whose live scene
+    /// is in use, see `active_switching_scenes`
+    pub additional_switching_scenes: Vec<switcher::SwitchingScenes>,
 
     /// Add multiple stream servers to watch before switching to low or offline
     pub stream_servers: Vec<stream_servers::StreamServer>,
@@ -86,6 +94,50 @@ impl Switcher {
         //    self.switcher_enabled_notifier.notify_waiters();
         //}
     }
+
+    /// The default switching scenes followed by the additional sets
+    pub fn scene_sets(&self) -> impl Iterator<Item = &switcher::SwitchingScenes> {
+        std::iter::once(&self.switching_scenes).chain(&self.additional_switching_scenes)
+    }
+
+    /// Whether the scene is the live scene of any scene set, including the
+    /// override and backup scenes of the stream servers
+    pub fn is_live_scene(&self, scene: &str) -> bool {
+        let server_scenes = self.stream_servers.iter().flat_map(|s| {
+            s.override_scenes
+                .iter()
+                .chain(s.depends_on.iter().map(|d| &d.backup_scenes))
+        });
+
+        self.scene_sets()
+            .chain(server_scenes)
+            .any(|s| s.normal == scene)
+    }
+
+    /// The scene set to switch within.
+    ///
+    /// This is the set whose live scene is showing, or whose low scene is
+    /// showing when no other set shares that low scene, or otherwise the set
+    /// of the live scene that was shown last. Falls back to the default
+    /// switching scenes.
+    pub fn active_switching_scenes(
+        &self,
+        current_scene: &str,
+        prev_scene: &str,
+    ) -> &switcher::SwitchingScenes {
+        if let Some(scenes) = self.scene_sets().find(|s| s.normal == current_scene) {
+            return scenes;
+        }
+
+        let mut low = self.scene_sets().filter(|s| s.low == current_scene);
+        if let (Some(scenes), None) = (low.next(), low.next()) {
+            return scenes;
+        }
+
+        self.scene_sets()
+            .find(|s| s.normal == prev_scene)
+            .unwrap_or(&self.switching_scenes)
+    }
 }
 
 impl Default for Switcher {
@@ -95,6 +147,7 @@ impl Default for Switcher {
             only_switch_when_streaming: true,
             instantly_switch_on_recover: true,
             auto_switch_notification: true,
+            switch_notifications: SwitchNotifications::default(),
             triggers: switcher::Triggers::default(),
             stream_servers: Vec::new(),
             switching_scenes: switcher::SwitchingScenes {
@@ -102,7 +155,41 @@ impl Default for Switcher {
                 low: "low".to_string(),
                 offline: "offline".to_string(),
             },
+            additional_switching_scenes: Vec::new(),
             retry_attempts: MAX_LOW_RETRY,
+        }
+    }
+}
+
+/// When and what the auto switch chat notifications say
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SwitchNotifications {
+    /// Seconds a low or offline switch has to last before it is announced,
+    /// so that short dips stay quiet. 0 announces every switch right away.
+    /// The switch back to live is only announced when the drop before it
+    /// was announced.
+    pub announce_after_seconds: u64,
+
+    /// Messages to use instead of the built in ones. `{scene}`, `{bitrate}`
+    /// and `{downtime}` get replaced.
+    pub messages: SwitchMessages,
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SwitchMessages {
+    pub normal: Option<String>,
+    pub low: Option<String>,
+    pub offline: Option<String>,
+}
+
+impl SwitchMessages {
+    pub fn get(&self, switch_type: &switcher::SwitchType) -> Option<&str> {
+        match switch_type {
+            switcher::SwitchType::Normal | switcher::SwitchType::Previous => self.normal.as_deref(),
+            switcher::SwitchType::Low => self.low.as_deref(),
+            switcher::SwitchType::Offline => self.offline.as_deref(),
         }
     }
 }
@@ -614,5 +701,199 @@ fn update_command(
         }
 
         c.alias.as_mut().unwrap().push(alias);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn scenes(normal: &str, low: &str, offline: &str) -> switcher::SwitchingScenes {
+        switcher::SwitchingScenes::new(normal, low, offline)
+    }
+
+    fn two_live_scenes() -> Switcher {
+        Switcher {
+            switching_scenes: scenes("Live2", "Low2", "BRB"),
+            additional_switching_scenes: vec![scenes("Live1", "Low", "BRB")],
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn active_scenes_follow_the_live_scene_showing() {
+        let switcher = two_live_scenes();
+
+        assert_eq!(
+            switcher.active_switching_scenes("Live1", "Live2").normal,
+            "Live1"
+        );
+        assert_eq!(
+            switcher.active_switching_scenes("Live2", "Live1").normal,
+            "Live2"
+        );
+    }
+
+    #[test]
+    fn active_scenes_follow_a_low_scene_used_by_one_set() {
+        let switcher = two_live_scenes();
+
+        assert_eq!(
+            switcher.active_switching_scenes("Low", "Live2").normal,
+            "Live1"
+        );
+        assert_eq!(
+            switcher.active_switching_scenes("Low2", "Live1").normal,
+            "Live2"
+        );
+    }
+
+    #[test]
+    fn active_scenes_return_to_the_last_live_scene() {
+        let switcher = two_live_scenes();
+
+        assert_eq!(switcher.active_switching_scenes("BRB", "Live1").low, "Low");
+        assert_eq!(
+            switcher.active_switching_scenes("BRB", "Live1").normal,
+            "Live1"
+        );
+        assert_eq!(
+            switcher.active_switching_scenes("BRB", "Live2").normal,
+            "Live2"
+        );
+        assert_eq!(
+            switcher.active_switching_scenes("Privacy", "Live1").normal,
+            "Live1"
+        );
+    }
+
+    #[test]
+    fn active_scenes_default_when_nothing_matches() {
+        let switcher = two_live_scenes();
+
+        assert_eq!(
+            switcher.active_switching_scenes("Privacy", "").normal,
+            "Live2"
+        );
+        assert_eq!(
+            Switcher::default()
+                .active_switching_scenes("BRB", "nope")
+                .normal,
+            "live"
+        );
+    }
+
+    #[test]
+    fn shared_low_scene_uses_the_last_live_scene() {
+        let switcher = Switcher {
+            switching_scenes: scenes("Live2", "Low", "BRB"),
+            additional_switching_scenes: vec![scenes("Live1", "Low", "BRB")],
+            ..Default::default()
+        };
+
+        assert_eq!(
+            switcher.active_switching_scenes("Low", "Live1").normal,
+            "Live1"
+        );
+        assert_eq!(
+            switcher.active_switching_scenes("Low", "Live2").normal,
+            "Live2"
+        );
+    }
+
+    #[test]
+    fn live_scenes_include_stream_server_scenes() {
+        let mut switcher = two_live_scenes();
+        switcher.add_stream_server(stream_servers::StreamServer {
+            stream_server: Box::new(stream_servers::Belabox {
+                stats_url: String::new(),
+                publisher: String::new(),
+                client: reqwest::Client::new(),
+            }),
+            name: "backup".to_string(),
+            priority: Some(1),
+            override_scenes: Some(scenes("LiveBackup", "LowBackup", "BRB")),
+            depends_on: Some(stream_servers::DependsOn {
+                name: "main".to_string(),
+                backup_scenes: scenes("LiveFallback", "LowFallback", "BRB"),
+            }),
+            enabled: true,
+        });
+
+        for scene in ["Live1", "Live2", "LiveBackup", "LiveFallback"] {
+            assert!(switcher.is_live_scene(scene), "{scene}");
+        }
+
+        for scene in ["Low", "Low2", "BRB", "LowBackup", "Privacy"] {
+            assert!(!switcher.is_live_scene(scene), "{scene}");
+        }
+    }
+
+    #[test]
+    fn config_without_additional_scenes_still_loads() {
+        let json = r#"{"switchingScenes": {"normal": "Live", "low": "Low", "offline": "BRB"}}"#;
+        let switcher: Switcher = serde_json::from_str(json).unwrap();
+
+        assert!(switcher.additional_switching_scenes.is_empty());
+        assert_eq!(switcher.scene_sets().count(), 1);
+        assert_eq!(switcher.active_switching_scenes("BRB", "").normal, "Live");
+    }
+
+    #[test]
+    fn switch_notifications_default_when_absent() {
+        let switcher: Switcher = serde_json::from_str("{}").unwrap();
+        let notifications = &switcher.switch_notifications;
+
+        assert_eq!(notifications.announce_after_seconds, 0);
+        assert!(
+            notifications
+                .messages
+                .get(&switcher::SwitchType::Normal)
+                .is_none()
+        );
+        assert!(
+            notifications
+                .messages
+                .get(&switcher::SwitchType::Low)
+                .is_none()
+        );
+        assert!(
+            notifications
+                .messages
+                .get(&switcher::SwitchType::Offline)
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn switch_messages_per_type() {
+        let json = r#"{"switchNotifications": {"announceAfterSeconds": 10, "messages": {"normal": "back", "offline": "gone"}}}"#;
+        let switcher: Switcher = serde_json::from_str(json).unwrap();
+        let notifications = &switcher.switch_notifications;
+
+        assert_eq!(notifications.announce_after_seconds, 10);
+        assert_eq!(
+            notifications.messages.get(&switcher::SwitchType::Normal),
+            Some("back")
+        );
+        assert_eq!(
+            notifications.messages.get(&switcher::SwitchType::Previous),
+            Some("back")
+        );
+        assert_eq!(notifications.messages.get(&switcher::SwitchType::Low), None);
+        assert_eq!(
+            notifications.messages.get(&switcher::SwitchType::Offline),
+            Some("gone")
+        );
+    }
+
+    #[test]
+    fn additional_scenes_round_trip() {
+        let json = serde_json::to_string(&two_live_scenes()).unwrap();
+        let switcher: Switcher = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(switcher.additional_switching_scenes.len(), 1);
+        assert_eq!(switcher.additional_switching_scenes[0].normal, "Live1");
+        assert_eq!(switcher.scene_sets().count(), 2);
     }
 }

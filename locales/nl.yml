@@ -57,6 +57,7 @@ alias:
     errorIncorrectArguments: Fout, onjuiste argumenten gegeven
 sceneSwitch:
     switch: Scène overgeschakeld naar "%{scene}"
+    downtimeUnknown: even
 offlineTimeout:
     timeout: Offline time-out bereikt, de stream wordt gestopt
 handleCommands:
