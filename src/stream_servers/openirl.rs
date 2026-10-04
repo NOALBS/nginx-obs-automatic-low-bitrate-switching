@@ -11,9 +11,56 @@ pub struct Stat {
     pub bitrate: u32,
     pub buffer: u32,
     pub dropped_pkts: u64,
-    pub latency: u16,
-    pub rtt: f64,
+    /// Not reported for RTMP ingest connections
+    #[serde(default)]
+    pub latency: Option<u16>,
+    /// Not reported for bonded connections, see `peers` instead
+    #[serde(default)]
+    pub rtt: Option<f64>,
     pub uptime: u64,
+    /// Individual links of a bonded connection
+    #[serde(default)]
+    pub peers: Vec<Peer>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Peer {
+    pub bitrate: u32,
+    pub rtt: f64,
+}
+
+impl Stat {
+    /// RTT of the connection, for bonded connections the bitrate-weighted
+    /// average of all active peers with a valid RTT
+    pub fn rtt(&self) -> Option<f64> {
+        if let Some(rtt) = self.rtt {
+            return Some(rtt);
+        }
+
+        let (weighted_sum, bitrate_sum) = self
+            .peers
+            .iter()
+            .filter(|peer| peer.bitrate > 0 && peer.rtt.is_finite() && peer.rtt >= 0.0)
+            .fold((0.0, 0u64), |(weighted_sum, bitrate_sum), peer| {
+                (
+                    weighted_sum + peer.rtt * peer.bitrate as f64,
+                    bitrate_sum + peer.bitrate as u64,
+                )
+            });
+
+        if bitrate_sum == 0 {
+            return None;
+        }
+
+        Some(weighted_sum / bitrate_sum as f64)
+    }
+
+    fn rtt_message(&self) -> String {
+        match self.rtt() {
+            Some(rtt) => format!(", {} ms", rtt.round()),
+            None => String::new(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -85,8 +132,11 @@ impl SwitchLogic for OpenIRL {
             return SwitchType::Offline;
         }
 
+        let rtt = stats.rtt();
+
         if let Some(rtt_offline) = triggers.rtt_offline
-            && stats.rtt >= rtt_offline.into()
+            && let Some(rtt) = rtt
+            && rtt >= rtt_offline.into()
         {
             return SwitchType::Offline;
         }
@@ -105,8 +155,9 @@ impl SwitchLogic for OpenIRL {
             return SwitchType::Low;
         }
 
-        if let Some(rtt) = triggers.rtt
-            && stats.rtt >= rtt.into()
+        if let Some(rtt_trigger) = triggers.rtt
+            && let Some(rtt) = rtt
+            && rtt >= rtt_trigger.into()
         {
             return SwitchType::Low;
         }
@@ -124,7 +175,7 @@ impl StreamServersCommands for OpenIRL {
             None => return super::Bitrate { message: None },
         };
 
-        let message = format!("{} Kbps, {} ms", stats.bitrate, stats.rtt.round());
+        let message = format!("{} Kbps{}", stats.bitrate, stats.rtt_message());
         super::Bitrate {
             message: Some(message),
         }
@@ -133,12 +184,10 @@ impl StreamServersCommands for OpenIRL {
     async fn source_info(&self) -> Option<String> {
         let stats = self.get_stats().await?;
 
-        let bitrate = format!(
-            "{} Kbps, {} ms at {} ms latency",
-            stats.bitrate,
-            stats.rtt.round(),
-            stats.latency
-        );
+        let mut bitrate = format!("{} Kbps{}", stats.bitrate, stats.rtt_message());
+        if let Some(latency) = stats.latency {
+            bitrate.push_str(&format!(" at {} ms latency", latency));
+        }
         let dropped = format!("dropped {} packets", stats.dropped_pkts);
 
         Some(format!("{} | {}", bitrate, dropped))
@@ -149,5 +198,72 @@ impl StreamServersCommands for OpenIRL {
 impl Bsl for OpenIRL {
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_single_connection_rtt() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":3000,"buffer":335,"dropped_pkts":0,"latency":3000,"rtt":42.4,"uptime":1}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.rtt(), Some(42.4));
+    }
+
+    #[test]
+    fn parses_rtmp_ingest_without_latency() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":6808,"buffer":0,"dropped_pkts":0,"rtt":26.458,"throughput":7001,"uptime":116}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.latency, None);
+        assert_eq!(stat.rtt(), Some(26.458));
+    }
+
+    #[test]
+    fn weights_bonded_peer_rtt_by_bitrate() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":3,"buffer":335,"dropped_pkts":0,"latency":3000,"peers":[{"bitrate":479,"connection_id":"4d2fc15b","jitter":12.069,"rtt":20.501,"throughput":483,"uptime":1},{"bitrate":284,"connection_id":"bf51f69f","jitter":12.165,"rtt":84.249,"throughput":288,"uptime":0}],"quality":100.0,"throughput":771,"uptime":1}"#,
+        )
+        .unwrap();
+
+        let expected = (20.501 * 479.0 + 84.249 * 284.0) / 763.0;
+        assert!((stat.rtt().unwrap() - expected).abs() < 0.000_001);
+    }
+
+    #[test]
+    fn ignores_inactive_peers() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":500,"buffer":335,"dropped_pkts":0,"latency":3000,"peers":[{"bitrate":500,"rtt":60.0},{"bitrate":0,"rtt":5.0}],"uptime":1}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.rtt(), Some(60.0));
+    }
+
+    #[test]
+    fn no_active_peers_is_none() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":0,"buffer":335,"dropped_pkts":0,"latency":3000,"peers":[{"bitrate":0,"rtt":20.0}],"uptime":1}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.rtt(), None);
+    }
+
+    #[test]
+    fn missing_rtt_without_peers_is_none() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":3000,"buffer":335,"dropped_pkts":0,"latency":3000,"uptime":1}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.rtt(), None);
     }
 }
