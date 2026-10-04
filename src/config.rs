@@ -181,12 +181,39 @@ pub enum ConfigChatPlatform {
     Kick(KickConfig),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[serde(rename_all = "camelCase", default)]
 pub struct KickConfig {
     pub channel_id: Option<usize>,
     pub chatroom_id: Option<usize>,
     pub use_irlproxy: Option<bool>,
+
+    /// Refresh token of a Kick account that granted the `chat:write` scope.
+    /// Without it NOALBS only reads chat, which is the historical behaviour.
+    ///
+    /// Kick rotates this token on every refresh, so NOALBS writes the new one
+    /// back into the config file.
+    pub refresh_token: Option<String>,
+
+    /// Who the message is attributed to. Defaults to [`KickSendAs::Bot`].
+    pub send_as: Option<KickSendAs>,
+
+    /// Target channel for `sendAs: "user"`. Resolved from the channel slug
+    /// when missing.
+    pub broadcaster_user_id: Option<u64>,
+}
+
+#[derive(
+    Debug, Serialize, Deserialize, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash,
+)]
+#[serde(rename_all = "lowercase")]
+pub enum KickSendAs {
+    /// Posts with the bot badge, using the identity of the OAuth app. Needs a
+    /// token from the BROADCASTER and a bot account on the app itself.
+    #[default]
+    Bot,
+    /// Posts as the account that owns the token, into any channel.
+    User,
 }
 
 impl ConfigChatPlatform {
@@ -614,5 +641,41 @@ fn update_command(
         }
 
         c.alias.as_mut().unwrap().push(alias);
+    }
+}
+
+#[cfg(test)]
+mod kick_config_tests {
+    use super::*;
+
+    /// A config written before Kick could answer in chat has to keep working.
+    #[test]
+    fn a_config_without_the_new_fields_still_parses() {
+        let json = r#"{"Kick":{"channelId":177817,"chatroomId":177815}}"#;
+
+        let platform: ConfigChatPlatform = serde_json::from_str(json).unwrap();
+        let ConfigChatPlatform::Kick(kick) = platform else {
+            panic!("expected the Kick variant");
+        };
+
+        assert_eq!(kick.channel_id, Some(177817));
+        assert_eq!(kick.chatroom_id, Some(177815));
+        assert_eq!(kick.refresh_token, None);
+        assert_eq!(kick.send_as, None);
+    }
+
+    /// The ids are optional now that they can be looked up from the slug.
+    #[test]
+    fn a_config_with_only_a_token_parses() {
+        let json = r#"{"Kick":{"refreshToken":"abc","sendAs":"user"}}"#;
+
+        let platform: ConfigChatPlatform = serde_json::from_str(json).unwrap();
+        let ConfigChatPlatform::Kick(kick) = platform else {
+            panic!("expected the Kick variant");
+        };
+
+        assert_eq!(kick.channel_id, None);
+        assert_eq!(kick.refresh_token.as_deref(), Some("abc"));
+        assert_eq!(kick.send_as, Some(KickSendAs::User));
     }
 }
