@@ -11,7 +11,9 @@ pub struct Stat {
     pub bitrate: u32,
     pub buffer: u32,
     pub dropped_pkts: u64,
-    pub latency: u16,
+    /// Not reported for RTMP ingest connections
+    #[serde(default)]
+    pub latency: Option<u16>,
     /// Not reported for bonded connections, see `peers` instead
     #[serde(default)]
     pub rtt: Option<f64>,
@@ -182,12 +184,10 @@ impl StreamServersCommands for OpenIRL {
     async fn source_info(&self) -> Option<String> {
         let stats = self.get_stats().await?;
 
-        let bitrate = format!(
-            "{} Kbps{} at {} ms latency",
-            stats.bitrate,
-            stats.rtt_message(),
-            stats.latency
-        );
+        let mut bitrate = format!("{} Kbps{}", stats.bitrate, stats.rtt_message());
+        if let Some(latency) = stats.latency {
+            bitrate.push_str(&format!(" at {} ms latency", latency));
+        }
         let dropped = format!("dropped {} packets", stats.dropped_pkts);
 
         Some(format!("{} | {}", bitrate, dropped))
@@ -213,6 +213,17 @@ mod tests {
         .unwrap();
 
         assert_eq!(stat.rtt(), Some(42.4));
+    }
+
+    #[test]
+    fn parses_rtmp_ingest_without_latency() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":6808,"buffer":0,"dropped_pkts":0,"rtt":26.458,"throughput":7001,"uptime":116}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.latency, None);
+        assert_eq!(stat.rtt(), Some(26.458));
     }
 
     #[test]
