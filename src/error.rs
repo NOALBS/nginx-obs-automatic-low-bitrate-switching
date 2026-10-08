@@ -54,5 +54,5 @@ pub enum Error {
     NoServerInfo,
 
     #[error("No stream server found")]
-    NoStreamServerFound
+    NoStreamServerFound,
 }

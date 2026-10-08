@@ -1375,12 +1375,18 @@ impl DispatchCommand {
         let name = name.into_iter().collect::<Vec<_>>().join(" ");
 
         if name.is_empty() {
-            self.send(t!("streamserver.noParams", locale = &self.lang)).await;
+            self.send(t!("streamserver.noParams", locale = &self.lang))
+                .await;
             return;
         };
 
         let Ok((name, enabled)) = self.user.toggle_stream_server(&name).await else {
-            self.send(t!("streamserver.notFound", locale = &self.lang, name = name)).await;
+            self.send(t!(
+                "streamserver.notFound",
+                locale = &self.lang,
+                name = name
+            ))
+            .await;
             return;
         };
 
