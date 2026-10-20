@@ -18,7 +18,12 @@ A simple executable for all Operating Systems (Windows, Mac & Linux) to automati
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/b3ck?logo=GitHub%20Sponsors&label=b3ck's%20sponsors%3A&color=%23DB61A2&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fb3ck)
 
 ---
-# Try out the new [NOALBS Cloud Alpha](https://noalbs.com/signin) (Twitch Only) today!
+# Try [NOALBS Cloud](https://noalbs.com): NOALBS without running anything on your PC
+
+Add one browser source to OBS and NOALBS Cloud switches your scenes for you. It also gives you a dashboard you can use from your phone, stream history with markers, Twitch and Kick chat commands, BELABOX Cloud and Moblin remote control, and workspaces to share your setup with moderators.
+
+[Get started](https://noalbs.com) · [Docs](https://docs.noalbs.com)
+
 ---
 
 
