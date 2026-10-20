@@ -159,17 +159,20 @@
       "Fix": {
         "permission": "Mod",
         "userPermissions": ["715209"],
-        "alias": ["f"]
+        "alias": ["f"],
+        "disabled": false
       },
       "Switch": {
         "permission": "Mod",
         "userPermissions": null,
-        "alias": ["ss"]
+        "alias": ["ss"],
+        "disabled": false
       },
       "Bitrate": {
         "permission": null,
         "userPermissions": null,
-        "alias": ["b"]
+        "alias": ["b"],
+        "disabled": false
       }
     }
   },

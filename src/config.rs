@@ -204,6 +204,7 @@ pub struct CommandInfo {
     pub permission: Option<chat::Permission>,
     pub user_permissions: Option<Vec<String>>,
     pub alias: Option<Vec<String>>,
+    pub disabled: bool,
 }
 
 pub struct File {
