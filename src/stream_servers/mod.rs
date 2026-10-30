@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::switcher;
 
 pub mod belabox;
+pub mod goirl;
 pub mod irlhosting;
 pub mod mediamtx;
 pub mod nginx;
@@ -20,6 +21,7 @@ pub mod websocket;
 pub mod xiu;
 
 pub use belabox::Belabox;
+pub use goirl::GoIrl;
 pub use irlhosting::Irlhosting;
 pub use mediamtx::Mediamtx;
 pub use nginx::Nginx;

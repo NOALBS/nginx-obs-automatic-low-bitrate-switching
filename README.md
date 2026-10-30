@@ -96,6 +96,7 @@ Do you offer a similar solution or paid service? Want your link here? Message [@
     <li><a href="#using-mediamtx">Using MediaMTX</a></li>
     <li><a href="#using-rist">Using RIST</a></li>
     <li><a href="#using-xiu">Using Xiu</a></li>
+    <li><a href="#using-go-irl">Using go-irl</a></li>
     <li><a href="#using-an-obs-source">Using an OBS Source</a></li>
   </ul>
 </details>
@@ -427,7 +428,7 @@ Make sure to replace the placeholders with your actual Kick channel and chatroom
 <details>
 <summary>Click to view the servers section</summary>
 
-Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud), [MediaMTX](#using-mediamtx), [WebSocket stats](#using-websocket-stats) and [OBS Sources](#using-an-obs-source).
+Currently NOALBS supports [NGINX](#using-nginx), [Nimble](#using-nimble-streamer-server-with-srt-protocol), [Node Media Server](#using-an-external-node-media-server), [SRT Live Server](#using-sls-srt-live-server), [BELABOX](#using-belabox-cloud), [MediaMTX](#using-mediamtx), [WebSocket stats](#using-websocket-stats), [go-irl](#using-go-irl) and [OBS Sources](#using-an-obs-source).
 You can have as many servers as you want to use in the config.
 
 Example stream server object:
@@ -453,7 +454,7 @@ Example stream server object:
 ```
 
 - `streamServer`: Replace the entire `streamServer` section with the one of [these](#stream-server-objects).
-- `type`: Nginx, NodeMediaServer, Nimble, SrtLiveServer, Belabox, Mediamtx, or WebSocket
+- `type`: Nginx, NodeMediaServer, Nimble, SrtLiveServer, Belabox, Mediamtx, WebSocket, or GoIrl
 - `name`: A unique name to distinguish the server
 - `priority`: Decides which stream server to monitor when multiple are online. 0 is consired the highest.
 - `overrideScenes`: Optional field to override the default scenes
@@ -749,6 +750,21 @@ python3 tools/mock_websocket_stats_server.py
 ```
 
 Then configure NOALBS with `ws://127.0.0.1:8765/ws-stats?feed=feed1`. The mock server sends healthy stats every 250ms and periodically drops bitrate to test low/offline switching.
+
+---
+
+### Using go-irl
+
+```JSON
+  "streamServer": {
+    "type": "GoIrl",
+    "url": "ws://127.0.0.1:8888/ws"
+  },
+```
+
+- `url`: URL to the [go-irl](https://github.com/e04/go-irl) WebSocket server, the port is set with `-ws-port` (default `8888`)
+
+NOALBS keeps a connection open to go-irl and uses the stats of the incoming SRT stream. go-irl only sends stats while it is receiving the stream, so NOALBS switches to offline when no stats have been received for 3 seconds.
 
 ---
 
