@@ -26,7 +26,9 @@ pub struct Stat {
 #[derive(Deserialize, Debug)]
 pub struct Peer {
     pub bitrate: u32,
-    pub rtt: f64,
+    /// Not reported per peer by every SLS version (e.g. srtla-receiver 1.2.0)
+    #[serde(default)]
+    pub rtt: Option<f64>,
 }
 
 impl Stat {
@@ -40,13 +42,21 @@ impl Stat {
         let (weighted_sum, bitrate_sum) = self
             .peers
             .iter()
-            .filter(|peer| peer.bitrate > 0 && peer.rtt.is_finite() && peer.rtt >= 0.0)
-            .fold((0.0, 0u64), |(weighted_sum, bitrate_sum), peer| {
-                (
-                    weighted_sum + peer.rtt * peer.bitrate as f64,
-                    bitrate_sum + peer.bitrate as u64,
-                )
-            });
+            .filter_map(|peer| match peer.rtt {
+                Some(rtt) if peer.bitrate > 0 && rtt.is_finite() && rtt >= 0.0 => {
+                    Some((rtt, peer.bitrate))
+                }
+                _ => None,
+            })
+            .fold(
+                (0.0, 0u64),
+                |(weighted_sum, bitrate_sum), (rtt, bitrate)| {
+                    (
+                        weighted_sum + rtt * bitrate as f64,
+                        bitrate_sum + bitrate as u64,
+                    )
+                },
+            );
 
         if bitrate_sum == 0 {
             return None;
@@ -261,6 +271,37 @@ mod tests {
     fn missing_rtt_without_peers_is_none() {
         let stat: Stat = serde_json::from_str(
             r#"{"bitrate":3000,"buffer":335,"dropped_pkts":0,"latency":3000,"uptime":1}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.rtt(), None);
+    }
+
+    #[test]
+    fn parses_peers_without_rtt() {
+        // srtla-receiver 1.2.0: top-level rtt present, peers report no rtt
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":10154,"buffer":2986,"dropped_pkts":0,"latency":3000,"peers":[{"bitrate":9218,"connection_id":"b505e7af","jitter":15.302,"throughput":9485,"uptime":105},{"bitrate":936,"connection_id":"d8cca13b","jitter":30.402,"throughput":949,"uptime":105}],"rtt":66.867,"throughput":10434,"uptime":106}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.rtt(), Some(66.867));
+    }
+
+    #[test]
+    fn skips_peers_without_rtt_in_weighted_average() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":800,"buffer":335,"dropped_pkts":0,"latency":3000,"peers":[{"bitrate":500,"rtt":40.0},{"bitrate":300}],"uptime":1}"#,
+        )
+        .unwrap();
+
+        assert_eq!(stat.rtt(), Some(40.0));
+    }
+
+    #[test]
+    fn peers_without_rtt_and_no_top_level_rtt_is_none() {
+        let stat: Stat = serde_json::from_str(
+            r#"{"bitrate":800,"buffer":335,"dropped_pkts":0,"latency":3000,"peers":[{"bitrate":800}],"uptime":1}"#,
         )
         .unwrap();
 
